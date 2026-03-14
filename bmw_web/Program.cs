@@ -24,7 +24,7 @@ app.MapGet("/api/health", () => Results.Ok(new { ok = true }));
 
 app.MapPost(
     "/api/analyze",
-    async (AnalyzeRequest request, AchievementPlanner planner, ILogger<Program> logger) =>
+    async (AnalyzeRequest? request, AchievementPlanner planner, ILogger<Program> logger) =>
     {
         if (request is null || string.IsNullOrWhiteSpace(request.SavePath))
         {

@@ -2,10 +2,26 @@
 
 This repo contains a save-file tracker for Black Myth: Wukong.
 
+![Black Myth: Wukong Achievement Tracker screenshot](assets/image.png)
+
 - `bmw_web`: the recommended browser UI for checking achievement progress
 - `bmw_probe`: an optional CLI that writes JSON and Markdown reports
 - `bmw.sln`: root solution that includes both projects
 - `vendor/blackwukong-dlls/`: vendored decoder/runtime DLLs required by both projects
+
+## Quickstart
+
+```powershell
+dotnet build .\bmw.sln
+dotnet run --project ".\\bmw_web\\bmw_web.csproj"
+```
+
+Then:
+
+1. Open the local URL printed in the terminal.
+2. Paste `<full-path-to-save>` into the save path field.
+3. Click `Analyze`.
+4. Review the overview, missing item tracker, and remaining achievements.
 
 ## What It Does
 
@@ -24,12 +40,6 @@ Run the web app:
 
 ```powershell
 dotnet run --project .\bmw_web\bmw_web.csproj
-```
-
-Or use the helper script:
-
-```powershell
-.\run-web.ps1
 ```
 
 Then open the local URL printed in the terminal.

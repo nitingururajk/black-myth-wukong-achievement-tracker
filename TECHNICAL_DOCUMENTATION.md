@@ -18,7 +18,6 @@ The two applications share the same core idea but are implemented separately:
 - `bmw_web/`: ASP.NET Core web application
 - `bmw_probe/`: console application for report generation
 - `vendor/blackwukong-dlls/`: vendored third-party decoder/runtime DLLs required to parse save data
-- `run-web.ps1`: helper script to start the web app
 - `run-planner.ps1`: helper script to start the CLI analyzer
 - `README.md`: user-facing usage notes
 
@@ -454,14 +453,6 @@ Current difference:
 This means the web app is the more accurate and feature-complete experience for collectible breakdowns.
 
 ## Scripts
-
-### `run-web.ps1`
-
-Runs:
-
-```powershell
-dotnet run --project ".\bmw_web\bmw_web.csproj"
-```
 
 ### `run-planner.ps1`
 
