@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bmw_web", "bmw_web\bmw_web.csproj", "{06A57572-9ACF-4A44-9588-A45D51B6D8B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bmw_probe", "bmw_probe\bmw_probe.csproj", "{F066A2D4-3A3A-447A-A468-2A5B921FE9C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06A57572-9ACF-4A44-9588-A45D51B6D8B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06A57572-9ACF-4A44-9588-A45D51B6D8B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06A57572-9ACF-4A44-9588-A45D51B6D8B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06A57572-9ACF-4A44-9588-A45D51B6D8B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F066A2D4-3A3A-447A-A468-2A5B921FE9C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F066A2D4-3A3A-447A-A468-2A5B921FE9C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F066A2D4-3A3A-447A-A468-2A5B921FE9C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F066A2D4-3A3A-447A-A468-2A5B921FE9C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

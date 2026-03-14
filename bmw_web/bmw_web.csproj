@@ -1,0 +1,189 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="b1.Managed">
+      <HintPath>..\vendor\blackwukong-dlls\b1.Managed.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="b1.Native">
+      <HintPath>..\vendor\blackwukong-dlls\b1.Native.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="b1.NativePlugins">
+      <HintPath>..\vendor\blackwukong-dlls\b1.NativePlugins.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="B1UI_GSE.Script">
+      <HintPath>..\vendor\blackwukong-dlls\B1UI_GSE.Script.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="BtlSvr.Main">
+      <HintPath>..\vendor\blackwukong-dlls\BtlSvr.Main.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Diana.Client.Common">
+      <HintPath>..\vendor\blackwukong-dlls\Diana.Client.Common.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Diana.Common">
+      <HintPath>..\vendor\blackwukong-dlls\Diana.Common.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Diana.Server.Common">
+      <HintPath>..\vendor\blackwukong-dlls\Diana.Server.Common.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <HintPath>..\vendor\blackwukong-dlls\Google.Protobuf.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GSE.Core">
+      <HintPath>..\vendor\blackwukong-dlls\GSE.Core.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GSE.GSNet">
+      <HintPath>..\vendor\blackwukong-dlls\GSE.GSNet.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GSE.GSSdk">
+      <HintPath>..\vendor\blackwukong-dlls\GSE.GSSdk.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GSE.OnlineBase">
+      <HintPath>..\vendor\blackwukong-dlls\GSE.OnlineBase.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GSE.ProtobufDB">
+      <HintPath>..\vendor\blackwukong-dlls\GSE.ProtobufDB.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GUR.Runtime">
+      <HintPath>..\vendor\blackwukong-dlls\GUR.Runtime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\vendor\blackwukong-dlls\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ILRuntime">
+      <HintPath>..\vendor\blackwukong-dlls\ILRuntime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ILRuntime.Mono.Cecil">
+      <HintPath>..\vendor\blackwukong-dlls\ILRuntime.Mono.Cecil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ILRuntime.Mono.Cecil.Mdb">
+      <HintPath>..\vendor\blackwukong-dlls\ILRuntime.Mono.Cecil.Mdb.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="ILRuntime.Mono.Cecil.Pdb">
+      <HintPath>..\vendor\blackwukong-dlls\ILRuntime.Mono.Cecil.Pdb.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="LiteNetLib">
+      <HintPath>..\vendor\blackwukong-dlls\LiteNetLib.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="LitJson">
+      <HintPath>..\vendor\blackwukong-dlls\LitJson.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>..\vendor\blackwukong-dlls\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\vendor\blackwukong-dlls\Mono.Cecil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>..\vendor\blackwukong-dlls\Mono.Data.Sqlite.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Posix">
+      <HintPath>..\vendor\blackwukong-dlls\Mono.Posix.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\vendor\blackwukong-dlls\Mono.Security.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.WebBrowser">
+      <HintPath>..\vendor\blackwukong-dlls\Mono.WebBrowser.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>..\vendor\blackwukong-dlls\netstandard.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Novell.Directory.Ldap">
+      <HintPath>..\vendor\blackwukong-dlls\Novell.Directory.Ldap.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Protobuf.RunTime">
+      <HintPath>..\vendor\blackwukong-dlls\Protobuf.RunTime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Sentry">
+      <HintPath>..\vendor\blackwukong-dlls\Sentry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Buffers">
+      <HintPath>..\vendor\blackwukong-dlls\System.Buffers.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\vendor\blackwukong-dlls\System.Collections.Immutable.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.IO.FileSystem">
+      <HintPath>..\vendor\blackwukong-dlls\System.IO.FileSystem.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>..\vendor\blackwukong-dlls\System.Memory.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Numerics.Vectors">
+      <HintPath>..\vendor\blackwukong-dlls\System.Numerics.Vectors.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Reflection.Metadata">
+      <HintPath>..\vendor\blackwukong-dlls\System.Reflection.Metadata.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>..\vendor\blackwukong-dlls\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.ServiceModel.Internals">
+      <HintPath>..\vendor\blackwukong-dlls\System.ServiceModel.Internals.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>..\vendor\blackwukong-dlls\System.Text.Encodings.Web.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>..\vendor\blackwukong-dlls\System.Text.Json.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>..\vendor\blackwukong-dlls\System.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="UnrealEngine">
+      <HintPath>..\vendor\blackwukong-dlls\UnrealEngine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="UnrealEngine.Runtime">
+      <HintPath>..\vendor\blackwukong-dlls\UnrealEngine.Runtime.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

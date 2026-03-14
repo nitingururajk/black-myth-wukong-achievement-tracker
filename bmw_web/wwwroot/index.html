@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wukong Achievement Tracker</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-a"></div>
+    <div class="bg-shape bg-shape-b"></div>
+    <main class="container">
+      <header class="hero">
+        <p class="eyebrow">Black Myth: Wukong</p>
+          <h1>Achievement Tracker</h1>
+          <p class="subtitle">
+          Load your save file to see which achievements and checklist items are still missing.
+          </p>
+      </header>
+
+      <section class="panel panel-input">
+        <label for="savePath">Save File Path</label>
+        <div class="input-row">
+          <input
+            id="savePath"
+            type="text"
+            placeholder="<full-path-to-save>\\b1\\Saved\\SaveGames\\<player-id>\\ArchiveSaveFile.<slot>.sav"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="analyzeBtn">Analyze</button>
+        </div>
+        <p class="hint">Usually under your game save folder &rarr; <code>b1\Saved\SaveGames</code></p>
+      </section>
+
+      <section id="statusPanel" class="panel status-panel hidden"></section>
+
+      <!-- Overview bar with progress ring -->
+      <section id="overviewPanel" class="overview-bar hidden">
+        <div class="overview-ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 80 80">
+            <circle class="progress-ring-bg" cx="40" cy="40" r="34" />
+            <circle id="progressArc" class="progress-ring-fg" cx="40" cy="40" r="34" stroke-dasharray="213.6 213.6" stroke-dashoffset="213.6" />
+          </svg>
+          <span id="progressPct" class="progress-pct">0%</span>
+        </div>
+        <div class="overview-stats">
+          <div class="overview-stat">
+            <span class="ov-label">Player</span>
+            <span id="ovPlayer" class="ov-value">-</span>
+          </div>
+          <div class="overview-stat">
+            <span class="ov-label">Level</span>
+            <span id="ovLevel" class="ov-value">-</span>
+          </div>
+          <div class="overview-stat">
+            <span class="ov-label">NG+</span>
+            <span id="ovNgPlus" class="ov-value">-</span>
+          </div>
+          <div class="overview-stat">
+            <span class="ov-label">Achievements</span>
+            <span id="ovAchievements" class="ov-value">-</span>
+          </div>
+          <div class="overview-stat">
+            <span class="ov-label">Missing</span>
+            <span id="ovMissing" class="ov-value highlight-missing">-</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="itemTrackerPanel" class="panel hidden">
+        <div class="section-title-row">
+          <h2>Missing Item Tracker</h2>
+          <span id="trackerCount" class="chip"></span>
+        </div>
+          <p class="action-subtitle">For collection achievements, this shows the exact items still missing from your save.</p>
+        <div id="trackerList" class="tracker-list"></div>
+      </section>
+
+      <!-- Action plan - what to do next -->
+      <section id="actionPlanPanel" class="panel hidden">
+        <div class="section-title-row">
+          <h2>Remaining Achievements</h2>
+          <span id="actionCount" class="chip chip-action"></span>
+        </div>
+        <p class="action-subtitle">These are your unfinished achievements, with progress and the best next place to check.</p>
+        <div id="actionList" class="action-list"></div>
+      </section>
+
+      <!-- Filter tabs + full table -->
+      <section id="fullPanel" class="panel hidden">
+        <div class="section-title-row">
+          <h2>All Achievements</h2>
+          <div class="filter-tabs">
+            <button class="tab active" data-filter="all">All</button>
+            <button class="tab" data-filter="incomplete">Incomplete</button>
+            <button class="tab" data-filter="complete">Complete</button>
+          </div>
+        </div>
+        <div id="searchRow" class="search-row">
+          <input id="searchInput" type="text" placeholder="Search achievements..." autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Remaining</th>
+              </tr>
+            </thead>
+            <tbody id="fullTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
