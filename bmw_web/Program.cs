@@ -24,8 +24,16 @@ app.MapGet("/api/health", () => Results.Ok(new { ok = true }));
 
 app.MapPost(
     "/api/analyze",
-    async (AnalyzeRequest? request, AchievementPlanner planner, ILogger<Program> logger) =>
+    async (
+        AnalyzeRequest? request,
+        AchievementPlanner planner,
+        ILogger<Program> logger,
+        HttpContext httpContext
+    ) =>
     {
+        httpContext.Response.Headers.CacheControl = "no-store, no-cache, max-age=0";
+        httpContext.Response.Headers.Pragma = "no-cache";
+
         if (request is null || string.IsNullOrWhiteSpace(request.SavePath))
         {
             logger.LogWarning("Analyze request rejected because no save path was provided.");
@@ -41,7 +49,9 @@ app.MapPost(
 
         try
         {
+            var saveFileLastWriteTimeUtc = File.GetLastWriteTimeUtc(savePath);
             var report = await planner.AnalyzeAsync(savePath);
+            var analyzedAtUtc = DateTimeOffset.UtcNow;
             stopwatch.Stop();
             logger.LogInformation(
                 "Analyze request completed in {ElapsedMs} ms for player {PlayerName}; {Completed}/{Total} achievements complete.",
@@ -50,7 +60,7 @@ app.MapPost(
                 report.CompletedAchievements,
                 report.TotalAchievements
             );
-            return Results.Ok(new { ok = true, report });
+            return Results.Ok(new { ok = true, report, analyzedAtUtc, saveFileLastWriteTimeUtc });
         }
         catch (FileNotFoundException ex)
         {

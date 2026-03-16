@@ -378,6 +378,58 @@ tbody tr:hover { background: rgba(255,255,255,0.035); }
 .row-incomplete { background: rgba(239,106,106,0.04); }
 .status-complete { color: var(--accent-2); font-weight: 600; }
 .status-incomplete { color: var(--danger); font-weight: 600; }
+.achievement-name-cell { min-width: 280px; }
+.achievement-name-main { font-weight: 600; }
+.achievement-name-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+.achievement-checklist-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.row-toggle-btn {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.76rem;
+  background: rgba(109, 207, 154, 0.12);
+  color: var(--accent-2);
+  border: 1px solid rgba(109, 207, 154, 0.22);
+  box-shadow: none;
+}
+.row-toggle-btn:hover {
+  background: rgba(109, 207, 154, 0.18);
+  filter: none;
+}
+.row-details:hover { background: transparent; }
+.row-details-cell {
+  padding: 0.75rem 0.85rem;
+  background: rgba(255,255,255,0.025);
+}
+.table-detail-panel {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.025);
+  padding: 0.7rem 0.8rem;
+}
+.table-detail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.table-detail-title {
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.table-detail-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 760px) {

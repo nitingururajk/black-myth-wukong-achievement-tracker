@@ -6,6 +6,91 @@ using Google.Protobuf;
 
 var options = CliOptions.Parse(args);
 var savePath = options.SavePath;
+IReadOnlyDictionary<int, string> achievementNameMap =
+    new Dictionary<int, string>
+    {
+        [81001] = "Home is Behind",
+        [81002] = "Hammer and Hew",
+        [81003] = "Warring with Wolves",
+        [81004] = "Absorb and Cultivate",
+        [81005] = "Brew of Bravery",
+        [81006] = "Slithering Snake",
+        [81007] = "Handy and Hardy",
+        [81008] = "Enduring Echoes",
+        [81009] = "Temple of Taint",
+        [81010] = "Blazing Black Wind",
+        [81011] = "Creative Concoction",
+        [81012] = "Cursed Clan",
+        [81013] = "Cage of Claws",
+        [81014] = "Sound in Stone",
+        [81015] = "Death in Despair",
+        [81016] = "The Stone's Secret",
+        [81017] = "Oṃ Maṇi Padme Hūm",
+        [81018] = "Shifting Sands",
+        [81019] = "Gleams of Gold",
+        [81020] = "The Tiger Family",
+        [81021] = "Buried in the Sand",
+        [81022] = "Precious Pills",
+        [81023] = "A Great Gust",
+        [81024] = "Thousand-Mile Quest",
+        [81025] = "Voice Vanquished",
+        [81026] = "Karma of Kang-Jin",
+        [81027] = "Boundless Bitterness",
+        [81028] = "Shell and Scales",
+        [81029] = "Secret in the Scroll",
+        [81030] = "Pound and Perfect",
+        [81031] = "The Soaring Slash",
+        [81032] = "Happy Harvest",
+        [81033] = "Marvelous Melon",
+        [81034] = "Lust and Dust",
+        [81035] = "Corrupted Captains",
+        [81036] = "Devoted Disciples",
+        [81037] = "Matches with the Macaque",
+        [81038] = "Nifty Nonsense",
+        [81039] = "Mud on His Face",
+        [81040] = "Gnashing Grudge",
+        [81041] = "Passion Passes",
+        [81042] = "The Loong Pattern",
+        [81043] = "Secret in Purple Cloud",
+        [81044] = "The Wayward Ways",
+        [81045] = "A Family Finished",
+        [81046] = "The Cockerel Crowed",
+        [81047] = "Misfit with Merit",
+        [81048] = "Behold the Betrayal",
+        [81049] = "Always Accompanied",
+        [81050] = "The Furnace Boy",
+        [81051] = "Urge Unfulfilled",
+        [81052] = "Seeds to Sow",
+        [81053] = "Souls in the Stalks",
+        [81054] = "A Willing Warrior",
+        [81055] = "Scenic Seeker",
+        [81056] = "Three Teams of Two",
+        [81057] = "With Full Spirit",
+        [81058] = "Frost and Flame",
+        [81059] = "Flaming Fury",
+        [81060] = "Treasure Trove",
+        [81061] = "Mei of Memory",
+        [81062] = "Meet the Match",
+        [81063] = "Full of Forms",
+        [81064] = "Brews and Barrels",
+        [81065] = "The Cloud Claimed",
+        [81066] = "The Clamor of Frogs",
+        [81067] = "A Curious Collection",
+        [81068] = "The Five Skandhas",
+        [81069] = "Medicine Meal",
+        [81070] = "Treaded Tracks",
+        [81071] = "Guardian of Gear",
+        [81072] = "A Duel of Destiny",
+        [81073] = "Portraits Perfected",
+        [81074] = "Six Senses Secured",
+        [81075] = "Master of Magic",
+        [81076] = "Gourds Gathered",
+        [81077] = "Page Preserver",
+        [81078] = "Brewer's Bounty",
+        [81079] = "Mantled with Might",
+        [81080] = "Staffs and Spears",
+        [81081] = "Final Fulfillment",
+    };
 if (string.IsNullOrWhiteSpace(savePath))
 {
     Console.Write("Enter full save path (.sav): ");
@@ -67,7 +152,7 @@ foreach (var item in incomplete.Take(15))
     );
 }
 
-static async Task<AnalysisReport> BuildReportAsync(string savePath)
+async Task<AnalysisReport> BuildReportAsync(string savePath)
 {
     var bytes = await File.ReadAllBytesAsync(savePath);
     IMessage<ArchiveFile> info = new ArchiveFile();
@@ -192,8 +277,13 @@ static (int order, string label) PriorityFor(string requirementType)
     return (3, "Normal");
 }
 
-static string BuildTitle(int achievementId, string requirementType)
+string BuildTitle(int achievementId, string requirementType)
 {
+    if (achievementNameMap.TryGetValue(achievementId, out var name))
+    {
+        return name;
+    }
+
     var objective = requirementType switch
     {
         var t when t.Contains("KillUnit", StringComparison.OrdinalIgnoreCase) => "Defeat Target(s)",

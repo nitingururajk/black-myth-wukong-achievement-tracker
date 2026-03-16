@@ -17,6 +17,9 @@ const searchInput = document.getElementById("searchInput");
 
 let currentReport = null;
 let currentFilter = "all";
+let latestAnalysisRequestId = 0;
+let lastAnalysisMeta = null;
+const expandedAchievementIds = new Set();
 
 // Events
 analyzeBtn.addEventListener("click", analyze);
@@ -37,11 +40,41 @@ searchInput.addEventListener("input", () => {
   if (currentReport) renderFullTable(currentReport);
 });
 
+fullTableBody.addEventListener("click", (event) => {
+  const toggleBtn = event.target.closest("[data-achievement-toggle]");
+  if (!toggleBtn) return;
+
+  const achievementId = Number(toggleBtn.dataset.achievementToggle);
+  if (!Number.isFinite(achievementId)) return;
+
+  if (expandedAchievementIds.has(achievementId)) {
+    expandedAchievementIds.delete(achievementId);
+  } else {
+    expandedAchievementIds.add(achievementId);
+  }
+
+  if (currentReport) renderFullTable(currentReport);
+});
+
 // Status
 function setStatus(text, type = "ok") {
   statusPanel.classList.remove("hidden", "status-ok", "status-error");
   statusPanel.classList.add(type === "error" ? "status-error" : "status-ok");
   statusPanel.textContent = text;
+}
+
+function formatTimestamp(value) {
+  if (!value) return "an unknown time";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium",
+  }).format(parsed);
 }
 
 function hideResults() {
@@ -60,32 +93,67 @@ async function analyze() {
     return;
   }
 
+  const requestId = ++latestAnalysisRequestId;
+  const priorAnalysis = lastAnalysisMeta;
+  const isRepeatAnalysis = currentReport !== null;
+  currentReport = null;
   analyzeBtn.disabled = true;
-  analyzeBtn.textContent = "Analyzing...";
-  setStatus("Reading your save and updating the checklist...");
+  analyzeBtn.textContent = isRepeatAnalysis ? "Reanalyzing..." : "Analyzing...";
+  setStatus(isRepeatAnalysis
+    ? "Re-reading your save and refreshing the checklist..."
+    : "Reading your save and updating the checklist...");
   hideResults();
 
   try {
-    const response = await fetch("/api/analyze", {
+    const response = await fetch(`/api/analyze?requestId=${requestId}`, {
       method: "POST",
+      cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ savePath }),
     });
     const data = await response.json();
+
+    if (requestId !== latestAnalysisRequestId) {
+      return;
+    }
 
     if (!response.ok || !data.ok) {
       throw new Error(data.error || "Analysis failed.");
     }
 
     currentReport = data.report;
+    lastAnalysisMeta = {
+      savePath,
+      analyzedAtUtc: data.analyzedAtUtc,
+      saveFileLastWriteTimeUtc: data.saveFileLastWriteTimeUtc,
+    };
     renderAll(data.report);
-    setStatus(`Updated — ${data.report.completedAchievements}/${data.report.totalAchievements} achievements complete.`);
+
+    const analyzedAtText = formatTimestamp(data.analyzedAtUtc);
+    const saveUpdatedText = formatTimestamp(data.saveFileLastWriteTimeUtc);
+    const repeatedSaveVersion =
+      priorAnalysis &&
+      priorAnalysis.savePath === savePath &&
+      priorAnalysis.saveFileLastWriteTimeUtc === data.saveFileLastWriteTimeUtc;
+
+    let statusText = `Updated on ${analyzedAtText}. Save file last modified on ${saveUpdatedText}. ${data.report.completedAchievements}/${data.report.totalAchievements} achievements complete.`;
+    if (repeatedSaveVersion) {
+      statusText += " The save file timestamp is unchanged since the previous analysis.";
+    }
+
+    setStatus(statusText);
   } catch (error) {
+    if (requestId !== latestAnalysisRequestId) {
+      return;
+    }
+
     setStatus(error.message || "Analysis failed.", "error");
     hideResults();
   } finally {
-    analyzeBtn.disabled = false;
-    analyzeBtn.textContent = "Analyze";
+    if (requestId === latestAnalysisRequestId) {
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = "Analyze";
+    }
   }
 }
 
@@ -275,6 +343,30 @@ function renderTargetBlock(item) {
   return `<div class="action-targets">${missingHtml}${trackedHtml}</div>`;
 }
 
+function renderExpandedTargetList(item) {
+  const all = Array.isArray(item.requirementTargets) ? item.requirementTargets : [];
+  if (all.length === 0) return "";
+
+  const collected = all.filter((target) => target.isCollected).length;
+  const missing = all.length - collected;
+
+  return `
+    <div class="table-detail-panel">
+      <div class="table-detail-head">
+        <div class="table-detail-title">Tracked items</div>
+        <div class="table-detail-meta">${collected}/${all.length} collected${missing > 0 ? `, ${missing} missing` : ""}</div>
+      </div>
+      <ul class="target-items target-items-compact">
+        ${all.map((target) => `
+          <li class="target-item ${target.isCollected ? "target-item-done" : "target-item-missing"}">
+            <span class="target-status-dot ${target.isCollected ? "dot-done" : "dot-missing"}"></span>
+            <strong>${esc(target.name)}</strong>
+            ${target.howToGet ? `<div class="target-how">${esc(target.howToGet)}</div>` : ""}
+          </li>`).join("")}
+      </ul>
+    </div>`;
+}
+
 // Full table with filtering
 function renderFullTable(report) {
   const query = searchInput.value.trim().toLowerCase();
@@ -291,13 +383,36 @@ function renderFullTable(report) {
     .map((item) => {
       const cls = item.isComplete ? "row-complete" : "row-incomplete";
       const statusCls = item.isComplete ? "status-complete" : "status-incomplete";
+      const trackedTargets = Array.isArray(item.requirementTargets) ? item.requirementTargets : [];
+      const hasTrackedTargets = trackedTargets.length > 0;
+      const trackedCollected = trackedTargets.filter((target) => target.isCollected).length;
+      const isExpanded = hasTrackedTargets && expandedAchievementIds.has(item.achievementId);
+
       return `
       <tr class="${cls}">
-        <td>${esc(item.displayTitle)}</td>
+        <td class="achievement-name-cell">
+          <div class="achievement-name-main">${esc(item.displayTitle)}</div>
+          ${hasTrackedTargets ? `
+            <div class="achievement-name-meta">
+              <span class="achievement-checklist-meta">${trackedCollected}/${trackedTargets.length} tracked</span>
+              <button
+                type="button"
+                class="row-toggle-btn"
+                data-achievement-toggle="${item.achievementId}">
+                ${isExpanded ? "Hide items" : "View items"}
+              </button>
+            </div>` : ""}
+        </td>
         <td class="${statusCls}">${item.isComplete ? "&#10003; Done" : "&#10007; Missing"}</td>
         <td>${item.completedCount}/${esc(item.requiredCountText)}</td>
         <td>${item.remainingCount}</td>
-      </tr>`;
+      </tr>
+      ${isExpanded ? `
+      <tr class="row-details">
+        <td colspan="4" class="row-details-cell">
+          ${renderExpandedTargetList(item)}
+        </td>
+      </tr>` : ""}`;
     })
     .join("");
 

@@ -9,6 +9,17 @@ namespace bmw_web.Services;
 
 public sealed class AchievementPlanner
 {
+    private static readonly string[] KnownOwnedIdPropertyNames = ["ItemId", "EquipId", "OwningItemId"];
+
+    private static readonly string[] KnownOwnedRootPropertyNames =
+    [
+        "Bag",
+        "Equip",
+        "Accessorylist",
+        "WearAccessory",
+        "WearEquip",
+    ];
+
     private readonly ILogger<AchievementPlanner> _logger;
 
     public AchievementPlanner(ILogger<AchievementPlanner> logger)
@@ -49,10 +60,10 @@ public sealed class AchievementPlanner
             [81028] = "Shell and Scales",
             [81029] = "Secret in the Scroll",
             [81030] = "Pound and Perfect",
-            [81031] = "Guardian of Gear",
+            [81031] = "The Soaring Slash",
             [81032] = "Happy Harvest",
-            [81033] = "Secret in Purple Cloud",
-            [81034] = "Marvelous Melon",
+            [81033] = "Marvelous Melon",
+            [81034] = "Lust and Dust",
             [81035] = "Corrupted Captains",
             [81036] = "Devoted Disciples",
             [81037] = "Matches with the Macaque",
@@ -61,11 +72,11 @@ public sealed class AchievementPlanner
             [81040] = "Gnashing Grudge",
             [81041] = "Passion Passes",
             [81042] = "The Loong Pattern",
-            [81043] = "Lust and Dust",
+            [81043] = "Secret in Purple Cloud",
             [81044] = "The Wayward Ways",
             [81045] = "A Family Finished",
-            [81046] = "The Soaring Slash",
-            [81047] = "The Cockerel Crowed",
+            [81046] = "The Cockerel Crowed",
+            [81047] = "Misfit with Merit",
             [81048] = "Behold the Betrayal",
             [81049] = "Always Accompanied",
             [81050] = "The Furnace Boy",
@@ -75,13 +86,13 @@ public sealed class AchievementPlanner
             [81054] = "A Willing Warrior",
             [81055] = "Scenic Seeker",
             [81056] = "Three Teams of Two",
-            [81057] = "Portraits Perfected",
+            [81057] = "With Full Spirit",
             [81058] = "Frost and Flame",
             [81059] = "Flaming Fury",
             [81060] = "Treasure Trove",
             [81061] = "Mei of Memory",
             [81062] = "Meet the Match",
-            [81063] = "Master of Magic",
+            [81063] = "Full of Forms",
             [81064] = "Brews and Barrels",
             [81065] = "The Cloud Claimed",
             [81066] = "The Clamor of Frogs",
@@ -89,14 +100,14 @@ public sealed class AchievementPlanner
             [81068] = "The Five Skandhas",
             [81069] = "Medicine Meal",
             [81070] = "Treaded Tracks",
-            [81071] = "Misfit with Merit",
+            [81071] = "Guardian of Gear",
             [81072] = "A Duel of Destiny",
-            [81073] = "Page Preserver",
+            [81073] = "Portraits Perfected",
             [81074] = "Six Senses Secured",
-            [81075] = "Full of Forms",
+            [81075] = "Master of Magic",
             [81076] = "Gourds Gathered",
-            [81077] = "Brewer's Bounty",
-            [81078] = "With Full Spirit",
+            [81077] = "Page Preserver",
+            [81078] = "Brewer's Bounty",
             [81079] = "Mantled with Might",
             [81080] = "Staffs and Spears",
             [81081] = "Final Fulfillment",
@@ -178,22 +189,62 @@ public sealed class AchievementPlanner
             [81045] = new AchievementKnowledge
             {
                 TargetSource = TargetSource.AchievementRequirements,
-                DisplayTitleOverride = "A Family Finished - Finish both Zhu Family questlines",
+                DisplayTitleOverride = "A Family Finished - Unite the Scorpion Family",
                 RouteHintOverride =
-                    "If this is still missing, revisit the Chapter 4 Zhu Bajie quest steps across Village of Lanxi, Webbed Hollow, and Temple of Yellow Flowers until both storylines are resolved.",
+                    "This achievement tracks two scorpion-family subgoals in Chapter 4. Finish both the Scorpionlord encounter and the Four Scorpion Princes chain before moving on if the game has not already marked it complete.",
                 Targets =
                 [
                     new TargetKnowledge(
                         3001,
-                        "Zhu Family Quest Part 1",
-                        "Complete the first Zhu family quest chain through the Temple of Yellow Flowers story arc."
+                        "Scorpionlord",
+                        "Defeat Scorpionlord in Chapter 4. If he does not appear, revisit the Yellow Flower routes and make sure you have not locked the encounter out."
                     ),
                     new TargetKnowledge(
                         3002,
-                        "Zhu Family Quest Part 2",
-                        "Complete the second Zhu family quest. Requires revisiting Chapter 4 areas and resolving the remaining family conflict."
+                        "Four Chapter 4 Scorpion Enemies",
+                        "Defeat the four smaller Chapter 4 scorpion-family enemies so the save records the second scorpion-family requirement."
                     ),
                 ],
+            },
+            [81055] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Scenic Seeker - Find all Meditation Spots",
+                RouteHintOverride =
+                    "Meditation spots are one-time map pickups. Sweep each chapter in shrine-travel order: Chapter 1 has 3, Chapter 2 has 6, Chapter 3 has 5, Chapter 4 has 6, and Chapter 5 has 4.",
+                Targets = BuildScenicSeekerTargets(),
+            },
+            [81057] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "With Full Spirit - Collect all Spirits",
+                RouteHintOverride =
+                    "The save tracks this trophy through spirit-skill ownership IDs. This checklist uses the runtime spirit skill names tied to each spirit so every collected entry is still visible in the planner.",
+                Targets = BuildWithFullSpiritTargets(),
+            },
+            [81060] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Treasure Trove - Collect all Vessels",
+                RouteHintOverride =
+                    "Only four vessels count here. Clean up the Chapter 1 secret area, Chapter 2 secret area, Chapter 4 secret area, and the Chapter 5 ending reward.",
+                Targets = BuildTreasureTroveTargets(),
+            },
+            [81063] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Full of Forms - Unlock all Transformations",
+                RouteHintOverride =
+                    "This trophy only checks transformations. Sweep the chapter rewards first, then clean up the Purple Cloud Mountain reward, Yellow Loong, the Chapter 5 horse questline, and the Chapter 6 / secret-ending forms.",
+                Targets = BuildFullOfFormsTargets(),
+            },
+            [81064] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.DecodedSaveInventory,
+                DisplayTitleOverride = "Brews and Barrels - Collect all Drinks",
+                RouteHintOverride =
+                    "Check Shen Monkey upgrades first, then clean up the one-off Chapter 3 and late-game drink collectibles.",
+                Targets = BuildBrewersBountyCategoryTargets(81064),
             },
             [81067] = new AchievementKnowledge
             {
@@ -241,42 +292,68 @@ public sealed class AchievementPlanner
                     new TargetKnowledge(16037, "White Seashell Waist Chain", "Random drop from the bull-like enemy at Chapter 5 -> Furnace Valley -> Rakshasa Palace."),
                 ],
             },
-            [81078] = new AchievementKnowledge
+            [81068] = new AchievementKnowledge
             {
-                TargetSource = TargetSource.DecodedSaveInventory,
-                DisplayTitleOverride = "With Full Spirit - Collect all 27 Soaks",
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "The Five Skandhas - Gather every Skandha",
                 RouteHintOverride =
-                    "This achievement tracks soaks, not drinks. The usual holdouts are the RNG plant soaks, Flame Mediator from Searing-Fire enemies, Graceful Orchid from Chen Loong, and the NG+ soak sold by Shen Monkey.",
+                    "Find the five Skandha collectibles across Chapters 1, 2, 4, and 6, then take them to Xu Dog so the final Five Skandhas Pill is crafted and the trophy registers.",
                 Targets =
                 [
-                    new TargetKnowledge(2301, "Guanyin's Willow Leaf", "Buy from Shen Monkey in New Game+."),
-                    new TargetKnowledge(2302, "Flower Primes", "Buy from Shen Monkey starting in Chapter 6."),
-                    new TargetKnowledge(2303, "Turtle Tear", "Defeat Apramana Bat, inspect the skeleton, then collect the dropped green tear on the shore in Chapter 3."),
-                    new TargetKnowledge(2304, "Stranded Loong's Whisker", "Hidden container on the island in Chapter 3 -> Snowhill Path -> Mirrormere."),
-                    new TargetKnowledge(2305, "Mount Lingtai Seedlings", "Golden turtle container on the main path from Chapter 5 -> Woods of Ember -> Camp of Seasons."),
-                    new TargetKnowledge(2306, "Breath of Fire", "Dropped by Cyan Loong on Turtle Island after getting Loong Scales."),
-                    new TargetKnowledge(2307, "Celestial Lotus Seeds", "Buy from Shen Monkey starting in Chapter 3."),
-                    new TargetKnowledge(2308, "Undying Vine", "Random drop from Verdant Glow enemies in Chapter 4 secret area -> Purple Cloud Mountain -> Valley of Blooms."),
-                    new TargetKnowledge(2309, "Tiger Relic", "Hidden in the cellar route opened after the Chapter 2 Tiger Vanguard and Stone Vanguard bosses."),
-                    new TargetKnowledge(2310, "Laurel Buds", "Container in Chapter 2 -> Sandgate Village -> Village Entrance, near the big village gate."),
-                    new TargetKnowledge(2311, "Sweet Ice", "Golden container at Chapter 3 -> New Thunderclap Temple -> Temple Entrance."),
-                    new TargetKnowledge(2312, "Thunderbolt Horn", "Buy from Shen Monkey starting in Chapter 3."),
-                    new TargetKnowledge(2313, "Deathstinger", "Dropped by the scorpion enemy near the hidden village reached from The Verdure Bridge."),
-                    new TargetKnowledge(2314, "Purple-Veined Peach Pit", "One of the rewards from the five chests at Chapter 4 -> The Verdure Bridge route."),
-                    new TargetKnowledge(2315, "Bee Mountain Stone", "Golden turtle container at Chapter 4 -> Temple of the Yellow Flower -> Mountain Trail."),
-                    new TargetKnowledge(2316, "Iron Pellet", "Buy from Man-in-Stone after finishing his Chapter 2 questline."),
-                    new TargetKnowledge(2317, "Slumbering Beetle Husk", "Golden turtle container in Emerald Hall after beating Yin-Yang Fish."),
-                    new TargetKnowledge(2318, "Copper Pill", "Container on the path beyond Tiger Vanguard in Chapter 2 -> Crouching Tiger Temple."),
-                    new TargetKnowledge(2319, "Goji Shoots", "Golden container in Chapter 4 -> Webbed Hollow -> Upper Hollow."),
-                    new TargetKnowledge(2320, "Fruit of Dao", "Random drop from the two monks just below Chapter 4 -> Court of Illumination shrine."),
-                    new TargetKnowledge(2321, "Flame Mediator", "Random drop from Searing-Fire enemies in Chapter 5 -> Field of Fire, including near Cooling Slope."),
-                    new TargetKnowledge(2322, "Double-Combed Rooster Blood", "Dropped by Duskveil in the Chapter 4 secret area, Purple Cloud Mountain."),
-                    new TargetKnowledge(2323, "Gall Gem", "Given automatically by Shen Monkey in Chapter 1 -> Bamboo Grove -> Marsh of White Mist."),
-                    new TargetKnowledge(2324, "Graceful Orchid", "Reward from Chen Loong in Zodiac Village after turning in all 15 seed types."),
-                    new TargetKnowledge(2325, "Tender Jade Lotus", "Random harvest from Lotus plants, easiest from Chapter 1 -> Black Wind Cave -> Cave Interior."),
-                    new TargetKnowledge(2326, "Steel Ginseng", "Random harvest from Ginseng plants, for example at Chapter 2 -> Fright Cliff -> Squall Hideout."),
-                    new TargetKnowledge(2327, "Goat Skull", "Random harvest from Licorice plants in Chapter 2 secret area -> Kingdom of Sahali -> Sandgate Bound."),
+                    new TargetKnowledge(
+                        1169,
+                        "Five Skandhas Pill",
+                        "Collect every Skandha piece and return them to Xu Dog so the final pill is created and the achievement can complete."
+                    ),
                 ],
+            },
+            [81069] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Medicine Meal - Collect all Celestial Medicines",
+                RouteHintOverride =
+                    "This tracker uses the achievement's own celestial-medicine IDs. The three Celestial pills require five pickups each, and the Five Skandhas Pill comes from Xu Dog after the Skandha cleanup.",
+                Targets = BuildMedicineMealTargets(),
+            },
+            [81073] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Portraits Perfected - Fill every journal category",
+                RouteHintOverride =
+                    "Portraits Perfected completes when every journal tab is full. The game tracks four category buckets here instead of every single portrait row.",
+                Targets = BuildPortraitsPerfectedTargets(),
+            },
+            [81075] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Master of Magic - Learn every spell",
+                RouteHintOverride =
+                    "This trophy checks the seven base spells, not the transformations. Clean up the Chapter 1-4 spell rewards first, then finish the Chapter 3 strand spells and the endgame Spell Binder unlock.",
+                Targets = BuildMasterOfMagicTargets(),
+            },
+            [81078] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.LinkedAchievementRequirements,
+                DisplayTitleOverride = "Brewer's Bounty - Collect all Drinks, Soaks, and Gourds",
+                RouteHintOverride =
+                    "This trophy needs every drink series, every soak, and every gourd series. The checklist below links each target to the correct achievement bucket: drinks come from Brews and Barrels, soaks come from Brewer's Bounty itself, and gourds come from Gourds Gathered.",
+                Targets = BuildBrewersBountyTargets(),
+            },
+            [81076] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.DecodedSaveInventory,
+                DisplayTitleOverride = "Gourds Gathered - Collect all Gourds",
+                RouteHintOverride =
+                    "Check Shen Monkey upgrades, the Chapter 2 secret-area gourd line, then sweep Purple Cloud Mountain, Chapter 3 exploration routes, and the Chapter 4 secret-area reward.",
+                Targets = BuildBrewersBountyCategoryTargets(81076),
+            },
+            [81077] = new AchievementKnowledge
+            {
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Page Preserver - Collect all Medicine Formulas",
+                RouteHintOverride =
+                    "Formula scrolls come from merchants, chests, quest rewards, and a few late-game pickups. Compare this checklist against shrine vendors and Xu Dog first, then sweep Chapters 3-5 for the holdouts.",
+                Targets = BuildPagePreserverTargets(),
             },
             [81079] = new AchievementKnowledge
             {
@@ -416,6 +493,331 @@ public sealed class AchievementPlanner
             }
         };
 
+    private static List<TargetKnowledge> BuildBrewersBountyTargets()
+    {
+        return
+        [
+            new TargetKnowledge(
+                2009,
+                "Drink: Coconut Wine",
+                "Starting drink series. Upgrade it through Shen Monkey; this line counts once for Brewer's Bounty.",
+                81064
+            ),
+            new TargetKnowledge(
+                2010,
+                "Drink: Lambbrew / Dry Spirit",
+                "Chapter 2 drink series from Shen Monkey. Dry Spirit is the upgraded form of the same line.",
+                81064
+            ),
+            new TargetKnowledge(
+                2011,
+                "Drink: Bluebridge Romance",
+                "Unique collectible drink from Chapter 3 exploration.",
+                81064
+            ),
+            new TargetKnowledge(
+                2012,
+                "Drink: Jade Essence / Jade Dew",
+                "Chapter 3 drink series. Jade Dew is the upgraded form of the same line.",
+                81064
+            ),
+            new TargetKnowledge(
+                2019,
+                "Drink: Worryfree Brew",
+                "Late-game collectible drink that counts toward Brews and Barrels and Brewer's Bounty.",
+                81064
+            ),
+            new TargetKnowledge(
+                2020,
+                "Drink: Sunset of the Nine Skies / Monkey Brew",
+                "Late-game drink series. Monkey Brew is the upgraded form of the same line.",
+                81064
+            ),
+            new TargetKnowledge(
+                2022,
+                "Drink: Loong Balm",
+                "Late-game collectible drink from optional exploration.",
+                81064
+            ),
+            new TargetKnowledge(
+                2023,
+                "Drink: A Thousand Days Inebriation",
+                "Late-game collectible drink from endgame exploration.",
+                81064
+            ),
+            new TargetKnowledge(2301, "Soak: Guanyin's Willow Leaf", "Buy from Shen Monkey in New Game+.", 81078),
+            new TargetKnowledge(2302, "Soak: Flower Primes", "Buy from Shen Monkey after reaching Chapter 6.", 81078),
+            new TargetKnowledge(2303, "Soak: Turtle Tear", "Chapter 3 collectible from the Bitter Lake turtle route after the North Shore sequence.", 81078),
+            new TargetKnowledge(2304, "Soak: Stranded Loong's Whisker", "Hidden container on the island in Chapter 3 -> Snowhill Path -> Mirrormere.", 81078),
+            new TargetKnowledge(2305, "Soak: Mount Lingtai Seedlings", "Golden container on the main path from Chapter 5 -> Woods of Ember -> Camp of Seasons.", 81078),
+            new TargetKnowledge(2306, "Soak: Breath of Fire", "Reward chest after defeating Cyan Loong on the turtle island in Chapter 3 -> Bitter Lake.", 81078),
+            new TargetKnowledge(2307, "Soak: Celestial Lotus Seeds", "Bought from Shen Monkey starting in Chapter 3.", 81078),
+            new TargetKnowledge(2308, "Soak: Undying Vine", "Purple Cloud Mountain -> Valley of Blooms: random drop from Lushleaf enemies.", 81078),
+            new TargetKnowledge(2309, "Soak: Tiger Relic", "Hidden in the cellar route opened after the Chapter 2 Tiger Vanguard and Stone Vanguard bosses.", 81078),
+            new TargetKnowledge(2310, "Soak: Laurel Buds", "Container in Chapter 2 -> Sandgate Village -> Village Entrance, near the big village gate.", 81078),
+            new TargetKnowledge(2311, "Soak: Sweet Ice", "Chapter 3 collectible from the New Thunderclap Temple route near the Temple Entrance area.", 81078),
+            new TargetKnowledge(2312, "Soak: Thunderbolt Horn", "Bought from Shen Monkey starting in Chapter 3.", 81078),
+            new TargetKnowledge(2313, "Soak: Deathstinger", "Dropped by the scorpion enemy near the hidden village reached from The Verdure Bridge.", 81078),
+            new TargetKnowledge(2314, "Soak: Purple-Veined Peach Pit", "One of the rewards from the five chests at Chapter 4 -> The Verdure Bridge route.", 81078),
+            new TargetKnowledge(2315, "Soak: Bee Mountain Stone", "Golden turtle container at Chapter 4 -> Temple of the Yellow Flower -> Mountain Trail.", 81078),
+            new TargetKnowledge(2316, "Soak: Iron Pellet", "Purchased after the Man-in-Stone side quest.", 81078),
+            new TargetKnowledge(2317, "Soak: Slumbering Beetle Husk", "Chapter 5 -> Furnace Valley -> Emerald Hall: loot the chest in the throne room side area.", 81078),
+            new TargetKnowledge(2318, "Soak: Copper Pill", "Container on the path beyond Tiger Vanguard in Chapter 2 -> Crouching Tiger Temple.", 81078),
+            new TargetKnowledge(2319, "Soak: Goji Shoots", "Golden container in Chapter 4 -> Webbed Hollow -> Upper Hollow.", 81078),
+            new TargetKnowledge(2320, "Soak: Fruit of Dao", "Purple Cloud Mountain -> Valley of Blooms: random drop from Staff Daoist / nearby Daoist enemies.", 81078),
+            new TargetKnowledge(2321, "Soak: Flame Mediator", "Chapter 5 random drop from the fire-aligned enemies around Field of Fire, especially Cooling Slope.", 81078),
+            new TargetKnowledge(2322, "Soak: Double-Combed Rooster Blood", "Dropped by Duskveil in the Chapter 4 secret area, Purple Cloud Mountain.", 81078),
+            new TargetKnowledge(2323, "Soak: Gall Gem", "Defeat the enemy near Shen Monkey in Chapter 1 -> Bamboo Grove -> Marsh of White Mist.", 81078),
+            new TargetKnowledge(2324, "Soak: Graceful Orchid", "Reward from Chen Loong in Zodiac Village after turning in all 15 seed types.", 81078),
+            new TargetKnowledge(2325, "Soak: Tender Jade Lotus", "Random harvest from Lotus plants, easiest from Chapter 1 -> Black Wind Cave -> Cave Interior.", 81078),
+            new TargetKnowledge(2326, "Soak: Steel Ginseng", "Random harvest from Ginseng plants, for example at Chapter 2 -> Fright Cliff -> Squall Hideout.", 81078),
+            new TargetKnowledge(2327, "Soak: Goat Skull", "Random harvest from Licorice plants in Chapter 2, for example around Yellow Wind Ridge / Fright Cliff.", 81078),
+            new TargetKnowledge(
+                18007,
+                "Gourd: Old / Supreme Gourd",
+                "Starting gourd series. Upgrade it through Shen Monkey; this line counts once for Brewer's Bounty.",
+                81076
+            ),
+            new TargetKnowledge(
+                18009,
+                "Gourd: Plaguebane Gourd",
+                "Unique gourd from Chapter 2 progression.",
+                81076
+            ),
+            new TargetKnowledge(
+                18011,
+                "Gourd: Jade Lotus / Jade Guanyin Gourd",
+                "Chapter 2 gourd series tied to the secret-area boar route. Jade Guanyin is the upgraded form of the same line.",
+                81076
+            ),
+            new TargetKnowledge(
+                18012,
+                "Gourd: Fiery Gourd",
+                "Unique Chapter 5 gourd from Furnace Valley cleanup.",
+                81076
+            ),
+            new TargetKnowledge(
+                18013,
+                "Gourd: Xiang River Goddess Gourd",
+                "Unique gourd from Purple Cloud Mountain exploration.",
+                81076
+            ),
+            new TargetKnowledge(
+                18014,
+                "Gourd: Stained Jade Gourd",
+                "Unique Chapter 3 gourd from Valley of Ecstasy exploration.",
+                81076
+            ),
+            new TargetKnowledge(
+                18015,
+                "Gourd: Qing-Tian Gourd",
+                "Unique Chapter 3 gourd from Pagoda Realm / Valley cleanup.",
+                81076
+            ),
+            new TargetKnowledge(
+                18016,
+                "Gourd: Immortal Blessing Gourd",
+                "Unique gourd from the Chapter 4 secret-area route.",
+                81076
+            ),
+            new TargetKnowledge(
+                18017,
+                "Gourd: Multi-Glazed Gourd",
+                "Late-game unique gourd from endgame exploration.",
+                81076
+            ),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildScenicSeekerTargets()
+    {
+        return
+        [
+            new TargetKnowledge(1006, "The Arbor, Forest of Wolves", "Chapter 1 meditation spot in the Forest of Wolves route."),
+            new TargetKnowledge(1007, "The Cavern, Bamboo Grove", "Chapter 1 meditation spot in the Bamboo Grove cave route."),
+            new TargetKnowledge(1004, "The Cliff, Black Wind Cave", "Chapter 1 meditation spot near the Black Wind Cave cliff path."),
+            new TargetKnowledge(2001, "The Ravine, Rock Clash Platform", "Chapter 2 meditation spot near Rock Clash Platform."),
+            new TargetKnowledge(2002, "The Altar, Sandgate Village", "Chapter 2 meditation spot in Sandgate Village."),
+            new TargetKnowledge(2003, "The Grotto, Yellow Wind Formation", "Chapter 2 meditation spot in Yellow Wind Formation."),
+            new TargetKnowledge(2004, "The Sculpture, Crouching Tiger Temple", "Chapter 2 meditation spot by the Crouching Tiger Temple sculpture."),
+            new TargetKnowledge(2005, "The Deadwood, Rockrest Flat", "Chapter 2 meditation spot near the dead tree at Rockrest Flat."),
+            new TargetKnowledge(2006, "The Rock, Sandgate Bound", "Chapter 2 meditation spot at Sandgate Bound."),
+            new TargetKnowledge(3001, "The Shade, Mirrormere", "Chapter 3 meditation spot at Mirrormere."),
+            new TargetKnowledge(3002, "The Bottom, Pagoda Realm", "Chapter 3 meditation spot in Pagoda Realm."),
+            new TargetKnowledge(3003, "The Statue, Precept Corridor", "Chapter 3 meditation spot at Precept Corridor."),
+            new TargetKnowledge(3004, "The Track, Mindfulness Cliff", "Chapter 3 meditation spot near Mindfulness Cliff."),
+            new TargetKnowledge(3005, "The Hall, New Thunderclap Temple", "Chapter 3 meditation spot inside New Thunderclap Temple."),
+            new TargetKnowledge(4001, "The Carvings, Pool of Shattered Jade", "Chapter 4 meditation spot at the Pool of Shattered Jade."),
+            new TargetKnowledge(4002, "The Tree, Middle Hollow", "Chapter 4 meditation spot in Middle Hollow."),
+            new TargetKnowledge(4003, "Cave Depths, Lower Hollow", "Chapter 4 meditation spot deep in Lower Hollow."),
+            new TargetKnowledge(4004, "The Height, Forest of Ferocity", "Chapter 4 meditation spot in the Forest of Ferocity route."),
+            new TargetKnowledge(4005, "The Pines, Temple of Yellow Flowers", "Chapter 4 meditation spot around the Temple of Yellow Flowers."),
+            new TargetKnowledge(4006, "The Ledge, Purple Cloud Mountain", "Chapter 4 meditation spot on the Purple Cloud Mountain ledge."),
+            new TargetKnowledge(5001, "The Buddha, Emerald Hall", "Chapter 5 meditation spot in Emerald Hall."),
+            new TargetKnowledge(5002, "The Relief, Camp of Seasons", "Chapter 5 meditation spot on the Camp of Seasons route."),
+            new TargetKnowledge(5003, "The Crag, Ashen Pass III", "Chapter 5 meditation spot near Ashen Pass III."),
+            new TargetKnowledge(5004, "The Screen, Purge Pit", "Chapter 5 meditation spot at Purge Pit."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildWithFullSpiritTargets()
+    {
+        return
+        [
+            SpiritTarget(8011, "Serpent Sleeve", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8012, "Clever Tongue", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8013, "Zen Strike", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8061, "Soul Chase", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8014, "Ritual Offering", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8015, "Boiling Blood", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8017, "Swift Blade", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8062, "Mountain Uproot", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8063, "Mountain Strike", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8064, "Flesh Flay", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8065, "Warding Exorcism", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8066, "Heart Rend", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8067, "Wing Flutter", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8068, "Gut Kick", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8069, "Heavy Crossbow", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8070, "Quick Delight", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8020, "Blinkstep", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8022, "Frost Blade", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8024, "Precept Guard", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8025, "Hard Bones", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8026, "Old Fist", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8071, "Yin Wind Fan", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8072, "Shadow Arrow", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8073, "Draw Blade", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8074, "Calamity Fire", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8075, "Crushing Wound", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8076, "Swift Leap", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8077, "Cold Fragrance", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8027, "Slaughter", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8028, "Insect Cry", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8029, "Verdant Stand", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8030, "Scorpion Sting", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8031, "Curl Up", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8078, "Flying Stinger", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8079, "Wild Volley", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8081, "Venom Scratch", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8083, "Tiger Roar", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8084, "Medicine Splash", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8085, "Ghostfire Spark", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8032, "Combined Body", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8033, "Hammer Force", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8034, "Heavy Shield", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8035, "Skyward Charge", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8036, "Stone Stance", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8037, "Beacon Blaze", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8086, "Blade Temper", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8087, "Stampede", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8088, "Raise the Fire", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8038, "Defiled Immortal", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8039, "Insect Queen", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8040, "Rootborn", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8041, "Drifting Tumbleweed", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8042, "Rolling Turn", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8092, "All Living Things", "Late-game spirit tracked by the runtime spirit-skill table."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildTreasureTroveTargets()
+    {
+        return
+        [
+            new TargetKnowledge(19001, "Fireproof Mantle", "Chapter 1 vessel from the Ancient Guanyin Temple secret area."),
+            new TargetKnowledge(19002, "Wind Tamer", "Chapter 2 vessel from the Kingdom of Sahali secret area."),
+            new TargetKnowledge(19004, "Weaver's Needle", "Chapter 4 vessel from Purple Cloud Mountain."),
+            new TargetKnowledge(19005, "Plantain Fan", "Chapter 5 vessel reward after finishing the main story arc there."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildFullOfFormsTargets()
+    {
+        return
+        [
+            new TargetKnowledge(5001, "Red Tides", "Transformation from Chapter 1 progression."),
+            new TargetKnowledge(5004, "Azure Dust", "Transformation from the Chapter 2 secret-area route."),
+            new TargetKnowledge(5006, "Ashen Slumber", "Transformation from Chapter 3."),
+            new TargetKnowledge(5008, "Ebon Flow", "Transformation from Chapter 3 cleanup."),
+            new TargetKnowledge(5014, "Hoarfrost", "Transformation from the Chapter 3 side-content route."),
+            new TargetKnowledge(5016, "Umbral Abyss", "Transformation from later Chapter 3 content."),
+            new TargetKnowledge(5017, "Violet Hail", "Transformation from the Daoist Mi questline in Chapter 4."),
+            new TargetKnowledge(5018, "Golden Lining", "Transformation from Yellow Loong in Chapter 4."),
+            new TargetKnowledge(5019, "Dark Thunder", "Transformation from the horse NPC questline in Chapter 5."),
+            new TargetKnowledge(5024, "Azure Dome", "Endgame transformation from the true-ending path."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildMedicineMealTargets()
+    {
+        return
+        [
+            new TargetKnowledge(1003, "Celestial Jade Lotus Pill", "Collect all 5 Health upgrade pills."),
+            new TargetKnowledge(1004, "Celestial Taiyi Pill", "Collect all 5 Mana upgrade pills."),
+            new TargetKnowledge(1005, "Celestial Nonary Pill", "Collect all 5 Stamina upgrade pills."),
+            new TargetKnowledge(1169, "Five Skandhas Pill", "Crafted by Xu Dog after the full Skandha cleanup."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildPortraitsPerfectedTargets()
+    {
+        return
+        [
+            new TargetKnowledge(7401, "Characters", "Fill the Characters tab in the journal."),
+            new TargetKnowledge(7402, "Yaoguais", "Fill the Yaoguais tab in the journal."),
+            new TargetKnowledge(7403, "Chiefs", "Fill the Chiefs tab in the journal."),
+            new TargetKnowledge(7404, "Kings", "Fill the Kings tab in the journal."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildMasterOfMagicTargets()
+    {
+        return
+        [
+            new TargetKnowledge(5101, "Immobilize", "Base spell from early story progression."),
+            new TargetKnowledge(5102, "Ring of Fire", "Chapter 1 spell from the Keeper route."),
+            new TargetKnowledge(5103, "Spell Binder", "Late-game spell from the Chapter 3 secret route."),
+            new TargetKnowledge(5201, "Cloud Step", "Base spell from early story progression."),
+            new TargetKnowledge(5202, "Rock Solid", "Chapter 2 spell from the Man-in-Stone route."),
+            new TargetKnowledge(5301, "A Pluck of Many", "Chapter 3 strand spell from story progression."),
+            new TargetKnowledge(5302, "Life-Saving Strand", "Late-game strand spell from story progression."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildPagePreserverTargets()
+    {
+        return
+        [
+            new TargetKnowledge(1107, "Body-Fleeting Powder", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1110, "Septenary Heartfire Pill", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1111, "Life-Saving Pill", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1113, "Ascension Powder", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1115, "Soul Remigration Pill", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1118, "Essence Decoction", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1121, "Tonifying Decoction", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1130, "Longevity Decoction", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1134, "Fortifying Medicament", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1136, "Mirage Pill", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1142, "Loong Aura Amplification Pellets", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1144, "Evil Repelling Medicament", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1166, "Enhanced Ginseng Pellets", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1168, "Enhanced Tiger Subduing Pellets", "Formula scroll that counts toward Page Preserver."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildBrewersBountyCategoryTargets(int sourceAchievementId)
+    {
+        return BuildBrewersBountyTargets()
+            .Where(x => x.SourceAchievementId == sourceAchievementId)
+            .ToList();
+    }
+
+    private static TargetKnowledge SpiritTarget(int id, string name, string howToGet)
+    {
+        return new TargetKnowledge(id, $"Spirit Skill: {name}", howToGet);
+    }
+
     public async Task<AnalysisReport> AnalyzeAsync(string savePath)
     {
         if (string.IsNullOrWhiteSpace(savePath))
@@ -446,6 +848,7 @@ public sealed class AchievementPlanner
         var chapter = data.RoleData?.RoleCs?.Chapter?.CurChapter ?? -1;
         var mapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MapId ?? -1;
         var maxMapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MaxMapId ?? -1;
+        var newGamePlusCount = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 0;
         var ownedIds = CollectOwnedIds(data);
         var activeRebirthPoints = data
             .PersistentECSData
@@ -460,6 +863,7 @@ public sealed class AchievementPlanner
 
         var achievements =
             data.RoleData?.RoleCs?.Achievement?.Achievements?.ToList() ?? new List<AchievementOne>();
+        var achievementRequirementIds = BuildAchievementRequirementIds(achievements);
         _logger.LogInformation(
             "Decoded save context for player {PlayerName}: chapter {Chapter}, map {MapId}, achievements {AchievementCount}, owned ids {OwnedIdCount}.",
             data.RoleData?.RoleCs?.Base?.Name ?? "Unknown",
@@ -479,26 +883,54 @@ public sealed class AchievementPlanner
             var completedCount = achievement.CompleteRequirementList?.Count ?? 0;
             var isComplete = achievement.IsComplete;
             var completedRequirementIds = achievement.CompleteRequirementList?.ToList() ?? [];
+            var context = new RouteContext(chapter, mapId, maxMapId, activeRebirthPoints.Count);
+            var knowledge = GetKnowledge(
+                config.AchievementId,
+                completedRequirementIds,
+                ownedIds,
+                achievementRequirementIds
+            );
+            var completionFallbackUsed = false;
+            if (
+                !isComplete
+                && config.IsResetOnGameplus
+                && newGamePlusCount > 0
+                && knowledge?.Targets.Count > 0
+                && knowledge.MissingTargets.Count == 0
+            )
+            {
+                isComplete = true;
+                completedCount = requiredCount > 0
+                    ? Math.Max(completedCount, requiredCount)
+                    : Math.Max(completedCount, knowledge.Targets.Count);
+                completionFallbackUsed = true;
+            }
 
             var remaining = isComplete
                 ? 0
                 : requiredCount > 0
                     ? Math.Max(requiredCount - completedCount, 0)
                     : 1;
-            var priority = PriorityFor(requirementType);
-            var context = new RouteContext(chapter, mapId, maxMapId, activeRebirthPoints.Count);
-            var knowledge = GetKnowledge(config.AchievementId, completedRequirementIds, ownedIds);
+            var priority = PriorityFor(config.AchievementId, requirementType);
             var displayTitle =
                 knowledge?.DisplayTitleOverride ?? BuildTitle(config.AchievementId, requirementType);
             var routeHint = knowledge?.RouteHintOverride ?? RouteHint(requirementType, context);
 
             var steps = BuildStepPlan(
+                config.AchievementId,
                 requirementType,
                 remaining,
                 requiredCount,
                 completedCount,
-                context
+                context,
+                knowledge
             );
+            if (completionFallbackUsed)
+            {
+                steps.Add(
+                    "Marked complete from the tracked checklist because this resettable NG+ achievement did not keep its top-level save flag in sync."
+                );
+            }
             if (knowledge is not null)
             {
                 if (knowledge.Targets.Count > 0)
@@ -564,7 +996,7 @@ public sealed class AchievementPlanner
             GeneratedAtUtc = DateTime.UtcNow,
             PlayerName = data.RoleData?.RoleCs?.Base?.Name ?? "Unknown",
             PlayerLevel = data.RoleData?.RoleCs?.Base?.Level ?? 0,
-            NewGamePlusCount = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 0,
+            NewGamePlusCount = newGamePlusCount,
             CurrentChapterId = chapter,
             CurrentMapId = mapId,
             MaxMapId = maxMapId,
@@ -639,11 +1071,13 @@ public sealed class AchievementPlanner
     }
 
     private static List<string> BuildStepPlan(
+        int achievementId,
         string requirementType,
         int remaining,
         int requiredCount,
         int completedCount,
-        RouteContext context
+        RouteContext context,
+        AchievementKnowledgeResult? knowledge
     )
     {
         var steps = new List<string>
@@ -652,6 +1086,35 @@ public sealed class AchievementPlanner
                 ? $"Progress: {completedCount}/{requiredCount} done, {remaining} left."
                 : $"Status: {(remaining == 0 ? "complete" : "still locked")}."
         };
+
+        if (achievementId == 81045)
+        {
+            var missingTargetIds = knowledge?.MissingTargets.Select(x => x.Id).ToHashSet() ?? [];
+            if (missingTargetIds.Count == 0)
+            {
+                steps.Add(
+                    "Both Chapter 4 scorpion-family requirements are already present in the save."
+                );
+                steps.Add("If this was earned on an earlier cycle, an NG+ rescan should now stay marked complete.");
+                return steps;
+            }
+
+            if (missingTargetIds.Contains(3001))
+            {
+                steps.Add(
+                    "Revisit the Temple of Yellow Flower routes and defeat Scorpionlord before the encounter locks out."
+                );
+            }
+
+            if (missingTargetIds.Contains(3002))
+            {
+                steps.Add(
+                    "Defeat the four smaller Chapter 4 scorpion-family enemies so the second requirement records."
+                );
+            }
+
+            return steps;
+        }
 
         if (requirementType.Contains("Kill", StringComparison.OrdinalIgnoreCase))
         {
@@ -727,8 +1190,13 @@ public sealed class AchievementPlanner
         return steps;
     }
 
-    private static (int order, string label) PriorityFor(string requirementType)
+    private static (int order, string label) PriorityFor(int achievementId, string requirementType)
     {
+        if (achievementId == 81045)
+        {
+            return (1, "High");
+        }
+
         if (
             requirementType.Contains("Pass", StringComparison.OrdinalIgnoreCase)
             || requirementType.Contains("EnterMap", StringComparison.OrdinalIgnoreCase)
@@ -762,28 +1230,15 @@ public sealed class AchievementPlanner
     {
         var owned = new HashSet<int>();
         var roleCs = data.RoleData?.RoleCs;
-        var bag = GetPropertyValue(roleCs, "Bag");
-        var equip = GetPropertyValue(roleCs, "Equip");
-
-        AddIdsFromObject(owned, bag, 0);
-        AddIdsFromObject(owned, GetPropertyValue(bag, "EquipList"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(bag, "CanActivateEquipList"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(bag, "Accessorylist"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(bag, "WearAccessory"), 0);
-
-        AddIdsFromObject(owned, equip, 0);
-        AddIdsFromObject(owned, GetPropertyValue(equip, "Accessorylist"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(equip, "WearAccessory"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(equip, "WearEquip"), 0);
-
-        AddIdsFromObject(owned, GetPropertyValue(roleCs, "Accessorylist"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(roleCs, "WearAccessory"), 0);
-        AddIdsFromObject(owned, GetPropertyValue(roleCs, "WearEquip"), 0);
+        foreach (var rootPropertyName in KnownOwnedRootPropertyNames)
+        {
+            AddIdsFromKnownNode(owned, GetPropertyValue(roleCs, rootPropertyName), 0);
+        }
 
         return owned;
     }
 
-    private static void AddIdsFromObject(HashSet<int> owned, object? value, int depth)
+    private static void AddIdsFromKnownNode(HashSet<int> owned, object? value, int depth)
     {
         if (value is null || depth > 5)
         {
@@ -795,26 +1250,19 @@ public sealed class AchievementPlanner
             return;
         }
 
-        if (TryReadPositiveInt(value, "ItemId", out var itemId))
+        foreach (var propertyName in KnownOwnedIdPropertyNames)
         {
-            owned.Add(itemId);
-        }
-
-        if (TryReadPositiveInt(value, "EquipId", out var equipId))
-        {
-            owned.Add(equipId);
-        }
-
-        if (TryReadPositiveInt(value, "OwningItemId", out var owningItemId))
-        {
-            owned.Add(owningItemId);
+            if (TryReadPositiveInt(value, propertyName, out var ownedId))
+            {
+                owned.Add(ownedId);
+            }
         }
 
         if (value is IEnumerable enumerable)
         {
             foreach (var entry in enumerable)
             {
-                AddIdsFromObject(owned, entry, depth + 1);
+                AddIdsFromKnownNode(owned, entry, depth + 1);
             }
 
             return;
@@ -848,7 +1296,7 @@ public sealed class AchievementPlanner
                 continue;
             }
 
-            AddIdsFromObject(owned, child, depth + 1);
+            AddIdsFromKnownNode(owned, child, depth + 1);
         }
     }
 
@@ -913,7 +1361,8 @@ public sealed class AchievementPlanner
     private static AchievementKnowledgeResult? GetKnowledge(
         int achievementId,
         IReadOnlyCollection<int> completedRequirementIds,
-        IReadOnlyCollection<int> ownedIds
+        IReadOnlyCollection<int> ownedIds,
+        IReadOnlyDictionary<int, IReadOnlySet<int>> achievementRequirementIds
     )
     {
         if (!AchievementKnowledgeMap.TryGetValue(achievementId, out var knowledge))
@@ -921,18 +1370,19 @@ public sealed class AchievementPlanner
             return null;
         }
 
-        var completed = knowledge.TargetSource == TargetSource.DecodedSaveInventory
-            ? new HashSet<int>(ownedIds)
-            : new HashSet<int>(completedRequirementIds);
-        var targets = knowledge
-            .Targets.Select(x => new RequirementTarget
-            {
-                Id = x.Id,
-                Name = x.Name,
-                IsCollected = completed.Contains(x.Id),
-                HowToGet = x.HowToGet,
-            })
-            .ToList();
+        var targets = knowledge.TargetSource switch
+        {
+            TargetSource.DecodedSaveInventory => BuildTargetsFromCollectedIds(
+                knowledge.Targets,
+                BuildCollectedTargetIds(completedRequirementIds, ownedIds)
+            ),
+            TargetSource.LinkedAchievementRequirements => BuildTargetsFromAchievementRequirements(
+                knowledge.Targets,
+                achievementRequirementIds,
+                ownedIds
+            ),
+            _ => BuildTargetsFromCollectedIds(knowledge.Targets, new HashSet<int>(completedRequirementIds))
+        };
         var missing = targets.Where(x => !x.IsCollected).ToList();
 
         return new AchievementKnowledgeResult
@@ -942,6 +1392,77 @@ public sealed class AchievementPlanner
             Targets = targets,
             MissingTargets = missing,
         };
+    }
+
+    private static HashSet<int> BuildCollectedTargetIds(
+        IReadOnlyCollection<int> completedRequirementIds,
+        IReadOnlyCollection<int> ownedIds
+    )
+    {
+        var completed = new HashSet<int>(ownedIds);
+        completed.UnionWith(completedRequirementIds);
+        return completed;
+    }
+
+    private static Dictionary<int, IReadOnlySet<int>> BuildAchievementRequirementIds(
+        IEnumerable<AchievementOne> achievements
+    )
+    {
+        var requirementIds = new Dictionary<int, IReadOnlySet<int>>();
+        foreach (var achievement in achievements)
+        {
+            var config = achievement.Config;
+            if (config is null)
+            {
+                continue;
+            }
+
+            requirementIds[config.AchievementId] =
+                new HashSet<int>(achievement.CompleteRequirementList?.ToList() ?? []);
+        }
+
+        return requirementIds;
+    }
+
+    private static List<RequirementTarget> BuildTargetsFromCollectedIds(
+        IEnumerable<TargetKnowledge> targets,
+        IReadOnlySet<int> collectedIds
+    )
+    {
+        return targets
+            .Select(x => new RequirementTarget
+            {
+                Id = x.Id,
+                Name = x.Name,
+                IsCollected = collectedIds.Contains(x.Id),
+                HowToGet = x.HowToGet,
+            })
+            .ToList();
+    }
+
+    private static List<RequirementTarget> BuildTargetsFromAchievementRequirements(
+        IEnumerable<TargetKnowledge> targets,
+        IReadOnlyDictionary<int, IReadOnlySet<int>> achievementRequirementIds,
+        IReadOnlyCollection<int> ownedIds
+    )
+    {
+        return targets
+            .Select(x => new RequirementTarget
+            {
+                Id = x.Id,
+                Name = x.Name,
+                IsCollected = ownedIds.Contains(x.Id)
+                    || (
+                        x.SourceAchievementId is int sourceAchievementId
+                        && achievementRequirementIds.TryGetValue(
+                            sourceAchievementId,
+                            out var collectedIds
+                        )
+                        && collectedIds.Contains(x.Id)
+                    ),
+                HowToGet = x.HowToGet,
+            })
+            .ToList();
     }
 }
 
@@ -1020,6 +1541,7 @@ enum TargetSource
 {
     AchievementRequirements,
     DecodedSaveInventory,
+    LinkedAchievementRequirements,
 }
 
 sealed class AchievementKnowledgeResult
@@ -1030,4 +1552,4 @@ sealed class AchievementKnowledgeResult
     public required List<RequirementTarget> MissingTargets { get; init; }
 }
 
-sealed record TargetKnowledge(int Id, string Name, string HowToGet);
+sealed record TargetKnowledge(int Id, string Name, string HowToGet, int? SourceAchievementId = null);

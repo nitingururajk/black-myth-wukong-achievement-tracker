@@ -32,7 +32,7 @@ The tracker reads a `.sav` file, decodes the achievement data, and builds a play
 - For tracked collection achievements, shows the exact missing items still absent from the decoded save
 - Uses English item and achievement names in the web UI
 
-Tracked collection checklists currently include achievements such as curios, soaks, seeds, armor pieces, and weapons.
+Tracked collection checklists currently include achievements such as curios, soaks, seeds, drinks, gourds, meditation spots, spells, medicine formulas, vessels, armor pieces, and weapons.
 
 ## Web App
 
