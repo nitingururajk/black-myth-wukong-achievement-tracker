@@ -2,7 +2,6 @@
 const saveFileInput = document.getElementById("saveFile");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const spoilerToggleBtn = document.getElementById("spoilerToggleBtn");
-const achievementTitleToggleBtn = document.getElementById("achievementTitleToggleBtn");
 const spoilerToggleHint = document.getElementById("spoilerToggleHint");
 const statusPanel = document.getElementById("statusPanel");
 const overviewPanel = document.getElementById("overviewPanel");
@@ -23,13 +22,11 @@ let currentFilter = "all";
 let latestAnalysisRequestId = 0;
 let lastAnalysisMeta = null;
 let hideSpoilers = loadSpoilerPreference();
-let hideAchievementTitles = loadAchievementTitlePreference();
 const expandedAchievementIds = new Set();
 
 // Events
 analyzeBtn.addEventListener("click", analyze);
 spoilerToggleBtn.addEventListener("click", toggleSpoilers);
-achievementTitleToggleBtn.addEventListener("click", toggleAchievementTitles);
 
 document.querySelectorAll(".filter-tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -108,30 +105,6 @@ function hideResults() {
 function toggleSpoilers() {
   hideSpoilers = !hideSpoilers;
   saveSpoilerPreference(hideSpoilers);
-
-  if (shouldHideAchievementTitles()) {
-    searchInput.value = "";
-  }
-
-  syncSpoilerControls();
-
-  if (currentReport) {
-    renderAll(currentReport);
-  }
-}
-
-function toggleAchievementTitles() {
-  if (!hideSpoilers) {
-    return;
-  }
-
-  hideAchievementTitles = !hideAchievementTitles;
-  saveAchievementTitlePreference(hideAchievementTitles);
-
-  if (shouldHideAchievementTitles()) {
-    searchInput.value = "";
-  }
-
   syncSpoilerControls();
 
   if (currentReport) {
@@ -300,7 +273,7 @@ function renderItemTracker(report) {
       <article class="tracker-card">
         <div class="tracker-card-head">
           <div>
-            <h3 class="tracker-title">${renderAchievementTitle(item, "tracker")}</h3>
+            <h3 class="tracker-title">${esc(item.displayTitle)}</h3>
             <p class="tracker-meta">${item.missingTargets.length} still missing</p>
           </div>
         </div>
@@ -363,7 +336,7 @@ function renderActionPlan(report) {
         <div class="action-header">
           <span class="action-number">${idx + 1}</span>
           <div class="action-title-block">
-            <h3 class="action-title">${renderAchievementTitle(item, "action")}</h3>
+            <h3 class="action-title">${esc(item.displayTitle)}</h3>
             <div class="action-badges">
               ${item.resetOnNewGamePlus ? '<span class="badge badge-warn">Resets on NG+</span>' : ""}
             </div>
@@ -450,7 +423,7 @@ function renderExpandedTargetList(item) {
 
 // Full table with filtering
 function renderFullTable(report) {
-  const query = shouldHideAchievementTitles() ? "" : searchInput.value.trim().toLowerCase();
+  const query = searchInput.value.trim().toLowerCase();
   const filtered = report.achievements
     .filter((item) => {
       if (currentFilter === "incomplete" && item.isComplete) return false;
@@ -472,7 +445,7 @@ function renderFullTable(report) {
       return `
       <tr class="${cls}">
         <td class="achievement-name-cell">
-          <div class="achievement-name-main">${renderAchievementTitle(item, "table")}</div>
+          <div class="achievement-name-main">${esc(item.displayTitle)}</div>
           ${hasTrackedTargets ? `
             <div class="achievement-name-meta">
               <span class="achievement-checklist-meta">${trackedCollected}/${trackedTargets.length} tracked</span>
@@ -501,43 +474,6 @@ function renderFullTable(report) {
 }
 
 // Helpers
-function shouldHideAchievementTitles() {
-  return hideSpoilers && hideAchievementTitles;
-}
-
-function renderAchievementTitle(item, context) {
-  if (!shouldHideAchievementTitles()) {
-    return esc(item.displayTitle);
-  }
-
-  return renderSpoilerText(
-    item.displayTitle,
-    buildSpoilerLabel(item, "title", "achievement title"),
-    hiddenAchievementTitle(context, item)
-  );
-}
-
-function renderSpoilerText(value, label, placeholderText) {
-  if (!shouldHideAchievementTitles()) {
-    return esc(value);
-  }
-
-  return `
-    <span
-      class="spoiler-inline spoiler-block spoiler-block-hidden"
-      data-spoiler-block="true"
-      data-revealed="false"
-      role="button"
-      tabindex="0"
-      aria-expanded="false"
-      aria-label="${esc(`Reveal spoiler: ${label}`)}">
-      <span class="spoiler-content spoiler-inline-content">${esc(value)}</span>
-      <span class="spoiler-overlay spoiler-inline-overlay">
-        <span class="spoiler-inline-label">${esc(placeholderText)}</span>
-      </span>
-    </span>`;
-}
-
 function renderSpoilerBlock(innerHtml, label) {
   if (!hideSpoilers) {
     return innerHtml;
@@ -561,59 +497,23 @@ function renderSpoilerBlock(innerHtml, label) {
 }
 
 function buildSpoilerLabel(item, suffix, genericLabel) {
-  if (shouldHideAchievementTitles()) {
-    return genericLabel;
-  }
-
   return `${item.displayTitle} ${suffix}`;
 }
 
-function hiddenAchievementTitle(context, item) {
-  if (context === "tracker") {
-    return "Hidden collection achievement";
-  }
-
-  if (item.isComplete) {
-    return "Hidden completed achievement";
-  }
-
-  return "Hidden achievement";
-}
-
 function syncSpoilerControls() {
-  const titlesHidden = shouldHideAchievementTitles();
-
   spoilerToggleBtn.textContent = hideSpoilers ? "Item Spoilers Hidden" : "Item Spoilers Visible";
   spoilerToggleBtn.setAttribute("aria-pressed", hideSpoilers ? "true" : "false");
-
-  achievementTitleToggleBtn.disabled = !hideSpoilers;
-  achievementTitleToggleBtn.textContent = titlesHidden
-    ? "Achievement Names Hidden"
-    : "Achievement Names Visible";
-  achievementTitleToggleBtn.setAttribute("aria-pressed", titlesHidden ? "true" : "false");
-
-  searchInput.disabled = titlesHidden;
-  searchInput.placeholder = titlesHidden
-    ? "Search is off while achievement names are hidden"
-    : "Search achievements...";
-  searchInput.title = titlesHidden
-    ? "Show achievement names to search by title."
-    : "";
-  searchInput.setAttribute(
-    "aria-label",
-    titlesHidden
-      ? "Achievement search disabled while achievement names are hidden"
-      : "Search achievements"
-  );
+  searchInput.disabled = false;
+  searchInput.placeholder = "Search achievements...";
+  searchInput.title = "";
+  searchInput.setAttribute("aria-label", "Search achievements");
 
   if (!hideSpoilers) {
-    spoilerToggleHint.textContent = "Achievement titles, route hints, item checklists, and next checks are fully visible.";
+    spoilerToggleHint.textContent = "Route hints, item checklists, and next checks are fully visible.";
     return;
   }
 
-  spoilerToggleHint.textContent = titlesHidden
-    ? "Achievement names are hidden. Route hints, item checklists, and next checks stay hidden until revealed."
-    : "Achievement names are visible. Route hints, item checklists, and next checks stay hidden until revealed.";
+  spoilerToggleHint.textContent = "Route hints, item checklists, and next checks stay hidden until revealed.";
 }
 
 function loadSpoilerPreference() {
@@ -627,22 +527,6 @@ function loadSpoilerPreference() {
 function saveSpoilerPreference(value) {
   try {
     window.localStorage.setItem("wukong.hideSpoilers", value ? "true" : "false");
-  } catch {
-  }
-}
-
-function loadAchievementTitlePreference() {
-  try {
-    const stored = window.localStorage.getItem("wukong.hideAchievementTitles");
-    return stored === null ? true : stored === "true";
-  } catch {
-    return true;
-  }
-}
-
-function saveAchievementTitlePreference(value) {
-  try {
-    window.localStorage.setItem("wukong.hideAchievementTitles", value ? "true" : "false");
   } catch {
   }
 }

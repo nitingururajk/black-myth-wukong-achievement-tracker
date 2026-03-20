@@ -484,17 +484,6 @@ tbody tr:hover { background: rgba(255,255,255,0.035); }
   margin-top: 0.55rem;
   border-radius: 12px;
 }
-.spoiler-inline {
-  display: inline-flex;
-  max-width: 100%;
-  min-width: 11rem;
-  margin-top: 0;
-  vertical-align: top;
-}
-.spoiler-inline-content {
-  display: inline-block;
-  max-width: 100%;
-}
 .spoiler-block-hidden {
   cursor: pointer;
   outline: none;
@@ -527,18 +516,6 @@ tbody tr:hover { background: rgba(255,255,255,0.035); }
   border: 1px dashed rgba(242,193,78,0.25);
   border-radius: 12px;
   background: rgba(10,15,14,0.72);
-}
-.spoiler-inline-overlay {
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0.18rem 0.45rem;
-  border-style: solid;
-}
-.spoiler-inline-label {
-  color: var(--text);
-  font-size: 0.81rem;
-  font-weight: 700;
-  line-height: 1.3;
 }
 .spoiler-chip {
   display: inline-flex;
