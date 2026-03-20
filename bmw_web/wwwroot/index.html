@@ -12,10 +12,10 @@
     <main class="container">
       <header class="hero">
         <p class="eyebrow">Black Myth: Wukong</p>
-          <h1>Achievement Tracker</h1>
-          <p class="subtitle">
+        <h1>Achievement Tracker</h1>
+        <p class="subtitle">
           Load your save file to see which achievements and checklist items are still missing.
-          </p>
+        </p>
       </header>
 
       <section class="panel panel-input">
@@ -29,6 +29,11 @@
           <button id="analyzeBtn">Analyze</button>
         </div>
         <p class="hint">Choose your <code>ArchiveSaveFile.&lt;slot&gt;.sav</code> from <code>b1\Saved\SaveGames</code>. The browser uploads the file for analysis, so hosted deployments work too.</p>
+        <div class="utility-row">
+          <button id="spoilerToggleBtn" type="button" class="button-secondary spoiler-toggle-btn" aria-pressed="false">Item Spoilers Visible</button>
+          <button id="achievementTitleToggleBtn" type="button" class="button-secondary title-toggle-btn" aria-pressed="false">Achievement Names Visible</button>
+          <p id="spoilerToggleHint" class="utility-hint">Achievement titles, route hints, item checklists, and next checks are fully visible.</p>
+        </div>
       </section>
 
       <section id="statusPanel" class="panel status-panel hidden"></section>

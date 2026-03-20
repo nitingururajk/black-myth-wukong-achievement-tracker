@@ -1,6 +1,9 @@
 // Elements
 const saveFileInput = document.getElementById("saveFile");
 const analyzeBtn = document.getElementById("analyzeBtn");
+const spoilerToggleBtn = document.getElementById("spoilerToggleBtn");
+const achievementTitleToggleBtn = document.getElementById("achievementTitleToggleBtn");
+const spoilerToggleHint = document.getElementById("spoilerToggleHint");
 const statusPanel = document.getElementById("statusPanel");
 const overviewPanel = document.getElementById("overviewPanel");
 const progressArc = document.getElementById("progressArc");
@@ -19,10 +22,14 @@ let currentReport = null;
 let currentFilter = "all";
 let latestAnalysisRequestId = 0;
 let lastAnalysisMeta = null;
+let hideSpoilers = loadSpoilerPreference();
+let hideAchievementTitles = loadAchievementTitlePreference();
 const expandedAchievementIds = new Set();
 
 // Events
 analyzeBtn.addEventListener("click", analyze);
+spoilerToggleBtn.addEventListener("click", toggleSpoilers);
+achievementTitleToggleBtn.addEventListener("click", toggleAchievementTitles);
 
 document.querySelectorAll(".filter-tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -35,6 +42,23 @@ document.querySelectorAll(".filter-tabs .tab").forEach((tab) => {
 
 searchInput.addEventListener("input", () => {
   if (currentReport) renderFullTable(currentReport);
+});
+
+document.addEventListener("click", (event) => {
+  const spoilerBlock = event.target.closest("[data-spoiler-block]");
+  if (!spoilerBlock) return;
+
+  toggleSpoilerBlock(spoilerBlock);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+
+  const spoilerBlock = event.target.closest("[data-spoiler-block]");
+  if (!spoilerBlock) return;
+
+  event.preventDefault();
+  toggleSpoilerBlock(spoilerBlock);
 });
 
 fullTableBody.addEventListener("click", (event) => {
@@ -79,6 +103,49 @@ function hideResults() {
   itemTrackerPanel.classList.add("hidden");
   actionPlanPanel.classList.add("hidden");
   fullPanel.classList.add("hidden");
+}
+
+function toggleSpoilers() {
+  hideSpoilers = !hideSpoilers;
+  saveSpoilerPreference(hideSpoilers);
+
+  if (shouldHideAchievementTitles()) {
+    searchInput.value = "";
+  }
+
+  syncSpoilerControls();
+
+  if (currentReport) {
+    renderAll(currentReport);
+  }
+}
+
+function toggleAchievementTitles() {
+  if (!hideSpoilers) {
+    return;
+  }
+
+  hideAchievementTitles = !hideAchievementTitles;
+  saveAchievementTitlePreference(hideAchievementTitles);
+
+  if (shouldHideAchievementTitles()) {
+    searchInput.value = "";
+  }
+
+  syncSpoilerControls();
+
+  if (currentReport) {
+    renderAll(currentReport);
+  }
+}
+
+function toggleSpoilerBlock(block) {
+  if (block.dataset.revealed === "true") {
+    return;
+  }
+
+  block.dataset.revealed = "true";
+  block.setAttribute("aria-expanded", "true");
 }
 
 // Analyze
@@ -193,7 +260,7 @@ function renderOverview(report) {
   overviewPanel.classList.remove("hidden");
 }
 
-// Action plan cards
+// Missing item tracker
 function renderItemTracker(report) {
   const tracked = report.achievements
     .filter((item) => !item.isComplete)
@@ -215,14 +282,8 @@ function renderItemTracker(report) {
     return;
   }
 
-  trackerList.innerHTML = tracked.map((item) => `
-    <article class="tracker-card">
-      <div class="tracker-card-head">
-        <div>
-          <h3 class="tracker-title">${esc(item.displayTitle)}</h3>
-          <p class="tracker-meta">${item.missingTargets.length} still missing</p>
-        </div>
-      </div>
+  trackerList.innerHTML = tracked.map((item) => {
+    const detailHtml = `
       <div class="tracker-route">${esc(item.routeHint)}</div>
       <div class="tracker-grid">
         ${item.missingTargets.map((target) => `
@@ -233,13 +294,24 @@ function renderItemTracker(report) {
             </div>
             ${target.howToGet ? `<div class="tracker-how">${esc(target.howToGet)}</div>` : ""}
           </div>`).join("")}
-      </div>
-    </article>`).join("");
+      </div>`;
+
+    return `
+      <article class="tracker-card">
+        <div class="tracker-card-head">
+          <div>
+            <h3 class="tracker-title">${renderAchievementTitle(item, "tracker")}</h3>
+            <p class="tracker-meta">${item.missingTargets.length} still missing</p>
+          </div>
+        </div>
+        ${renderSpoilerBlock(detailHtml, buildSpoilerLabel(item, "missing item details", "collection achievement details"))}
+      </article>`;
+  }).join("");
 
   itemTrackerPanel.classList.remove("hidden");
 }
 
-// Action plan cards
+// Remaining achievement cards
 function renderActionPlan(report) {
   const incomplete = report.achievements
     .filter((x) => !x.isComplete)
@@ -261,7 +333,6 @@ function renderActionPlan(report) {
     return;
   }
 
-  // Separate meta achievements to show last
   const direct = incomplete.filter((x) => x.priorityLabel !== "Meta");
   const meta = incomplete.filter((x) => x.priorityLabel === "Meta");
   const ordered = [...direct, ...meta];
@@ -272,26 +343,7 @@ function renderActionPlan(report) {
         ? Math.round((item.completedCount / item.requiredCount) * 100)
         : (item.isComplete ? 100 : 0);
       const isMeta = item.priorityLabel === "Meta";
-
-      return `
-      <article class="action-card ${isMeta ? 'action-card-meta' : ''}">
-        <div class="action-header">
-          <span class="action-number">${idx + 1}</span>
-          <div class="action-title-block">
-            <h3 class="action-title">${esc(item.displayTitle)}</h3>
-            <div class="action-badges">
-              ${item.resetOnNewGamePlus ? '<span class="badge badge-warn">Resets on NG+</span>' : ''}
-            </div>
-          </div>
-        </div>
-
-        <div class="action-progress-row">
-          <div class="action-progress-bar">
-            <div class="action-progress-fill" style="width: ${pctVal}%"></div>
-          </div>
-          <span class="action-progress-text">${item.completedCount}/${esc(item.requiredCountText)}</span>
-        </div>
-
+      const detailHtml = `
         <div class="action-route">
           <span class="route-icon">&#9873;</span>
           <span>${esc(item.routeHint)}</span>
@@ -304,7 +356,28 @@ function renderActionPlan(report) {
           <ol class="steps-list">
             ${item.steps.map((s) => `<li>${esc(s)}</li>`).join("")}
           </ol>
+        </div>`;
+
+      return `
+      <article class="action-card ${isMeta ? "action-card-meta" : ""}">
+        <div class="action-header">
+          <span class="action-number">${idx + 1}</span>
+          <div class="action-title-block">
+            <h3 class="action-title">${renderAchievementTitle(item, "action")}</h3>
+            <div class="action-badges">
+              ${item.resetOnNewGamePlus ? '<span class="badge badge-warn">Resets on NG+</span>' : ""}
+            </div>
+          </div>
         </div>
+
+        <div class="action-progress-row">
+          <div class="action-progress-bar">
+            <div class="action-progress-fill" style="width: ${pctVal}%"></div>
+          </div>
+          <span class="action-progress-text">${item.completedCount}/${esc(item.requiredCountText)}</span>
+        </div>
+
+        ${renderSpoilerBlock(detailHtml, buildSpoilerLabel(item, "details", "achievement details"))}
       </article>`;
     })
     .join("");
@@ -339,8 +412,8 @@ function renderTargetBlock(item) {
         <summary class="targets-heading">Full checklist (${collected}/${all.length})</summary>
         <ul class="target-items target-items-compact">
           ${all.map((t) => `
-            <li class="target-item ${t.isCollected ? 'target-item-done' : 'target-item-missing'}">
-              <span class="target-status-dot ${t.isCollected ? 'dot-done' : 'dot-missing'}"></span>
+            <li class="target-item ${t.isCollected ? "target-item-done" : "target-item-missing"}">
+              <span class="target-status-dot ${t.isCollected ? "dot-done" : "dot-missing"}"></span>
               ${esc(t.name)}
             </li>`).join("")}
         </ul>
@@ -356,8 +429,7 @@ function renderExpandedTargetList(item) {
 
   const collected = all.filter((target) => target.isCollected).length;
   const missing = all.length - collected;
-
-  return `
+  const detailHtml = `
     <div class="table-detail-panel">
       <div class="table-detail-head">
         <div class="table-detail-title">Tracked items</div>
@@ -372,18 +444,20 @@ function renderExpandedTargetList(item) {
           </li>`).join("")}
       </ul>
     </div>`;
+
+  return renderSpoilerBlock(detailHtml, buildSpoilerLabel(item, "tracked items", "tracked item checklist"));
 }
 
 // Full table with filtering
 function renderFullTable(report) {
-  const query = searchInput.value.trim().toLowerCase();
+  const query = shouldHideAchievementTitles() ? "" : searchInput.value.trim().toLowerCase();
   const filtered = report.achievements
     .filter((item) => {
       if (currentFilter === "incomplete" && item.isComplete) return false;
       if (currentFilter === "complete" && !item.isComplete) return false;
-       if (query && !item.displayTitle.toLowerCase().includes(query)) return false;
-       return true;
-     })
+      if (query && !item.displayTitle.toLowerCase().includes(query)) return false;
+      return true;
+    })
     .sort((a, b) => a.achievementId - b.achievementId);
 
   fullTableBody.innerHTML = filtered
@@ -398,7 +472,7 @@ function renderFullTable(report) {
       return `
       <tr class="${cls}">
         <td class="achievement-name-cell">
-          <div class="achievement-name-main">${esc(item.displayTitle)}</div>
+          <div class="achievement-name-main">${renderAchievementTitle(item, "table")}</div>
           ${hasTrackedTargets ? `
             <div class="achievement-name-meta">
               <span class="achievement-checklist-meta">${trackedCollected}/${trackedTargets.length} tracked</span>
@@ -427,6 +501,152 @@ function renderFullTable(report) {
 }
 
 // Helpers
+function shouldHideAchievementTitles() {
+  return hideSpoilers && hideAchievementTitles;
+}
+
+function renderAchievementTitle(item, context) {
+  if (!shouldHideAchievementTitles()) {
+    return esc(item.displayTitle);
+  }
+
+  return renderSpoilerText(
+    item.displayTitle,
+    buildSpoilerLabel(item, "title", "achievement title"),
+    hiddenAchievementTitle(context, item)
+  );
+}
+
+function renderSpoilerText(value, label, placeholderText) {
+  if (!shouldHideAchievementTitles()) {
+    return esc(value);
+  }
+
+  return `
+    <span
+      class="spoiler-inline spoiler-block spoiler-block-hidden"
+      data-spoiler-block="true"
+      data-revealed="false"
+      role="button"
+      tabindex="0"
+      aria-expanded="false"
+      aria-label="${esc(`Reveal spoiler: ${label}`)}">
+      <span class="spoiler-content spoiler-inline-content">${esc(value)}</span>
+      <span class="spoiler-overlay spoiler-inline-overlay">
+        <span class="spoiler-inline-label">${esc(placeholderText)}</span>
+      </span>
+    </span>`;
+}
+
+function renderSpoilerBlock(innerHtml, label) {
+  if (!hideSpoilers) {
+    return innerHtml;
+  }
+
+  return `
+    <div
+      class="spoiler-block spoiler-block-hidden"
+      data-spoiler-block="true"
+      data-revealed="false"
+      role="button"
+      tabindex="0"
+      aria-expanded="false"
+      aria-label="${esc(`Reveal spoiler: ${label}`)}">
+      <div class="spoiler-content">${innerHtml}</div>
+      <div class="spoiler-overlay">
+        <span class="spoiler-chip">Spoiler hidden</span>
+        <span class="spoiler-overlay-text">Click to reveal ${esc(label).toLowerCase()}.</span>
+      </div>
+    </div>`;
+}
+
+function buildSpoilerLabel(item, suffix, genericLabel) {
+  if (shouldHideAchievementTitles()) {
+    return genericLabel;
+  }
+
+  return `${item.displayTitle} ${suffix}`;
+}
+
+function hiddenAchievementTitle(context, item) {
+  if (context === "tracker") {
+    return "Hidden collection achievement";
+  }
+
+  if (item.isComplete) {
+    return "Hidden completed achievement";
+  }
+
+  return "Hidden achievement";
+}
+
+function syncSpoilerControls() {
+  const titlesHidden = shouldHideAchievementTitles();
+
+  spoilerToggleBtn.textContent = hideSpoilers ? "Item Spoilers Hidden" : "Item Spoilers Visible";
+  spoilerToggleBtn.setAttribute("aria-pressed", hideSpoilers ? "true" : "false");
+
+  achievementTitleToggleBtn.disabled = !hideSpoilers;
+  achievementTitleToggleBtn.textContent = titlesHidden
+    ? "Achievement Names Hidden"
+    : "Achievement Names Visible";
+  achievementTitleToggleBtn.setAttribute("aria-pressed", titlesHidden ? "true" : "false");
+
+  searchInput.disabled = titlesHidden;
+  searchInput.placeholder = titlesHidden
+    ? "Search is off while achievement names are hidden"
+    : "Search achievements...";
+  searchInput.title = titlesHidden
+    ? "Show achievement names to search by title."
+    : "";
+  searchInput.setAttribute(
+    "aria-label",
+    titlesHidden
+      ? "Achievement search disabled while achievement names are hidden"
+      : "Search achievements"
+  );
+
+  if (!hideSpoilers) {
+    spoilerToggleHint.textContent = "Achievement titles, route hints, item checklists, and next checks are fully visible.";
+    return;
+  }
+
+  spoilerToggleHint.textContent = titlesHidden
+    ? "Achievement names are hidden. Route hints, item checklists, and next checks stay hidden until revealed."
+    : "Achievement names are visible. Route hints, item checklists, and next checks stay hidden until revealed.";
+}
+
+function loadSpoilerPreference() {
+  try {
+    return window.localStorage.getItem("wukong.hideSpoilers") === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveSpoilerPreference(value) {
+  try {
+    window.localStorage.setItem("wukong.hideSpoilers", value ? "true" : "false");
+  } catch {
+  }
+}
+
+function loadAchievementTitlePreference() {
+  try {
+    const stored = window.localStorage.getItem("wukong.hideAchievementTitles");
+    return stored === null ? true : stored === "true";
+  } catch {
+    return true;
+  }
+}
+
+function saveAchievementTitlePreference(value) {
+  try {
+    window.localStorage.setItem("wukong.hideAchievementTitles", value ? "true" : "false");
+  } catch {
+  }
+}
+
 function friendlyType(rawType) {
   if (!rawType) return "Unknown";
   const t = rawType.toLowerCase();
@@ -458,3 +678,5 @@ function esc(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
+syncSpoilerControls();
