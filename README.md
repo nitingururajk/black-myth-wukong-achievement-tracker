@@ -19,7 +19,7 @@ dotnet run --project ".\\bmw_web\\bmw_web.csproj"
 Then:
 
 1. Open the local URL printed in the terminal.
-2. Paste `<full-path-to-save>` into the save path field.
+2. Choose your `.sav` file in the browser.
 3. Click `Analyze`.
 4. Review the overview, missing item tracker, and remaining achievements.
 
@@ -46,7 +46,7 @@ Then open the local URL printed in the terminal.
 
 In the UI:
 
-1. Paste the full path to your save file.
+1. Choose your save file from disk.
 2. Click `Analyze`.
 3. Review:
    - the overview panel
@@ -54,7 +54,7 @@ In the UI:
    - the remaining achievements list
    - the full achievement table
 
-Example save file path:
+Look for save files like:
 
 ```text
 <game-install-or-save-root>\b1\Saved\SaveGames\<player-id>\ArchiveSaveFile.<slot>.sav

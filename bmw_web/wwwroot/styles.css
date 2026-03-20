@@ -67,6 +67,22 @@ input {
   border-radius: 10px; padding: 0.7rem 0.85rem; font-size: 0.93rem;
 }
 input:focus { outline: 2px solid rgba(242,193,78,0.44); outline-offset: 0; }
+input[type="file"] {
+  padding: 0.45rem 0.55rem;
+  line-height: 1.35;
+}
+input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.48rem 0.82rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(242,193,78,0.16);
+  color: var(--accent);
+}
+input[type="file"]::file-selector-button:hover { filter: brightness(1.05); }
 button {
   border: none; border-radius: 10px;
   padding: 0.7rem 1.2rem; font-weight: 700;

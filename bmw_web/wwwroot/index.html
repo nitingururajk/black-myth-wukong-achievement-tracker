@@ -19,18 +19,16 @@
       </header>
 
       <section class="panel panel-input">
-        <label for="savePath">Save File Path</label>
+        <label for="saveFile">Save File</label>
         <div class="input-row">
           <input
-            id="savePath"
-            type="text"
-            placeholder="<full-path-to-save>\\b1\\Saved\\SaveGames\\<player-id>\\ArchiveSaveFile.<slot>.sav"
-            autocomplete="off"
-            spellcheck="false"
+            id="saveFile"
+            type="file"
+            accept=".sav"
           />
           <button id="analyzeBtn">Analyze</button>
         </div>
-        <p class="hint">Usually under your game save folder &rarr; <code>b1\Saved\SaveGames</code></p>
+        <p class="hint">Choose your <code>ArchiveSaveFile.&lt;slot&gt;.sav</code> from <code>b1\Saved\SaveGames</code>. The browser uploads the file for analysis, so hosted deployments work too.</p>
       </section>
 
       <section id="statusPanel" class="panel status-panel hidden"></section>

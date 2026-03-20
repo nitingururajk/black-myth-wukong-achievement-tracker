@@ -27,8 +27,8 @@ The two applications share the same core idea but are implemented separately:
 
 The main runtime flow is:
 
-1. A user provides the path to a `.sav` file.
-2. The application reads the raw save bytes from disk.
+1. A user uploads a `.sav` file in the browser UI, or a caller provides a server-local path to the API.
+2. The application reads the raw save bytes from the upload or from disk.
 3. The raw bytes are parsed as an `ArchiveFile` protobuf container.
 4. The inner archive payload is extracted from `GameArchivesDataBytes`.
 5. The vendored decoder runtime deserializes that payload into `FUStBEDArchivesData`.
@@ -107,21 +107,21 @@ Returns a simple `{ ok = true }` response for health checks.
 
 #### `POST /api/analyze`
 
-Accepts a JSON payload matching `AnalyzeRequest`:
+Accepts either:
 
-```json
-{
-  "savePath": "<full-path-to-save>"
-}
-```
+- multipart form-data with a `saveFile` upload field
+- a legacy JSON payload matching `AnalyzeRequest`
 
 Execution flow:
 
-1. validate that `savePath` is present
-2. start request timing/log scope
-3. call `AchievementPlanner.AnalyzeAsync(savePath)`
-4. return `{ ok: true, report }` on success
-5. return a bad request with a readable error for missing file or parse failure
+1. validate that an uploaded file or `savePath` is present
+2. enforce a basic upload size limit for browser uploads
+3. start request timing/log scope
+4. call `AchievementPlanner.AnalyzeUploadedSave(...)` for uploads or `AchievementPlanner.AnalyzeAsync(savePath)` for server-local paths
+5. return `{ ok: true, report, analyzedAtUtc, saveFileName, saveFileLastWriteTimeUtc }` on success
+6. return a bad request with a readable error for missing file or parse failure
+
+The analyze response is explicitly marked `no-store` so repeated button presses always hit the server again instead of reusing a cached response.
 
 ### Logging
 
@@ -133,7 +133,7 @@ The web app uses console logging with timestamps. Logging currently exists at tw
 Logged events include:
 
 - application startup
-- rejected analyze requests with no save path
+- rejected analyze requests with no uploaded file or save path
 - analyze request start and completion timing
 - file-not-found failures
 - unexpected parse failures
@@ -151,8 +151,8 @@ This is the main backend component in the repository.
 
 ### Primary Responsibilities
 
-- validate the save path
-- read and decode the save file
+- validate uploaded save input or server-local save path
+- read and decode the save file bytes
 - extract player and achievement state
 - extract owned inventory/equipment IDs from decoded save data
 - enrich raw achievement data with curated knowledge for specific achievements
@@ -185,20 +185,29 @@ Examples of tracked achievements:
 
 - `Seeds to Sow`
 - `A Family Finished`
-- `A Curious Collection`
+- `Scenic Seeker`
 - `With Full Spirit`
+- `Treasure Trove`
+- `Full of Forms`
+- `A Curious Collection`
+- `The Five Skandhas`
+- `Medicine Meal`
+- `Portraits Perfected`
+- `Master of Magic`
+- `Page Preserver`
+- `Brewer's Bounty`
 - `Mantled with Might`
 - `Staffs and Spears`
 - `Final Fulfillment`
 
 #### `AnalyzeAsync`
 
-`AnalyzeAsync` is the main analysis pipeline.
+`AnalyzeAsync` and `AnalyzeUploadedSave` feed the same analysis pipeline.
 
 High-level behavior:
 
-1. validate save path
-2. read bytes from disk
+1. validate the save source
+2. read bytes from disk or accept uploaded bytes
 3. protobuf-parse the outer save archive
 4. deserialize the inner archive payload
 5. extract chapter/map/player state
@@ -245,21 +254,32 @@ Otherwise:
 
 This is the most specialized logic in the repo.
 
-For tracked achievements, the planner can resolve ownership from one of two sources:
+For tracked achievements, the planner can resolve ownership from three sources:
 
 - `AchievementRequirements`: use `CompleteRequirementList`
 - `DecodedSaveInventory`: use collected item/equipment IDs from the decoded save object graph
+- `LinkedAchievementRequirements`: use another achievement's `CompleteRequirementList` for each tracked target
 
 This distinction matters because some collection achievements are not reliable if you only inspect the raw achievement completion list.
 
 For example:
 
 - curios
-- soaks
 - armor pieces
 - weapons
 
 These use `DecodedSaveInventory`, not only achievement requirement progress.
+
+Composite trophies can also be tracked from related achievement buckets instead of raw inventory items.
+
+For example:
+
+- `Brewer's Bounty` now expands to the actual drink, soak, and gourd checklist
+- each target points at the correct source achievement bucket
+- drinks use `81064` (`Brews and Barrels`)
+- soaks use `81078` (`Brewer's Bounty`)
+- gourds use `81076` (`Gourds Gathered`)
+- source-backed soak IDs are labeled directly, while unresolved soak IDs stay generic instead of reusing a guessed item name
 
 ### Inventory/Equipment Ownership Extraction
 
@@ -279,7 +299,7 @@ It checks fields such as:
 - `WearAccessory`
 - `WearEquip`
 
-It then recursively walks nested objects and collections with `AddIdsFromObject`.
+It walks known root save nodes and then recursively traverses nested objects and collections with `AddIdsFromKnownNode`.
 
 Recognized ID properties include:
 
@@ -294,7 +314,7 @@ Important implementation details:
 - primitive/enum leaf values are ignored
 - property getter exceptions are swallowed so partially inaccessible objects do not break analysis
 
-This makes ownership extraction resilient to schema differences while still finding most useful inventory/equipment nodes.
+This keeps the extractor resilient to schema differences while still finding most useful inventory/equipment nodes.
 
 ### Knowledge Resolution
 
@@ -308,15 +328,16 @@ Behavior:
 
 1. look up the knowledge entry for the achievement ID
 2. choose the completion source based on `TargetSource`
-3. build `RequirementTarget` objects
-4. mark each target as collected or missing
-5. return the enriched checklist result
+3. for inventory-backed checklists, union decoded owned IDs with the achievement's own completed requirement IDs so tracker output stays aligned when reflective inventory scanning misses a save node
+4. build `RequirementTarget` objects
+5. mark each target as collected or missing
+6. return the enriched checklist result
 
 ### Output Models
 
 Important backend DTOs:
 
-- `AnalyzeRequest`: input payload for the web API
+- `AnalyzeRequest`: legacy JSON input payload for the web API
 - `AnalysisReport`: top-level response model
 - `AchievementPlan`: per-achievement derived state
 - `RequirementTarget`: individual tracked collectible/equipment target
@@ -336,7 +357,7 @@ Files:
 Defines the page structure:
 
 - hero header
-- save path input panel
+- save file upload panel
 - status panel
 - overview panel with progress ring
 - missing item tracker panel
@@ -351,7 +372,7 @@ This is the client-side controller.
 
 Main responsibilities:
 
-- wire button and keyboard events
+- wire button and filter/search events
 - call `/api/analyze`
 - handle API success/failure states
 - cache the current `AnalysisReport`
@@ -368,6 +389,9 @@ Main render functions:
 Important client-side behavior:
 
 - incomplete tracked items are grouped into the Missing Item Tracker
+- each analyze click uses a fresh `no-store` request and ignores older in-flight responses
+- the browser uploads the selected `.sav` file with `FormData` instead of sending a client-local path
+- the status panel shows the analysis timestamp and, when available from the browser file metadata, the selected file's last-modified timestamp so reruns are visible even when the achievement counts do not change
 - remaining achievements are sorted by priority and remaining count
 - meta achievements are pushed to the end of the remaining list
 - search filters only by visible achievement title

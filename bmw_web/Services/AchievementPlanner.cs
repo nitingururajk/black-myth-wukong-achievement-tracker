@@ -827,16 +827,30 @@ public sealed class AchievementPlanner
 
         if (!File.Exists(savePath))
         {
-            throw new FileNotFoundException($"Save file not found at path: {savePath}");
+            throw new FileNotFoundException("Save file was not found at the provided path.");
+        }
+
+        var bytes = await File.ReadAllBytesAsync(savePath);
+        return AnalyzeCore(bytes, NormalizeSaveFileName(savePath));
+    }
+
+    public AnalysisReport AnalyzeUploadedSave(string saveFileName, byte[] saveBytes)
+    {
+        return AnalyzeCore(saveBytes, NormalizeSaveFileName(saveFileName));
+    }
+
+    private AnalysisReport AnalyzeCore(byte[] saveBytes, string saveFileName)
+    {
+        if (saveBytes.Length == 0)
+        {
+            throw new ArgumentException("Save file is empty.", nameof(saveBytes));
         }
 
         var stopwatch = Stopwatch.StartNew();
-        _logger.LogInformation("Reading save file {SavePath}", savePath);
-
-        var bytes = await File.ReadAllBytesAsync(savePath);
-        _logger.LogInformation("Loaded {ByteCount} bytes from save file.", bytes.Length);
+        _logger.LogInformation("Reading save file {SaveFileName}", saveFileName);
+        _logger.LogInformation("Loaded {ByteCount} bytes from save file.", saveBytes.Length);
         IMessage<ArchiveFile> info = new ArchiveFile();
-        info.MergeFrom(bytes);
+        info.MergeFrom(saveBytes);
         if (info is not ArchiveFile archiveFile)
         {
             throw new InvalidOperationException("Invalid archive protobuf payload.");
@@ -992,7 +1006,7 @@ public sealed class AchievementPlanner
 
         return new AnalysisReport
         {
-            SavePath = savePath,
+            SaveFileName = saveFileName,
             GeneratedAtUtc = DateTime.UtcNow,
             PlayerName = data.RoleData?.RoleCs?.Base?.Name ?? "Unknown",
             PlayerLevel = data.RoleData?.RoleCs?.Base?.Level ?? 0,
@@ -1009,6 +1023,12 @@ public sealed class AchievementPlanner
             IncompleteAchievements = selectedPlans.Count - completed,
             Achievements = selectedPlans.OrderBy(x => x.AchievementId).ThenBy(x => x.Index).ToList(),
         };
+    }
+
+    private static string NormalizeSaveFileName(string pathOrFileName)
+    {
+        var saveFileName = Path.GetFileName(pathOrFileName.Trim());
+        return string.IsNullOrWhiteSpace(saveFileName) ? "uploaded-save.sav" : saveFileName;
     }
 
     private static string BuildTitle(int achievementId, string requirementType)
@@ -1480,7 +1500,7 @@ public sealed record RouteContext(
 
 public sealed class AnalysisReport
 {
-    public required string SavePath { get; init; }
+    public required string SaveFileName { get; init; }
     public required DateTime GeneratedAtUtc { get; init; }
     public required string PlayerName { get; init; }
     public required int PlayerLevel { get; init; }

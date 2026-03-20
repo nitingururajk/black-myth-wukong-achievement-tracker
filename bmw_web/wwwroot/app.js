@@ -1,5 +1,5 @@
 // Elements
-const savePathInput = document.getElementById("savePath");
+const saveFileInput = document.getElementById("saveFile");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const statusPanel = document.getElementById("statusPanel");
 const overviewPanel = document.getElementById("overviewPanel");
@@ -23,9 +23,6 @@ const expandedAchievementIds = new Set();
 
 // Events
 analyzeBtn.addEventListener("click", analyze);
-savePathInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); analyze(); }
-});
 
 document.querySelectorAll(".filter-tabs .tab").forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -86,9 +83,9 @@ function hideResults() {
 
 // Analyze
 async function analyze() {
-  const savePath = savePathInput.value.trim();
-  if (!savePath) {
-    setStatus("Enter a save path first.", "error");
+  const saveFile = saveFileInput.files && saveFileInput.files[0];
+  if (!saveFile) {
+    setStatus("Choose a save file first.", "error");
     hideResults();
     return;
   }
@@ -100,16 +97,18 @@ async function analyze() {
   analyzeBtn.disabled = true;
   analyzeBtn.textContent = isRepeatAnalysis ? "Reanalyzing..." : "Analyzing...";
   setStatus(isRepeatAnalysis
-    ? "Re-reading your save and refreshing the checklist..."
-    : "Reading your save and updating the checklist...");
+    ? "Re-uploading your save and refreshing the checklist..."
+    : "Uploading your save and building the checklist...");
   hideResults();
 
   try {
+    const formData = new FormData();
+    formData.append("saveFile", saveFile, saveFile.name);
+
     const response = await fetch(`/api/analyze?requestId=${requestId}`, {
       method: "POST",
       cache: "no-store",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ savePath }),
+      body: formData,
     });
     const data = await response.json();
 
@@ -123,22 +122,30 @@ async function analyze() {
 
     currentReport = data.report;
     lastAnalysisMeta = {
-      savePath,
+      saveFileName: data.saveFileName || saveFile.name,
+      saveFileSize: saveFile.size,
       analyzedAtUtc: data.analyzedAtUtc,
-      saveFileLastWriteTimeUtc: data.saveFileLastWriteTimeUtc,
+      saveFileLastModified: saveFile.lastModified || null,
     };
     renderAll(data.report);
 
     const analyzedAtText = formatTimestamp(data.analyzedAtUtc);
-    const saveUpdatedText = formatTimestamp(data.saveFileLastWriteTimeUtc);
+    const saveUpdatedText = lastAnalysisMeta.saveFileLastModified
+      ? formatTimestamp(lastAnalysisMeta.saveFileLastModified)
+      : null;
     const repeatedSaveVersion =
       priorAnalysis &&
-      priorAnalysis.savePath === savePath &&
-      priorAnalysis.saveFileLastWriteTimeUtc === data.saveFileLastWriteTimeUtc;
+      priorAnalysis.saveFileName === lastAnalysisMeta.saveFileName &&
+      priorAnalysis.saveFileSize === lastAnalysisMeta.saveFileSize &&
+      priorAnalysis.saveFileLastModified === lastAnalysisMeta.saveFileLastModified;
 
-    let statusText = `Updated on ${analyzedAtText}. Save file last modified on ${saveUpdatedText}. ${data.report.completedAchievements}/${data.report.totalAchievements} achievements complete.`;
+    let statusText = `Updated on ${analyzedAtText}. Analyzed ${lastAnalysisMeta.saveFileName}.`;
+    if (saveUpdatedText) {
+      statusText += ` File last modified on ${saveUpdatedText}.`;
+    }
+    statusText += ` ${data.report.completedAchievements}/${data.report.totalAchievements} achievements complete.`;
     if (repeatedSaveVersion) {
-      statusText += " The save file timestamp is unchanged since the previous analysis.";
+      statusText += " This looks like the same save version as the previous analysis.";
     }
 
     setStatus(statusText);
