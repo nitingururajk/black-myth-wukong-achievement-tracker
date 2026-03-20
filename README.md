@@ -60,6 +60,22 @@ Look for save files like:
 <game-install-or-save-root>\b1\Saved\SaveGames\<player-id>\ArchiveSaveFile.<slot>.sav
 ```
 
+## Docker
+
+Build the container image from the repo root:
+
+```powershell
+docker build -t bmw-web .
+```
+
+Run the containerized web app:
+
+```powershell
+docker run --rm -p 8080:8080 bmw-web
+```
+
+Then open `http://localhost:8080` and upload your `.sav` file in the browser. No save-path volume mount is required because the web UI uploads the file directly.
+
 ## CLI
 
 Run the CLI directly:

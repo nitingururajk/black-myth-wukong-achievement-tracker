@@ -1,0 +1,10 @@
+.git
+.gitignore
+.vs
+**/bin
+**/obj
+tmp_saves
+assets
+*.user
+*.suo
+*.log

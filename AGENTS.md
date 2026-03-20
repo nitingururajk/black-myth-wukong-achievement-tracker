@@ -49,6 +49,12 @@ Build the web app only:
 dotnet build .\bmw_web\bmw_web.csproj
 ```
 
+Build the Docker image for the web app:
+
+```powershell
+docker build -t bmw-web .
+```
+
 Build the CLI only:
 
 ```powershell
@@ -75,6 +81,12 @@ Run the web app:
 
 ```powershell
 dotnet run --project .\bmw_web\bmw_web.csproj
+```
+
+Run the web app in Docker:
+
+```powershell
+docker run --rm -p 8080:8080 bmw-web
 ```
 
 Helper script for the web app:
@@ -207,6 +219,7 @@ Recommended validation after frontend-only changes:
 - Do not delete `vendor/blackwukong-dlls/`.
 - Do not replace vendored DLLs casually; they are the decoder/runtime dependency for both apps.
 - If you must update vendored binaries, document the source and rebuild both projects.
+- Keep the root `Dockerfile` aligned with `bmw_web/bmw_web.csproj` and `vendor/blackwukong-dlls/` if paths or project names change.
 
 ## Documentation Rules
 

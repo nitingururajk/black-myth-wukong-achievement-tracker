@@ -15,6 +15,8 @@ The two applications share the same core idea but are implemented separately:
 ## Repository Layout
 
 - `bmw.sln`: root solution containing `bmw_web` and `bmw_probe`
+- `Dockerfile`: multi-stage container build for the web app
+- `.dockerignore`: trims the Docker build context
 - `bmw_web/`: ASP.NET Core web application
 - `bmw_probe/`: console application for report generation
 - `vendor/blackwukong-dlls/`: vendored third-party decoder/runtime DLLs required to parse save data
@@ -140,6 +142,25 @@ Logged events include:
 - bytes loaded from disk
 - decoded player/chapter/map context
 - final report summary with tracked checklist counts
+
+### Container Packaging
+
+The repository now includes a root `Dockerfile` that packages `bmw_web` as a multi-stage ASP.NET Core container image.
+
+Container build flow:
+
+1. copy `bmw_web/bmw_web.csproj`
+2. copy `vendor/blackwukong-dlls/`
+3. run `dotnet restore`
+4. copy the rest of `bmw_web/`
+5. run `dotnet publish -c Release`
+6. copy the publish output into the final ASP.NET runtime image
+
+Container runtime details:
+
+- the image serves the web app on port `8080`
+- the browser upload flow means no host save-path mount is required for normal use
+- the vendored decoder DLLs are included through the published web app output
 
 ## `AchievementPlanner` Service
 
