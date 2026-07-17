@@ -1,4 +1,5 @@
 const MAX_SAVE_BYTES = 8 * 1024 * 1024;
+const EXPECTED_ACHIEVEMENT_COUNT = 81;
 
 const uploadForm = document.getElementById("uploadForm");
 const saveFileInput = document.getElementById("saveFile");
@@ -7,6 +8,8 @@ const selectedFilePanel = document.getElementById("selectedFile");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const statusPanel = document.getElementById("statusPanel");
 const results = document.getElementById("results");
+const completionCeremony = document.getElementById("completionCeremony");
+const completionPlayer = document.getElementById("completionPlayer");
 const progressArc = document.getElementById("progressArc");
 const progressPct = document.getElementById("progressPct");
 const overviewNarrative = document.getElementById("overviewNarrative");
@@ -151,6 +154,7 @@ function chooseFile(file) {
   activeRequest = null;
   selectedFile = file;
   currentReport = null;
+  renderCompletionState(null);
   results.classList.add("hidden");
   revealedGuideIds.clear();
   openGuideIds.clear();
@@ -210,6 +214,7 @@ async function analyzeSave(event) {
   }
 
   activeRequest?.abort();
+  renderCompletionState(null);
   const controller = new AbortController();
   activeRequest = controller;
   const analyzedFile = selectedFile;
@@ -257,6 +262,7 @@ async function analyzeSave(event) {
     if (error.name === "AbortError") return;
 
     currentReport = null;
+    renderCompletionState(null);
     results.classList.add("hidden");
     setStatus(error.message || "The save could not be analyzed.", "error", true);
   } finally {
@@ -292,9 +298,34 @@ function hideStatus() {
 }
 
 function renderAll(report) {
+  renderCompletionState(report);
   renderOverview(report);
   syncSpoilerButton();
   renderSpoilerSensitiveViews();
+}
+
+function renderCompletionState(report) {
+  const journeyComplete = isJourneyComplete(report);
+
+  completionCeremony.hidden = !journeyComplete;
+  results.classList.toggle("is-journey-complete", journeyComplete);
+  results.classList.toggle("is-celebrating", journeyComplete);
+
+  if (!journeyComplete) return;
+
+  completionPlayer.textContent = report.playerName || "The Destined One";
+}
+
+function isJourneyComplete(report) {
+  const achievements = Array.isArray(report?.achievements) ? report.achievements : [];
+
+  return (
+    Number(report?.totalAchievements) === EXPECTED_ACHIEVEMENT_COUNT &&
+    Number(report?.completedAchievements) === EXPECTED_ACHIEVEMENT_COUNT &&
+    Number(report?.incompleteAchievements) === 0 &&
+    achievements.length === EXPECTED_ACHIEVEMENT_COUNT &&
+    achievements.every((item) => item?.isComplete === true)
+  );
 }
 
 function renderSpoilerSensitiveViews() {
@@ -354,10 +385,15 @@ function renderNextSteps(report) {
     .slice(0, 3);
 
   if (candidates.length === 0) {
+    const journeyComplete = isJourneyComplete(report);
     nextStepsList.innerHTML = `
       <div class="completion-banner">
-        <strong>All 81 ordeals are complete.</strong>
-        <p>Your save has no remaining achievement work.</p>
+        <strong>${journeyComplete ? "No further route is needed." : "The final fulfillment remains."}</strong>
+        <p>${
+          journeyComplete
+            ? "The final seal above marks every achievement complete."
+            : "Open Ordeal 81 in the full ledger to review the last platform trigger."
+        }</p>
       </div>`;
     return;
   }
