@@ -83,9 +83,12 @@ chapterFilter.addEventListener("change", renderAchievementLibrary);
 spoilerToggleBtn.addEventListener("click", () => {
   rememberOpenGuides();
   hideSpoilers = !hideSpoilers;
+  if (hideSpoilers) {
+    revealedGuideIds.clear();
+  }
   saveSpoilerPreference(hideSpoilers);
   syncSpoilerButton();
-  renderAchievementLibrary();
+  renderSpoilerSensitiveViews();
 });
 
 achievementList.addEventListener("click", (event) => {
@@ -97,7 +100,7 @@ achievementList.addEventListener("click", (event) => {
 
   revealedGuideIds.add(achievementId);
   openGuideIds.add(achievementId);
-  renderAchievementLibrary();
+  renderSpoilerSensitiveViews();
   document
     .getElementById(`achievement-${achievementId}`)
     ?.querySelector("summary")
@@ -290,9 +293,15 @@ function hideStatus() {
 
 function renderAll(report) {
   renderOverview(report);
-  renderNextSteps(report);
-  renderTracker(report);
   syncSpoilerButton();
+  renderSpoilerSensitiveViews();
+}
+
+function renderSpoilerSensitiveViews() {
+  if (!currentReport) return;
+
+  renderNextSteps(currentReport);
+  renderTracker(currentReport);
   renderAchievementLibrary();
 }
 
@@ -355,13 +364,20 @@ function renderNextSteps(report) {
 
   nextStepsList.innerHTML = candidates
     .map(
-      (item, index) => `
+      (item, index) => {
+        const spoilerHidden = isAchievementSpoilerHidden(item);
+        return `
         <article class="next-card" data-order="${index + 1}">
           <span class="next-card-number">Move ${index + 1} · ${esc(item.chapter)}</span>
           <h3>${esc(item.displayTitle)}</h3>
-          <p>${esc(item.requirementSummary || item.routeHint)}</p>
+          <p${spoilerHidden ? ' class="spoiler-placeholder"' : ""}>${
+            spoilerHidden
+              ? "Achievement description hidden while spoiler protection is on."
+              : esc(item.requirementSummary || item.routeHint)
+          }</p>
           <a href="#achievement-${item.achievementId}">Open this guide →</a>
-        </article>`
+        </article>`;
+      }
     )
     .join("");
 }
@@ -422,7 +438,9 @@ function renderTracker(report) {
 
   trackerList.innerHTML = trackedAchievements
     .map(
-      ({ item, missing }) => `
+      ({ item, missing }) => {
+        const spoilerHidden = isAchievementSpoilerHidden(item);
+        return `
         <details class="tracker-group">
           <summary>
             <span class="tracker-group-title">
@@ -430,18 +448,25 @@ function renderTracker(report) {
               <small>${missing.length} of ${(item.requirementTargets ?? []).length} tracked rows missing</small>
             </span>
           </summary>
-          <ul class="tracker-items">
-            ${missing
-              .map(
-                (target) => `
-                  <li class="tracker-item">
-                    <strong>${esc(target.name)}</strong>
-                    ${target.howToGet ? `<p>${esc(target.howToGet)}</p>` : ""}
-                  </li>`
-              )
-              .join("")}
-          </ul>
-        </details>`
+          ${
+            spoilerHidden
+              ? `<div class="spoiler-gate spoiler-gate-compact">
+                  <p>Missing item names and locations are hidden while spoiler protection is on.</p>
+                </div>`
+              : `<ul class="tracker-items">
+                  ${missing
+                    .map(
+                      (target) => `
+                        <li class="tracker-item">
+                          <strong>${esc(target.name)}</strong>
+                          ${target.howToGet ? `<p>${esc(target.howToGet)}</p>` : ""}
+                        </li>`
+                    )
+                    .join("")}
+                </ul>`
+          }
+        </details>`;
+      }
     )
     .join("");
 }
@@ -493,19 +518,24 @@ function renderAchievementLibrary() {
 function buildSearchText(item) {
   const parts = [
     item.displayTitle,
-    item.requirementSummary,
     item.category,
     item.chapter,
-    item.routeHint,
-    item.missableNote,
-    ...(item.prerequisites ?? []),
-    ...(item.guideSteps ?? []),
-    ...(item.guideChecklist ?? []),
   ];
 
-  (item.requirementTargets ?? []).forEach((target) => {
-    parts.push(target.name, target.howToGet);
-  });
+  if (!isAchievementSpoilerHidden(item)) {
+    parts.push(
+      item.requirementSummary,
+      item.routeHint,
+      item.missableNote,
+      ...(item.prerequisites ?? []),
+      ...(item.guideSteps ?? []),
+      ...(item.guideChecklist ?? [])
+    );
+
+    (item.requirementTargets ?? []).forEach((target) => {
+      parts.push(target.name, target.howToGet);
+    });
+  }
 
   return parts.filter(Boolean).join(" ").toLocaleLowerCase();
 }
@@ -513,7 +543,7 @@ function buildSearchText(item) {
 function renderAchievementCard(item) {
   const ordeal = String(item.achievementId - 81000).padStart(2, "0");
   const progress = getProgress(item);
-  const guideHidden = hideSpoilers && !revealedGuideIds.has(item.achievementId);
+  const guideHidden = isAchievementSpoilerHidden(item);
   const isOpen = openGuideIds.has(item.achievementId);
   const classes = [
     "achievement-card",
@@ -531,7 +561,11 @@ function renderAchievementCard(item) {
           <span class="status-label">${item.isComplete ? "Complete" : "Remaining"}</span>
         </div>
         <h3>${esc(item.displayTitle)}</h3>
-        <p class="requirement-summary">${esc(item.requirementSummary || item.routeHint)}</p>
+        <p class="requirement-summary${guideHidden ? " spoiler-placeholder" : ""}">${
+          guideHidden
+            ? "Achievement description hidden while spoiler protection is on."
+            : esc(item.requirementSummary || item.routeHint)
+        }</p>
         <div class="tag-row">
           <span class="tag">${esc(item.category)}</span>
           <span class="tag">${esc(item.chapter)}</span>
@@ -575,11 +609,15 @@ function getProgress(item) {
   };
 }
 
+function isAchievementSpoilerHidden(item) {
+  return hideSpoilers && !revealedGuideIds.has(item.achievementId);
+}
+
 function renderSpoilerGate(item) {
   return `
     <div class="spoiler-gate">
       <div>
-        <p>Route details and collectible locations are hidden.</p>
+        <p>The achievement description, route details, and collectible locations are hidden.</p>
         <button class="reveal-button" type="button" data-reveal-guide="${item.achievementId}">
           Reveal ${esc(item.displayTitle)} guide
         </button>
@@ -690,8 +728,8 @@ function syncExpandButton() {
 function syncSpoilerButton() {
   spoilerToggleBtn.setAttribute("aria-pressed", hideSpoilers ? "true" : "false");
   spoilerToggleBtn.textContent = hideSpoilers
-    ? "Show route spoilers"
-    : "Hide route spoilers";
+    ? "Show achievement spoilers"
+    : "Hide achievement spoilers";
 }
 
 function loadSpoilerPreference() {

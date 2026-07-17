@@ -1136,6 +1136,22 @@ code {
   line-height: 1.58;
 }
 
+.spoiler-placeholder {
+  color: var(--paper-muted);
+  font-style: italic;
+}
+
+.spoiler-placeholder::before {
+  display: inline-block;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin: 0 0.5rem 0.08rem 0;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  content: "";
+  box-shadow: 0 0 0 3px rgba(214, 169, 78, 0.08);
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -1387,6 +1403,16 @@ code {
   margin: 0 0 0.7rem;
   color: var(--paper-muted);
   font-size: 0.75rem;
+}
+
+.spoiler-gate-compact {
+  min-height: 0;
+  margin: 0 1rem 1rem;
+  padding: 0.85rem 1rem;
+}
+
+.spoiler-gate-compact p {
+  margin: 0;
 }
 
 .reveal-button {
