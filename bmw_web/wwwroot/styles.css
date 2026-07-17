@@ -1598,7 +1598,7 @@ code {
 
 .guide-label {
   display: block;
-  margin-bottom: 0.48rem;
+  margin: 0 0 0.48rem;
   color: var(--gold-bright);
   font-size: 0.62rem;
   font-weight: 780;
@@ -1622,8 +1622,7 @@ code {
   color: var(--cinnabar-bright);
 }
 
-.guide-list,
-.checklist {
+.guide-list {
   margin: 0;
   padding-left: 1.15rem;
   color: var(--paper-soft);
@@ -1631,34 +1630,12 @@ code {
   line-height: 1.55;
 }
 
-.guide-list li + li,
-.checklist li + li {
+.guide-list li + li {
   margin-top: 0.32rem;
 }
 
 .guide-list li::marker {
   color: var(--gold-bright);
-}
-
-.checklist {
-  padding: 0;
-  list-style: none;
-}
-
-.checklist li {
-  position: relative;
-  padding-left: 1.25rem;
-}
-
-.checklist li::before {
-  position: absolute;
-  top: 0.34rem;
-  left: 0;
-  width: 0.58rem;
-  height: 0.58rem;
-  border: 1px solid rgba(239, 201, 107, 0.48);
-  border-radius: 2px;
-  content: "";
 }
 
 .tracking-note {
@@ -1692,9 +1669,10 @@ code {
   place-items: center;
   margin-top: 0.05rem;
   border: 1px solid var(--cinnabar-bright);
-  border-radius: 50%;
+  border-radius: 3px;
   color: var(--cinnabar-bright);
   font-size: 0.62rem;
+  font-weight: 800;
 }
 
 .target-row.is-owned .target-mark {
@@ -2065,7 +2043,6 @@ code {
   .achievement-card p,
   .guide-section p,
   .guide-list,
-  .checklist,
   .target-row small {
     color: #333;
   }

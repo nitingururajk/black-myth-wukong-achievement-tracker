@@ -666,18 +666,19 @@ function renderGuideContent(item) {
   const guideSteps = Array.isArray(item.guideSteps) ? item.guideSteps : [];
   const guideChecklist = Array.isArray(item.guideChecklist) ? item.guideChecklist : [];
   const targets = Array.isArray(item.requirementTargets) ? item.requirementTargets : [];
+  const additionalMilestones = getAdditionalGuideMilestones(guideChecklist, targets);
 
   return `
     <div class="guide-layout">
       <div class="guide-column">
         <section class="guide-section">
-          <span class="guide-label">Exact route</span>
+          <h4 class="guide-label">Exact route</h4>
           <p>${esc(item.routeHint || item.requirementSummary)}</p>
         </section>
         ${
           item.isMissable && item.missableNote
             ? `<section class="guide-section warning-box">
-                <span class="guide-label">Do this before moving on</span>
+                <h4 class="guide-label">Do this before moving on</h4>
                 <p>${esc(item.missableNote)}</p>
               </section>`
             : ""
@@ -685,7 +686,7 @@ function renderGuideContent(item) {
         ${
           prerequisites.length
             ? `<section class="guide-section">
-                <span class="guide-label">Prerequisites</span>
+                <h4 class="guide-label">Prerequisites</h4>
                 <ul class="guide-list">${prerequisites.map((step) => `<li>${esc(step)}</li>`).join("")}</ul>
               </section>`
             : ""
@@ -693,26 +694,19 @@ function renderGuideContent(item) {
         ${
           guideSteps.length
             ? `<section class="guide-section">
-                <span class="guide-label">Walkthrough</span>
+                <h4 class="guide-label">Walkthrough</h4>
                 <ol class="guide-list">${guideSteps.map((step) => `<li>${esc(step)}</li>`).join("")}</ol>
               </section>`
             : ""
         }
       </div>
       <div class="guide-column">
-        ${
-          guideChecklist.length
-            ? `<section class="guide-section">
-                <span class="guide-label">Guide checklist · not individually save-verified</span>
-                <ul class="checklist">${guideChecklist.map((entry) => `<li>${esc(entry)}</li>`).join("")}</ul>
-              </section>`
-            : ""
-        }
         ${targets.length ? renderTargetChecklist(targets) : ""}
+        ${additionalMilestones.length ? renderGuideMilestones(additionalMilestones, targets.length > 0) : ""}
         ${
-          !guideChecklist.length && !targets.length
+          !additionalMilestones.length && !targets.length
             ? `<section class="guide-section">
-                <span class="guide-label">Completion check</span>
+                <h4 class="guide-label">Completion check</h4>
                 <p>This is a single trigger achievement. Follow the route on the left; the uploaded save supplies the final complete / incomplete state.</p>
               </section>`
             : ""
@@ -721,18 +715,47 @@ function renderGuideContent(item) {
     </div>`;
 }
 
+function getAdditionalGuideMilestones(entries, targets) {
+  if (!targets.length) return entries;
+
+  const targetNames = new Set(targets.map((target) => normalizeRequirementName(target.name)));
+  return entries.filter((entry) => !targetNames.has(normalizeRequirementName(entry)));
+}
+
+function normalizeRequirementName(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/^(?:soak|spirit(?: skill)?):\s*/, "")
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function renderGuideMilestones(entries, hasTrackedTargets) {
+  const heading = hasTrackedTargets ? "Additional route milestones" : "Route milestones";
+  const note = hasTrackedTargets
+    ? "These notes add route context; automatically checked requirements are shown above."
+    : "These are route notes. The uploaded save exposes the overall achievement result, not a separate state for each step.";
+
+  return `
+    <section class="guide-section">
+      <h4 class="guide-label">${heading}</h4>
+      <p class="tracking-note">${note}</p>
+      <ul class="guide-list">${entries.map((entry) => `<li>${esc(entry)}</li>`).join("")}</ul>
+    </section>`;
+}
+
 function renderTargetChecklist(targets) {
   const collected = targets.filter((target) => target.isCollected).length;
   return `
     <section class="guide-section">
-      <span class="guide-label">Save-verified checklist · ${collected}/${targets.length}</span>
-      <p class="tracking-note">Collected and missing states below come from decoded save IDs.</p>
+      <h4 class="guide-label">Requirements from your save · ${collected}/${targets.length} complete</h4>
+      <p class="tracking-note">The uploaded save automatically marks each requirement collected or missing.</p>
       <ul class="target-list">
         ${targets
           .map(
             (target) => `
               <li class="target-row ${target.isCollected ? "is-owned" : "is-missing"}">
-                <span class="target-mark" aria-hidden="true">${target.isCollected ? "✓" : "!"}</span>
+                <span class="target-mark" aria-hidden="true">${target.isCollected ? "✓" : "×"}</span>
                 <span>
                   <strong>${esc(target.name)}</strong>
                   <span class="target-state">${target.isCollected ? "Collected" : "Missing"}</span>
