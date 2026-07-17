@@ -284,6 +284,8 @@ These use `DecodedSaveInventory`, not only achievement requirement progress.
 
 Collection buckets remain separate: `Brews and Barrels` tracks the eight non-default drink IDs, `Gourds Gathered` tracks the nine collectible gourd IDs, and `Brewer's Bounty` tracks the 27 soak IDs. Automatic starting or upgrade-line entries are explained in the guide without inventing extra runtime IDs.
 
+The extraction evidence, current-game verification hashes, and Chinese-to-English crosswalk for the soak IDs are documented in [`SOAK_ID_MAPPING_METHODOLOGY.md`](SOAK_ID_MAPPING_METHODOLOGY.md).
+
 ### Inventory/Equipment Ownership Extraction
 
 Method:
