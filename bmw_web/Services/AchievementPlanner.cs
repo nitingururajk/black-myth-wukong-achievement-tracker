@@ -243,8 +243,8 @@ public sealed class AchievementPlanner
                 TargetSource = TargetSource.DecodedSaveInventory,
                 DisplayTitleOverride = "Brews and Barrels - Collect all Drinks",
                 RouteHintOverride =
-                    "Check Shen Monkey upgrades first, then clean up the one-off Chapter 3 and late-game drink collectibles.",
-                Targets = BuildBrewersBountyCategoryTargets(81064),
+                    "The save tracks eight non-default drinks. The starting Coconut Wine is automatic; collect the Chapter 2-5 exploration drinks and buy Pinebrew / A Thousand Days Inebriation from Shen Monkey when they unlock.",
+                Targets = BuildDrinkTargets(),
             },
             [81067] = new AchievementKnowledge
             {
@@ -333,19 +333,19 @@ public sealed class AchievementPlanner
             },
             [81078] = new AchievementKnowledge
             {
-                TargetSource = TargetSource.LinkedAchievementRequirements,
-                DisplayTitleOverride = "Brewer's Bounty - Collect all Drinks, Soaks, and Gourds",
+                TargetSource = TargetSource.AchievementRequirements,
+                DisplayTitleOverride = "Brewer's Bounty - Collect all 27 Soaks",
                 RouteHintOverride =
-                    "This trophy needs every drink series, every soak, and every gourd series. The checklist below links each target to the correct achievement bucket: drinks come from Brews and Barrels, soaks come from Brewer's Bounty itself, and gourds come from Gourds Gathered.",
-                Targets = BuildBrewersBountyTargets(),
+                    "Brewer's Bounty checks the 27 required soaks only. Drinks are tracked by Brews and Barrels, while gourds are tracked by Gourds Gathered. Guanyin's Willow Leaf requires New Game+.",
+                Targets = BuildSoakTargets(),
             },
             [81076] = new AchievementKnowledge
             {
                 TargetSource = TargetSource.DecodedSaveInventory,
                 DisplayTitleOverride = "Gourds Gathered - Collect all Gourds",
                 RouteHintOverride =
-                    "Check Shen Monkey upgrades, the Chapter 2 secret-area gourd line, then sweep Purple Cloud Mountain, Chapter 3 exploration routes, and the Chapter 4 secret-area reward.",
-                Targets = BuildBrewersBountyCategoryTargets(81076),
+                    "The save tracks nine collectible gourd series in addition to the automatic Old / Supreme Gourd line. Stained Jade is missable, and Qing-Tian requires New Game+.",
+                Targets = BuildGourdTargets(),
             },
             [81077] = new AchievementKnowledge
             {
@@ -364,92 +364,92 @@ public sealed class AchievementPlanner
                 Targets =
                 [
                     // Serpentscale set (Ch1)
-                    new TargetKnowledge(10302, "Serpentscale Battlerobe", "Chapter 1 — crafted at blacksmith / treasure."),
-                    new TargetKnowledge(10303, "Serpentscale Bracers", "Chapter 1 — crafted at blacksmith / treasure."),
-                    new TargetKnowledge(10304, "Serpentscale Gaiters", "Chapter 1 — crafted at blacksmith / treasure."),
+                    new TargetKnowledge(10302, "Serpentscale Battlerobe", "Craft at a shrine after defeating Whiteclad Noble in Chapter 1."),
+                    new TargetKnowledge(10303, "Serpentscale Bracers", "Craft at a shrine after defeating Whiteclad Noble in Chapter 1."),
+                    new TargetKnowledge(10304, "Serpentscale Gaiters", "Craft at a shrine after defeating Whiteclad Noble in Chapter 1."),
                     // Pilgrim set (Ch1)
-                    new TargetKnowledge(10401, "Pilgrim's Headband", "Chapter 1 — starting / quest reward."),
-                    new TargetKnowledge(10402, "Pilgrim's Garb", "Chapter 1 — starting / quest reward."),
-                    new TargetKnowledge(10403, "Pilgrim Wristwraps", "Chapter 1 — starting / quest reward."),
-                    new TargetKnowledge(10404, "Pilgrim's Legwraps", "Chapter 1 — starting / quest reward."),
-                    // Heaven's Equal set (Ch1 ultimate)
-                    new TargetKnowledge(10501, "Golden Feng-Tail Crown", "Chapter 1 — complete all secret bosses or NG+ craft."),
-                    new TargetKnowledge(10502, "Gold Suozi Armor", "Chapter 1 — complete all secret bosses or NG+ craft."),
-                    new TargetKnowledge(10503, "Dian-Cui Loong-Soaring Bracers", "Chapter 1 — complete all secret bosses or NG+ craft."),
-                    new TargetKnowledge(10504, "Lotus Silk Cloudtreaders", "Chapter 1 — complete all secret bosses or NG+ craft."),
+                    new TargetKnowledge(10401, "Pilgrim's Headband", "Craft at a shrine after reaching Guanyin Temple in Chapter 1."),
+                    new TargetKnowledge(10402, "Pilgrim's Garb", "Craft at a shrine after reaching Guanyin Temple in Chapter 1."),
+                    new TargetKnowledge(10403, "Pilgrim Wristwraps", "Craft at a shrine after reaching Guanyin Temple in Chapter 1."),
+                    new TargetKnowledge(10404, "Pilgrim's Legwraps", "Craft at a shrine after reaching Guanyin Temple in Chapter 1."),
+                    // Original Wukong set (hidden Chapter 6 chest; separate from the story set)
+                    new TargetKnowledge(10501, "Golden Feng-Tail Crown (Original)", "Chapter 6 -> Foothills -> Verdant Path: use the cloud to reach the hidden golden chest on the mountain near the opening shrine."),
+                    new TargetKnowledge(10502, "Gold Suozi Armor (Original)", "Found in the same hidden Chapter 6 Verdant Path chest as the other three Original Wukong pieces."),
+                    new TargetKnowledge(10503, "Dian-Cui Loong-Soaring Bracers (Original)", "Found in the same hidden Chapter 6 Verdant Path chest as the other three Original Wukong pieces."),
+                    new TargetKnowledge(10504, "Lotus Silk Cloudtreaders (Original)", "Found in the same hidden Chapter 6 Verdant Path chest as the other three Original Wukong pieces."),
                     // Ochre set (Ch2)
-                    new TargetKnowledge(10602, "Ochre Battlerobe", "Chapter 2 — crafted / boss drops in Yellow Wind Ridge."),
-                    new TargetKnowledge(10603, "Ochre Armguard", "Chapter 2 — crafted / boss drops in Yellow Wind Ridge."),
-                    new TargetKnowledge(10604, "Ochre Greaves", "Chapter 2 — crafted / boss drops in Yellow Wind Ridge."),
+                    new TargetKnowledge(10602, "Ochre Battlerobe", "Craft at a shrine after reaching the first shrine in Chapter 3."),
+                    new TargetKnowledge(10603, "Ochre Armguard", "Craft at a shrine after reaching the first shrine in Chapter 3."),
+                    new TargetKnowledge(10604, "Ochre Greaves", "Craft at a shrine after reaching the first shrine in Chapter 3."),
                     // Yaksha Outrage set (Ch2)
-                    new TargetKnowledge(10701, "Yaksha Mask of Outrage", "Chapter 2 — crafted at blacksmith."),
-                    new TargetKnowledge(10702, "Embroidered Shirt of Outrage", "Chapter 2 — crafted at blacksmith."),
-                    new TargetKnowledge(10703, "Fire Yaksha Gauntlets", "Chapter 2 — crafted at blacksmith."),
-                    new TargetKnowledge(10704, "Yaksha Greaves of Outrage", "Chapter 2 — crafted at blacksmith."),
+                    new TargetKnowledge(10701, "Yaksha Mask of Outrage", "Craft at a shrine after reaching the first shrine in Chapter 6."),
+                    new TargetKnowledge(10702, "Embroidered Shirt of Outrage", "Craft at a shrine after reaching the first shrine in Chapter 6."),
+                    new TargetKnowledge(10703, "Fire Yaksha Gauntlets", "Craft at a shrine after reaching the first shrine in Chapter 6."),
+                    new TargetKnowledge(10704, "Yaksha Greaves of Outrage", "Craft at a shrine after reaching the first shrine in Chapter 6."),
                     // Loongscale set (Ch3)
-                    new TargetKnowledge(10802, "Loongscale Battlerobe", "Chapter 3 — crafted / drops in Valley of Ecstasy."),
-                    new TargetKnowledge(10803, "Loongscale Armguard", "Chapter 3 — crafted / drops in Valley of Ecstasy."),
-                    new TargetKnowledge(10804, "Loongscale Greaves", "Chapter 3 — crafted / drops in Valley of Ecstasy."),
+                    new TargetKnowledge(10802, "Loongscale Battlerobe", "Craft after defeating Kang-Jin Star on Turtle Island in Chapter 3."),
+                    new TargetKnowledge(10803, "Loongscale Armguard", "Craft after defeating Kang-Jin Star on Turtle Island in Chapter 3."),
+                    new TargetKnowledge(10804, "Loongscale Greaves", "Craft after defeating Kang-Jin Star on Turtle Island in Chapter 3."),
                     // Ebongold set (Ch3)
-                    new TargetKnowledge(10902, "Ebongold Silk Robe", "Chapter 3 — crafted / Pagoda Realm drops."),
-                    new TargetKnowledge(10903, "Ebongold Armguard", "Chapter 3 — crafted / Pagoda Realm drops."),
-                    new TargetKnowledge(10904, "Ebongold Gaiters", "Chapter 3 — crafted / Pagoda Realm drops."),
+                    new TargetKnowledge(10902, "Ebongold Silk Robe", "Craft at a shrine after reaching the first shrine in Chapter 2."),
+                    new TargetKnowledge(10903, "Ebongold Armguard", "Craft at a shrine after reaching the first shrine in Chapter 2."),
+                    new TargetKnowledge(10904, "Ebongold Gaiters", "Craft at a shrine after reaching the first shrine in Chapter 2."),
                     // Golden set (Ch3)
-                    new TargetKnowledge(11001, "Golden Mask of Fury", "Chapter 3 — hidden boss / Pagoda Realm secret."),
-                    new TargetKnowledge(11002, "Golden Embroidered Shirt", "Chapter 3 — hidden boss / Pagoda Realm secret."),
-                    new TargetKnowledge(11003, "Golden Armguard", "Chapter 3 — hidden boss / Pagoda Realm secret."),
-                    new TargetKnowledge(11004, "Golden Greaves", "Chapter 3 — hidden boss / Pagoda Realm secret."),
+                    new TargetKnowledge(11001, "Golden Mask of Fury", "Craft at a shrine after reaching the first shrine in Chapter 4."),
+                    new TargetKnowledge(11002, "Golden Embroidered Shirt", "Craft at a shrine after reaching the first shrine in Chapter 4."),
+                    new TargetKnowledge(11003, "Golden Armguard", "Craft at a shrine after reaching the first shrine in Chapter 4."),
+                    new TargetKnowledge(11004, "Golden Greaves", "Craft at a shrine after reaching the first shrine in Chapter 4."),
                     // Galeguard set (Ch3-4)
-                    new TargetKnowledge(11201, "Galeguard Beast Mask", "Chapter 3-4 — crafted / boss drops."),
-                    new TargetKnowledge(11202, "Galeguard Beastmaw Armor", "Chapter 3-4 — crafted / boss drops."),
-                    new TargetKnowledge(11203, "Galeguard Bracers", "Chapter 3-4 — crafted / boss drops."),
-                    new TargetKnowledge(11204, "Galeguard Greaves", "Chapter 3-4 — crafted / boss drops."),
+                    new TargetKnowledge(11201, "Galeguard Beast Mask", "Craft after defeating Stone Vanguard in Chapter 2."),
+                    new TargetKnowledge(11202, "Galeguard Beastmaw Armor", "Craft after defeating Stone Vanguard in Chapter 2."),
+                    new TargetKnowledge(11203, "Galeguard Bracers", "Craft after defeating Stone Vanguard in Chapter 2."),
+                    new TargetKnowledge(11204, "Galeguard Greaves", "Craft after defeating Stone Vanguard in Chapter 2."),
                     // Non-Pure set (Ch4)
                     new TargetKnowledge(11301, "Non-Pure Broken Mask", "Chapter 4 — crafted / Temple of Yellow Flowers."),
                     new TargetKnowledge(11302, "Non-Pure Armor of Coiling Loong", "Chapter 4 — crafted / Temple of Yellow Flowers."),
                     new TargetKnowledge(11303, "Non-Pure Gauntlets", "Chapter 4 — crafted / Temple of Yellow Flowers."),
                     new TargetKnowledge(11304, "Non-Pure Greaves", "Chapter 4 — crafted / Temple of Yellow Flowers."),
-                    // Scholar set (Ch4)
-                    new TargetKnowledge(11401, "Scholar's Cloud Hat", "Chapter 4 — crafted / side quest reward."),
-                    new TargetKnowledge(11402, "Scholar's Gilt Armor", "Chapter 4 — crafted / side quest reward."),
-                    new TargetKnowledge(11403, "Scholar's Spiked Bracers", "Chapter 4 — crafted / side quest reward."),
-                    new TargetKnowledge(11404, "Scholar's Leg Guards", "Chapter 4 — crafted / side quest reward."),
+                    // Insect set (three Fuban crafts plus Scorpionlord armor)
+                    new TargetKnowledge(11401, "Monastic Insect Hat", "Craft after defeating Fuban in the Chapter 2 secret area, Kingdom of Sahali."),
+                    new TargetKnowledge(11402, "Venomous Sting Insect Armor", "Craft after defeating Scorpionlord in the Chapter 4 secret area, Purple Cloud Mountain."),
+                    new TargetKnowledge(11403, "Insect Spike Bracers", "Craft after defeating Fuban in the Chapter 2 secret area, Kingdom of Sahali."),
+                    new TargetKnowledge(11404, "Insect Spike Gaiters", "Craft after defeating Fuban in the Chapter 2 secret area, Kingdom of Sahali."),
                     // Bull King set (Ch5)
                     new TargetKnowledge(11601, "Bull King's Mask", "Craft after defeating Bishui Golden-Eyed Beast in the Chapter 5 secret area. Needs Bull King's Iron Horns, so NG+ is required for the full Bull King set."),
-                    new TargetKnowledge(11602, "Bull King's Shan Wen Armor", "Chapter 5 — defeat the Mighty King enemy or craft at blacksmith."),
-                    new TargetKnowledge(11603, "Bull King's Bracers", "Chapter 5 — crafted at blacksmith."),
-                    new TargetKnowledge(11604, "Bull King's Greaves", "Chapter 5 — crafted at blacksmith."),
+                    new TargetKnowledge(11602, "Bull King's Shan Wen Armor", "Craft after defeating Bishui Golden-Eyed Beast. The full set needs more Iron Horns than one cycle provides, so finish it in New Game+."),
+                    new TargetKnowledge(11603, "Bull King's Bracers", "Craft after defeating Bishui Golden-Eyed Beast. The full set needs more Iron Horns than one cycle provides, so finish it in New Game+."),
+                    new TargetKnowledge(11604, "Bull King's Greaves", "Craft after defeating Bishui Golden-Eyed Beast. The full set needs more Iron Horns than one cycle provides, so finish it in New Game+."),
                     // Bronze set (Ch5)
-                    new TargetKnowledge(11701, "Bronze Monkey Mask", "Chapter 5 — crafted / boss drops."),
-                    new TargetKnowledge(11702, "Bronze Brocade Battlerobe", "Chapter 5 — crafted / boss drops."),
-                    new TargetKnowledge(11703, "Bronze Armguard", "Chapter 5 — crafted / boss drops."),
-                    new TargetKnowledge(11704, "Bronze Buskins", "Chapter 5 — crafted / boss drops."),
+                    new TargetKnowledge(11701, "Bronze Monkey Mask", "Craft after defeating Elder Jinchi in the Chapter 1 secret area, Ancient Guanyin Temple."),
+                    new TargetKnowledge(11702, "Bronze Brocade Battlerobe", "Craft after defeating Elder Jinchi in the Chapter 1 secret area, Ancient Guanyin Temple."),
+                    new TargetKnowledge(11703, "Bronze Armguard", "Craft after defeating Elder Jinchi in the Chapter 1 secret area, Ancient Guanyin Temple."),
+                    new TargetKnowledge(11704, "Bronze Buskins", "Craft after defeating Elder Jinchi in the Chapter 1 secret area, Ancient Guanyin Temple."),
                     // Iron set (Ch5-6)
-                    new TargetKnowledge(11801, "Iron Horned Helm", "Chapter 5-6 — crafted with rare materials from endgame bosses."),
-                    new TargetKnowledge(11802, "Iron-Tough Armor", "Chapter 5-6 — crafted with rare materials from endgame bosses."),
-                    new TargetKnowledge(11803, "Iron-Tough Gauntlets", "Chapter 5-6 — crafted with rare materials from endgame bosses."),
-                    new TargetKnowledge(11804, "Iron-Tough Greaves", "Chapter 5-6 — crafted with rare materials from endgame bosses."),
+                    new TargetKnowledge(11801, "Iron Horned Helm", "Craft after defeating Yin Tiger in Zodiac Village during Chapter 3."),
+                    new TargetKnowledge(11802, "Iron-Tough Armor", "Craft after defeating Yin Tiger in Zodiac Village during Chapter 3."),
+                    new TargetKnowledge(11803, "Iron-Tough Gauntlets", "Craft after defeating Yin Tiger in Zodiac Village during Chapter 3."),
+                    new TargetKnowledge(11804, "Iron-Tough Greaves", "Craft after defeating Yin Tiger in Zodiac Village during Chapter 3."),
                     // Centipede set (Ch6)
-                    new TargetKnowledge(11901, "Centipede Hat of Transcendence", "Chapter 6 — crafted / Centipede boss drops."),
-                    new TargetKnowledge(11912, "Centipede Qiang-Jin Armor", "Chapter 6 — upgraded rank; craft at blacksmith using Centipede materials."),
-                    new TargetKnowledge(11903, "Centipede Spiked Armguard", "Chapter 6 — crafted / Centipede boss drops."),
-                    new TargetKnowledge(11904, "Centipede Greaves of Transcendence", "Chapter 6 — crafted / Centipede boss drops."),
+                    new TargetKnowledge(11901, "Centipede Hat of Transcendence", "Craft after reaching the first shrine in Chapter 5."),
+                    new TargetKnowledge(11912, "Centipede Qiang-Jin Armor", "Craft after reaching the first shrine in Chapter 5."),
+                    new TargetKnowledge(11903, "Centipede Spiked Armguard", "Craft after reaching the first shrine in Chapter 5."),
+                    new TargetKnowledge(11904, "Centipede Greaves of Transcendence", "Craft after reaching the first shrine in Chapter 5."),
                     // Heaven's Equal set (Endgame)
-                    new TargetKnowledge(12001, "Golden Feng-Tail Crown", "Endgame — final version, unlocked after defeating all chapter bosses or NG+."),
-                    new TargetKnowledge(12002, "Gold Suozi Armor", "Endgame — final version, unlocked after defeating all chapter bosses or NG+."),
-                    new TargetKnowledge(12003, "Dian-Cui Loong-Soaring Bracers", "Endgame — final version, unlocked after defeating all chapter bosses or NG+."),
-                    new TargetKnowledge(12004, "Lotus Silk Cloudtreaders", "Endgame — final version, unlocked after defeating all chapter bosses or NG+."),
-                    // ── 17xxx Special accessories ──
-                    new TargetKnowledge(17001, "Earth Spirit Cap", "Spirit accessories — from special NPC or quest reward."),
-                    new TargetKnowledge(17002, "Long-Nosed Mask", "Spirit accessories — Chapter 4 or side quest reward."),
-                    new TargetKnowledge(17003, "Skull of Turtle Treasure", "Spirit accessories — Chapter 3 treasure / quest."),
-                    new TargetKnowledge(17004, "Mountain Delicacy Raincoat", "Spirit accessories — food-related side quest reward."),
+                    new TargetKnowledge(12001, "Golden Feng-Tail Crown", "Defeat Feng-Tail General in Chapter 6; this is the mythical story version, separate from the Original set in the hidden chest."),
+                    new TargetKnowledge(12002, "Gold Suozi Armor", "Defeat Gold-Armored Rhino in Chapter 6; this is the mythical story version, separate from the Original set in the hidden chest."),
+                    new TargetKnowledge(12003, "Dian-Cui Loong-Soaring Bracers", "Defeat Emerald-Armed Mantis in Chapter 6; this is the mythical story version, separate from the Original set in the hidden chest."),
+                    new TargetKnowledge(12004, "Lotus Silk Cloudtreaders", "Defeat Cloudtreading Deer in Chapter 6; this is the mythical story version, separate from the Original set in the hidden chest."),
+                    // Standalone pieces
+                    new TargetKnowledge(17001, "Earth Spirit Cap", "Defeat Nine-Capped Lingzhi Guai near Chapter 5 -> Field of Fire -> Ashen Pass III."),
+                    new TargetKnowledge(17002, "Snout Mask", "Defeat Yellow-Robed Squire during the Chapter 2 Drunken Boar questline."),
+                    new TargetKnowledge(17003, "Skull of Turtle Treasure", "Rare drop from Turtle Treasure enemies in Chapter 3; farm the one near Longevity Road and rest between attempts."),
+                    new TargetKnowledge(17004, "Ginseng Cape", "Defeat Old Ginseng Guai behind Chapter 3 -> Valley of Ecstasy -> Towers of Karma."),
                     new TargetKnowledge(17005, "Locust Antennae Mask", "Rare drop from the locust enemy at Chapter 4 -> Webbed Hollow -> Upper Hollow. Rest at the shrine and farm the cocoon-spawn enemy until it drops."),
-                    new TargetKnowledge(17006, "White Face Mask", "Spirit accessories — Chapter 4 Temple of Yellow Flowers / Silk Nest area."),
-                    new TargetKnowledge(17007, "See No Evil", "Spirit accessories — Chapter 3 meditation side quest."),
-                    new TargetKnowledge(17008, "Yin-Yang Daoist Robe", "Spirit accessories — Chapter 5 or 6 quest reward."),
-                    new TargetKnowledge(17009, "Venomous Armguard", "Spirit accessories — Chapter 4 spider cave or poison-themed boss drop."),
-                    new TargetKnowledge(17010, "Guanyin's Prayer Beads", "Spirit accessories — Chapter 3 or endgame Buddhist-themed quest."),
+                    new TargetKnowledge(17006, "Grey Wolf Mask", "Defeat Lingxuzi in Chapter 1."),
+                    new TargetKnowledge(17007, "See No Evil", "Rare drop from Blind Monk enemies in Chapter 3 -> New Thunderclap Temple."),
+                    new TargetKnowledge(17008, "Yin-Yang Daoist Robe", "Automatic reward for defeating Keeper of Flaming Mountains / Yin-Yang Fish in Chapter 5."),
+                    new TargetKnowledge(17009, "Venomous Armguard", "During the first Venom Daoist fight in Chapter 4, break four of his extra arms before defeating him. Missable for the cycle."),
+                    new TargetKnowledge(17010, "Guanyin's Prayer Beads", "Open the chest in the Chapter 1 Ancient Guanyin Temple secret area."),
                     new TargetKnowledge(17011, "Vajra Armguard", "Rare drop from the Clay Vajra enemy at Chapter 3 -> New Thunderclap Temple -> Temple Entrance."),
                 ],
             },
@@ -461,25 +461,25 @@ public sealed class AchievementPlanner
                     "Most weapons come from shrine crafting plus a few boss and quest rewards. Compare this checklist against your shrine craft list first; the usual final holdouts are the two NG+ crafts.",
                 Targets =
                 [
-                    new TargetKnowledge(15002, "Jingubang", "Story unlock in Chapter 6 at the Water Curtain Cave."),
-                    new TargetKnowledge(15003, "Twin Serpents Staff", "Chapter 1 — boss drop or crafted."),
-                    new TargetKnowledge(15004, "Wind Bear Staff", "Chapter 1 — boss drop or crafted."),
-                    new TargetKnowledge(15005, "Willow Wood Staff", "Chapter 1 — treasure or vendor."),
-                    new TargetKnowledge(15006, "Chitin Staff", "Chapter 2 — insect boss drop or crafted."),
-                    new TargetKnowledge(15007, "Visionary Centipede Staff", "Chapter 2 — defeat Hundred-Eyed Daoist or related boss."),
-                    new TargetKnowledge(15008, "Cloud-Patterned Stone Staff", "Chapter 2 — treasure or boss drop."),
-                    new TargetKnowledge(15009, "Rat Sage Staff", "Chapter 3 — defeat Marten Spirit or crafted."),
-                    new TargetKnowledge(15010, "Loongwreathe Staff", "Chapter 3 — dragon boss drop or crafted."),
-                    new TargetKnowledge(15011, "Staff of Blazing Karma", "Chapter 3 — defeat flame-themed boss."),
-                    new TargetKnowledge(15012, "Spikeshaft Staff", "Chapter 4 — boss drop or treasure."),
-                    new TargetKnowledge(15013, "Spider Celestial Staff", "Chapter 4 — defeat Spider bosses in Temple of Yellow Flowers / Silk Nest."),
-                    new TargetKnowledge(15014, "Kang-Jin Staff", "Chapter 4 — defeat the scorpion boss or crafted."),
-                    new TargetKnowledge(15015, "Golden Loong Staff", "Chapter 5 — defeat dragon-themed boss or crafted."),
+                    new TargetKnowledge(15002, "Jingubang", "Unmissable Chapter 6 story reward at Water Curtain Cave after collecting Wukong's four armor pieces."),
+                    new TargetKnowledge(15003, "Twin Serpents Staff", "Craft it after defeating Whiteclad Noble in Chapter 1."),
+                    new TargetKnowledge(15004, "Wind Bear Staff", "Craft it at a Keeper's Shrine after advancing the Chapter 1 Black Wind Mountain story."),
+                    new TargetKnowledge(15005, "Willow Wood Staff", "The Destined One's starting weapon; keep it in the collection as later branches are crafted."),
+                    new TargetKnowledge(15006, "Chitin Staff", "Craft it after defeating the Second Sister at the start of Chapter 4."),
+                    new TargetKnowledge(15007, "Visionary Centipede Staff", "Upgrade the Chitin Staff after completing Chapter 4."),
+                    new TargetKnowledge(15008, "Cloud-Patterned Stone Staff", "Collect all six Buddha's Eyeballs and defeat Shigandang in Chapter 2, then craft it."),
+                    new TargetKnowledge(15009, "Rat Sage Staff", "Craft it after defeating Yellow Wind Sage at the end of Chapter 2."),
+                    new TargetKnowledge(15010, "Loongwreathe Staff", "Use the Chapter 2 Loong Scales to defeat Red Loong in Chapter 1, then upgrade the Twin Serpents Staff."),
+                    new TargetKnowledge(15011, "Staff of Blazing Karma", "In Chapter 5, collect Samadhi Fire Crystals from Flint Chief, Flint Vanguard, and Mother of Flamlings, then craft it."),
+                    new TargetKnowledge(15012, "Spikeshaft Staff", "Craft it after completing Chapter 3."),
+                    new TargetKnowledge(15013, "Spider Celestial Staff", "Upgrade the Chitin Staff after defeating Violet Spider in Chapter 4."),
+                    new TargetKnowledge(15014, "Kang-Jin Staff", "Craft it after defeating Kang-Jin Star on Turtle Island in Chapter 3."),
+                    new TargetKnowledge(15015, "Golden Loong Staff", "Use Loong Scales to defeat Cyan Loong on Turtle Island in Chapter 3, then upgrade the Loongwreathe Staff."),
                     new TargetKnowledge(15016, "Dark Iron Staff", "New Game+ craft only. Upgrade Staff of Blazing Karma after beating Bishui Golden-Eyed Beast and collecting Bull King's Iron Horns."),
                     new TargetKnowledge(15017, "Stormflash Loong Staff", "New Game+ craft at any shrine. This weapon does not unlock until you enter a new cycle."),
-                    new TargetKnowledge(15018, "Adept-Spine Shooting Fuban Staff", "Chapter 5-6 — defeat the centipede boss or crafted."),
-                    new TargetKnowledge(15019, "Bishui Beast Staff", "Chapter 5 — defeat the golden-eyed beast boss or crafted."),
-                    new TargetKnowledge(15101, "Tri-Point Double-Edged Spear", "Chapter 6 — defeat Erlang Shen / final boss or NG+ reward."),
+                    new TargetKnowledge(15018, "Adept-Spine Shooting Fuban Staff", "New Game+ craft requiring four Sky-Piercing Horns; defeat Fuban again in the Chapter 2 secret area for the final required horn."),
+                    new TargetKnowledge(15019, "Bishui Beast Staff", "Defeat Bishui Golden-Eyed Beast in the Chapter 5 secret area, then upgrade the Rat Sage Staff."),
+                    new TargetKnowledge(15101, "Tri-Point Double-Edged Spear", "Defeat Erlang in Mount Mei and complete the secret-ending sequence."),
                     new TargetKnowledge(15102, "Chu-Bai Spear", "Craft after completing the Prisoner / Four Captains questline in Chapter 3."),
                 ],
             },
@@ -493,58 +493,41 @@ public sealed class AchievementPlanner
             }
         };
 
-    private static List<TargetKnowledge> BuildBrewersBountyTargets()
+    private static List<TargetKnowledge> BuildDrinkTargets()
     {
         return
         [
-            new TargetKnowledge(
-                2009,
-                "Drink: Coconut Wine",
-                "Starting drink series. Upgrade it through Shen Monkey; this line counts once for Brewer's Bounty.",
-                81064
-            ),
-            new TargetKnowledge(
-                2010,
-                "Drink: Lambbrew / Dry Spirit",
-                "Chapter 2 drink series from Shen Monkey. Dry Spirit is the upgraded form of the same line.",
-                81064
-            ),
-            new TargetKnowledge(
-                2011,
-                "Drink: Bluebridge Romance",
-                "Unique collectible drink from Chapter 3 exploration.",
-                81064
-            ),
-            new TargetKnowledge(
-                2012,
-                "Drink: Jade Essence / Jade Dew",
-                "Chapter 3 drink series. Jade Dew is the upgraded form of the same line.",
-                81064
-            ),
-            new TargetKnowledge(
-                2019,
-                "Drink: Worryfree Brew",
-                "Late-game collectible drink that counts toward Brews and Barrels and Brewer's Bounty.",
-                81064
-            ),
-            new TargetKnowledge(
-                2020,
-                "Drink: Sunset of the Nine Skies / Monkey Brew",
-                "Late-game drink series. Monkey Brew is the upgraded form of the same line.",
-                81064
-            ),
-            new TargetKnowledge(
-                2022,
-                "Drink: Loong Balm",
-                "Late-game collectible drink from optional exploration.",
-                81064
-            ),
-            new TargetKnowledge(
-                2023,
-                "Drink: A Thousand Days Inebriation",
-                "Late-game collectible drink from endgame exploration.",
-                81064
-            ),
+            new TargetKnowledge(2009, "Bluebridge Romance", "Chapter 3 -> Bitter Lake -> North Shore: follow the coast back toward the temple and collect it from the lake beside the temple."),
+            new TargetKnowledge(2010, "Lambbrew", "Chapter 2 -> Sandgate Village: before the Village Entrance shrine, climb the rat-archer hill and collect it from the altar at the top."),
+            new TargetKnowledge(2011, "Worryfree Brew", "Chapter 4 -> Webbed Hollow -> Verdure Bridge: reach the village beyond the lantern path, break the cocoons beside the purple altar, and inspect the tea kettle."),
+            new TargetKnowledge(2012, "Loong Balm", "Chapter 5 -> Furnace Valley -> Emerald Hall: after the Yin-Yang Fish fight, collect it beside the throne."),
+            new TargetKnowledge(2019, "Jade Essence", "Chapter 3 -> Valley of Ecstasy -> Towers of Karma: look behind the stone pillar near the shrine."),
+            new TargetKnowledge(2020, "A Thousand Days Inebriation", "Buy it from Shen Monkey once Chapter 6 has begun."),
+            new TargetKnowledge(2022, "Pinebrew", "Buy it from Shen Monkey once Chapter 4 has begun."),
+            new TargetKnowledge(2023, "Sunset of the Nine Skies", "Chapter 4 -> Temple of Yellow Flowers -> Court of Illumination: take the path opposite the shrine, turn right at the split, and inspect the hut."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildGourdTargets()
+    {
+        return
+        [
+            new TargetKnowledge(18007, "Xiang River Goddess Gourd", "Chapter 4 -> Webbed Hollow -> Verdure Bridge: open the chests in the room reached after the lantern-throwing cutscene."),
+            new TargetKnowledge(18009, "Trailblazer's Scarlet Gourd", "Redeem the preorder reward at a shrine, or exhaust Ma Tianba's dialogue on the upper balcony near Chapter 3 -> New Thunderclap Temple -> Temple Entrance."),
+            new TargetKnowledge(18011, "Qing-Tian Gourd", "Buy it from Shen Monkey in New Game+ after completing the journal."),
+            new TargetKnowledge(18012, "Plaguebane Gourd", "Chapter 2: complete all three Old-Rattle Drum sites, defeat Mad Tiger in the well, then open the chest behind his arena."),
+            new TargetKnowledge(18013, "Stained Jade Gourd", "Defeat Scorpionlord in Purple Cloud Mountain before Duskveil. This reward is missable for the current cycle."),
+            new TargetKnowledge(18014, "Immortal Blessing Gourd", "Buy it from Shen Monkey from Chapter 5 onward after obtaining Buddha's Left Hand and Buddha's Right Hand."),
+            new TargetKnowledge(18015, "Multi-Glazed Gourd", "Buy it from Shen Monkey once Chapter 6 has begun."),
+            new TargetKnowledge(18016, "Jade Lotus Gourd", "Buy it from Shen Monkey once Chapter 3 has begun. Its fully upgraded form is called Jade Guanyin Gourd."),
+            new TargetKnowledge(18017, "Fiery Gourd", "Chapter 3 -> Valley of Ecstasy -> Mindfulness Cliff: drop from the wooden boards and follow the lower path to the chest."),
+        ];
+    }
+
+    private static List<TargetKnowledge> BuildSoakTargets()
+    {
+        return
+        [
             new TargetKnowledge(2301, "Soak: Guanyin's Willow Leaf", "Buy from Shen Monkey in New Game+.", 81078),
             new TargetKnowledge(2302, "Soak: Flower Primes", "Buy from Shen Monkey after reaching Chapter 6.", 81078),
             new TargetKnowledge(2303, "Soak: Turtle Tear", "Chapter 3 collectible from the Bitter Lake turtle route after the North Shore sequence.", 81078),
@@ -568,64 +551,10 @@ public sealed class AchievementPlanner
             new TargetKnowledge(2321, "Soak: Flame Mediator", "Chapter 5 random drop from the fire-aligned enemies around Field of Fire, especially Cooling Slope.", 81078),
             new TargetKnowledge(2322, "Soak: Double-Combed Rooster Blood", "Dropped by Duskveil in the Chapter 4 secret area, Purple Cloud Mountain.", 81078),
             new TargetKnowledge(2323, "Soak: Gall Gem", "Defeat the enemy near Shen Monkey in Chapter 1 -> Bamboo Grove -> Marsh of White Mist.", 81078),
-            new TargetKnowledge(2324, "Soak: Graceful Orchid", "Reward from Chen Loong in Zodiac Village after turning in all 15 seed types.", 81078),
+            new TargetKnowledge(2324, "Soak: Graceful Orchid", "Reward from Chen Loong in Zodiac Village after the 12 achievement-tracked seed items have filled all 15 garden entries.", 81078),
             new TargetKnowledge(2325, "Soak: Tender Jade Lotus", "Random harvest from Lotus plants, easiest from Chapter 1 -> Black Wind Cave -> Cave Interior.", 81078),
             new TargetKnowledge(2326, "Soak: Steel Ginseng", "Random harvest from Ginseng plants, for example at Chapter 2 -> Fright Cliff -> Squall Hideout.", 81078),
             new TargetKnowledge(2327, "Soak: Goat Skull", "Random harvest from Licorice plants in Chapter 2, for example around Yellow Wind Ridge / Fright Cliff.", 81078),
-            new TargetKnowledge(
-                18007,
-                "Gourd: Old / Supreme Gourd",
-                "Starting gourd series. Upgrade it through Shen Monkey; this line counts once for Brewer's Bounty.",
-                81076
-            ),
-            new TargetKnowledge(
-                18009,
-                "Gourd: Plaguebane Gourd",
-                "Unique gourd from Chapter 2 progression.",
-                81076
-            ),
-            new TargetKnowledge(
-                18011,
-                "Gourd: Jade Lotus / Jade Guanyin Gourd",
-                "Chapter 2 gourd series tied to the secret-area boar route. Jade Guanyin is the upgraded form of the same line.",
-                81076
-            ),
-            new TargetKnowledge(
-                18012,
-                "Gourd: Fiery Gourd",
-                "Unique Chapter 5 gourd from Furnace Valley cleanup.",
-                81076
-            ),
-            new TargetKnowledge(
-                18013,
-                "Gourd: Xiang River Goddess Gourd",
-                "Unique gourd from Purple Cloud Mountain exploration.",
-                81076
-            ),
-            new TargetKnowledge(
-                18014,
-                "Gourd: Stained Jade Gourd",
-                "Unique Chapter 3 gourd from Valley of Ecstasy exploration.",
-                81076
-            ),
-            new TargetKnowledge(
-                18015,
-                "Gourd: Qing-Tian Gourd",
-                "Unique Chapter 3 gourd from Pagoda Realm / Valley cleanup.",
-                81076
-            ),
-            new TargetKnowledge(
-                18016,
-                "Gourd: Immortal Blessing Gourd",
-                "Unique gourd from the Chapter 4 secret-area route.",
-                81076
-            ),
-            new TargetKnowledge(
-                18017,
-                "Gourd: Multi-Glazed Gourd",
-                "Late-game unique gourd from endgame exploration.",
-                81076
-            ),
         ];
     }
 
@@ -664,60 +593,60 @@ public sealed class AchievementPlanner
     {
         return
         [
-            SpiritTarget(8011, "Serpent Sleeve", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8012, "Clever Tongue", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8013, "Zen Strike", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8061, "Soul Chase", "Chapter 1 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8014, "Ritual Offering", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8015, "Boiling Blood", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8017, "Swift Blade", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8062, "Mountain Uproot", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8063, "Mountain Strike", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8064, "Flesh Flay", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8065, "Warding Exorcism", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8066, "Heart Rend", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8067, "Wing Flutter", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8068, "Gut Kick", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8069, "Heavy Crossbow", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8070, "Quick Delight", "Chapter 2 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8020, "Blinkstep", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8022, "Frost Blade", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8024, "Precept Guard", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8025, "Hard Bones", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8026, "Old Fist", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8071, "Yin Wind Fan", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8072, "Shadow Arrow", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8073, "Draw Blade", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8074, "Calamity Fire", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8075, "Crushing Wound", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8076, "Swift Leap", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8077, "Cold Fragrance", "Chapter 3 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8027, "Slaughter", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8028, "Insect Cry", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8029, "Verdant Stand", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8030, "Scorpion Sting", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8031, "Curl Up", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8078, "Flying Stinger", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8079, "Wild Volley", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8081, "Venom Scratch", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8083, "Tiger Roar", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8084, "Medicine Splash", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8085, "Ghostfire Spark", "Chapter 4 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8032, "Combined Body", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8033, "Hammer Force", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8034, "Heavy Shield", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8035, "Skyward Charge", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8036, "Stone Stance", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8037, "Beacon Blaze", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8086, "Blade Temper", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8087, "Stampede", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8088, "Raise the Fire", "Chapter 5 spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8038, "Defiled Immortal", "Late-game spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8039, "Insect Queen", "Late-game spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8040, "Rootborn", "Late-game spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8041, "Drifting Tumbleweed", "Late-game spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8042, "Rolling Turn", "Late-game spirit tracked by the runtime spirit-skill table."),
-            SpiritTarget(8092, "All Living Things", "Late-game spirit tracked by the runtime spirit-skill table."),
+            SpiritTarget(8011, "Guangmou", "Chapter 1 -> Bamboo Grove -> Snake Trail: cross the river into the bamboo arena, defeat Guangmou, and absorb the flame."),
+            SpiritTarget(8012, "Baw-Li-Guhh-Lang", "Chapter 1 -> Bamboo Grove -> Snake Trail: follow the lower river to the frog arena, defeat it, and absorb the flame."),
+            SpiritTarget(8013, "Wandering Wight", "Chapter 1 -> Forest of Wolves -> Front Hills. Collect this before defeating Elder Jinchi or it disappears until New Game+."),
+            SpiritTarget(8061, "Wolf Assassin", "Chapter 1 -> Black Wind Cave -> Outside the Cave: drop into the chest side area after the archer bridge and defeat the blue-glowing wolf."),
+            SpiritTarget(8014, "Rat Governor", "Defeat and absorb the blue-flame Rat Governor while clearing Chapter 2's Yellow Wind Ridge side routes."),
+            SpiritTarget(8015, "Gore-Eye Daoist", "Defeat and absorb Gore-Eye Daoist near the Chapter 2 Fright Cliff / Rockrest Flat route."),
+            SpiritTarget(8017, "Tiger's Acolyte", "Defeat Tiger's Acolyte on the bridge beyond Chapter 2 -> Windrest Hamlet and absorb the flame."),
+            SpiritTarget(8062, "Mad Tiger", "Complete the three Old-Rattle Drum sites, enter the Chapter 2 village well, defeat Mad Tiger, and absorb the flame."),
+            SpiritTarget(8063, "Second Rat Prince", "At the Sandgate Village dual-boss fight, defeat King of Flowing Sands first, then the Second Rat Prince so his Spirit drops."),
+            SpiritTarget(8064, "Rat Imperial Guard", "Defeat and absorb the blue-flame Rat Imperial Guard in Chapter 2."),
+            SpiritTarget(8065, "Spearbone", "Chapter 2 -> Fright Cliff -> Rockrest Flat: take the uphill path beside the shrine and defeat the blue-glowing shield wielder."),
+            SpiritTarget(8066, "Civet Sergeant", "Defeat and absorb the blue-flame Civet Sergeant while clearing Chapter 2."),
+            SpiritTarget(8067, "Swift Bat", "Chapter 2 -> Sandgate Village -> Valley of Despair: cross the broken pillar in the cave and squeeze through the wall to the blue-flame bat."),
+            SpiritTarget(8068, "Poisestone", "Chapter 2 -> Fright Cliff -> Squall Hideout: follow the cave path toward Rockrest Flat and defeat the blue-glowing Poisestone."),
+            SpiritTarget(8069, "Rat Archer", "Open Sandgate Village's main gate from behind after Earth Wolf; defeat the blue-glowing archer that falls from the gate."),
+            SpiritTarget(8070, "Earth Wolf", "Chapter 2 -> Sandgate Village -> Village Entrance: enter the enclosed village meadow and defeat Earth Wolf."),
+            SpiritTarget(8020, "Non-Void", "Complete the Chapter 3 Snow Fox quest at New Thunderclap Temple, defeat Non-Void, and absorb the flame."),
+            SpiritTarget(8022, "Apramana Bat", "Defeat Apramana Bat at Bitter Lake's north shore before Zhu Bajie leaves; the Spirit is awarded after finishing Chapter 3."),
+            SpiritTarget(8024, "Non-Pure", "Defeat Non-Pure in New Thunderclap Temple during Chapter 3 and absorb the flame."),
+            SpiritTarget(8025, "Non-White", "Defeat the story encounter at Chapter 3 -> Valley of Ecstasy -> Mindfulness Cliff and absorb the flame."),
+            SpiritTarget(8026, "Non-Able", "Chapter 3 -> Valley of Ecstasy -> Brook of Bliss: climb the right slope, circle around, and defeat Non-Able."),
+            SpiritTarget(8071, "Falcon Hermit", "Chapter 3 -> Pagoda Realm -> Snow-Veiled Trail: climb the long left slope to the blue-glowing bird at the summit."),
+            SpiritTarget(8072, "Red-Haired Yaksha", "Defeat the blue-flame enemy on the linear route after Chapter 3 -> Bitter Lake -> Precept Corridor."),
+            SpiritTarget(8073, "Blade Monk", "Chapter 3 -> Pagoda Realm -> Outside the Wheel: drop one level at the far cliff and follow it to the blue-flame monk."),
+            SpiritTarget(8074, "Clay Vajra", "Defeat and absorb a blue-flame Clay Vajra in Chapter 3 -> New Thunderclap Temple."),
+            SpiritTarget(8075, "Enslaved Yaksha", "After defeating Captain Lotus-Vision, open the prison gates in Upper Pagoda and defeat the blue-flame Enslaved Yaksha."),
+            SpiritTarget(8076, "Mountain Patroller", "Chapter 3 -> Snowhill Path -> Frost-Clad Path: climb the left stairs in the first building area and clear the enemies at the path's end."),
+            SpiritTarget(8077, "Crow Diviner", "Defeat and absorb the blue-flame Crow Diviner while clearing Chapter 3's Valley of Ecstasy routes."),
+            SpiritTarget(8027, "Commander Beetle", "Defeat and absorb Commander Beetle in Chapter 4 -> Temple of Yellow Flowers."),
+            SpiritTarget(8028, "Puppet Tick", "Defeat and absorb the blue-flame Puppet Tick while sweeping Chapter 4's Webbed Hollow."),
+            SpiritTarget(8029, "Verdant Glow", "Purple Cloud Mountain -> Valley of Blooms: drop into the water left of the shrine and defeat the large blue-flame tree enemy."),
+            SpiritTarget(8030, "Scorpion Prince", "Chapter 4 -> Verdure Bridge: reach the village beyond the lantern path and defeat the blue-glowing scorpion near its entrance."),
+            SpiritTarget(8031, "Centipede Guai", "Defeat Centipede Guai on the Chapter 4 story route and absorb the Spirit flame."),
+            SpiritTarget(8078, "Beetle Captain", "Chapter 4 -> Webbed Hollow -> Upper Hollow: after the second green-arrow archer, enter the cave on the right and defeat the blue-flame beetle."),
+            SpiritTarget(8079, "Dragonfly Guai", "Defeat and absorb the blue-flame Dragonfly Guai while clearing Chapter 4's Webbed Hollow routes."),
+            SpiritTarget(8081, "Puppet Spider", "Defeat and absorb the blue-flame Puppet Spider while clearing Chapter 4's Webbed Hollow routes."),
+            SpiritTarget(8083, "Snake Sheriff", "Chapter 4 -> Temple of Yellow Flowers -> Temple Entrance: pass through the first gate and defeat the blue-glowing long-necked enemy."),
+            SpiritTarget(8084, "Snake Herbalist", "Purple Cloud Mountain -> Valley of Blooms: cross the bridge, turn left, and defeat the blue-flame herbalist on the path."),
+            SpiritTarget(8085, "Lantern Holder", "After defeating Second Sister, return to Chapter 4 -> Estate of the Zhu and defeat the blue-glowing lantern enemy in her arena."),
+            SpiritTarget(8032, "Top Takes Bottom, Bottom Takes Top", "After their Bishui Cave fight, return beyond Emerald Hall and interact with the steel ball embedded in the rock."),
+            SpiritTarget(8033, "Father of Stones", "Defeat Father of Stones along the Chapter 5 Woods of Ember route and absorb the Spirit."),
+            SpiritTarget(8034, "Earth Rakshasa", "Chapter 5 -> Furnace Valley -> Valley Entrance: take the left side path before Cloudy Mist and defeat the shield enemy guarding a chest."),
+            SpiritTarget(8035, "Turtle Treasure", "Defeat and absorb the blue-flame Turtle Treasure in Chapter 5."),
+            SpiritTarget(8036, "Flint Chief", "Defeat and absorb Flint Chief in Chapter 5; its Samadhi Fire Crystal is also needed for Staff of Blazing Karma."),
+            SpiritTarget(8037, "Flint Vanguard", "Defeat Flint Vanguard near Chapter 5 -> Field of Fire -> Fallen Furnace Crater and absorb the flame."),
+            SpiritTarget(8086, "Charface", "Defeat and absorb the blue-flame Charface while clearing Chapter 5."),
+            SpiritTarget(8087, "Bull Governor", "Defeat and absorb the blue-flame Bull Governor while clearing Chapter 5."),
+            SpiritTarget(8088, "Cloudy Mist, Misty Cloud", "Defeat the required paired boss on Chapter 5 -> Furnace Valley -> Valley Entrance; absorb the shared Spirit."),
+            SpiritTarget(8038, "Elder Armourworm", "Give Proto-Armourworm to Chen Loong, feed it three Rice Cocoons with rests between, then collect its Spirit in Zodiac Village."),
+            SpiritTarget(8039, "Mother of Flamlings", "Offer four Flame Ore at the Chapter 5 summoning spot, defeat Mother of Flamlings, and absorb the Spirit."),
+            SpiritTarget(8040, "Old Ginseng Guai", "Chapter 3 -> Valley of Ecstasy -> Towers of Karma: harvest the large ginseng plant behind the shrine and defeat the boss."),
+            SpiritTarget(8041, "Fungiwoman", "Chapter 4 -> Court of Illumination: pull the mushroom on the right-hand path beyond the shrine and defeat the hidden boss."),
+            SpiritTarget(8042, "Fungiman", "Chapter 3 -> Pagoda Realm -> Upper Pagoda: cross the beam, enter the first left gate, and pull the mushroom from the ground."),
+            SpiritTarget(8092, "Nine-Capped Lingzhi Guai", "Chapter 5 -> Field of Fire -> Ashen Pass III: interact with the large lingzhi plant and defeat the hidden boss."),
         ];
     }
 
@@ -736,16 +665,16 @@ public sealed class AchievementPlanner
     {
         return
         [
-            new TargetKnowledge(5001, "Red Tides", "Transformation from Chapter 1 progression."),
-            new TargetKnowledge(5004, "Azure Dust", "Transformation from the Chapter 2 secret-area route."),
-            new TargetKnowledge(5006, "Ashen Slumber", "Transformation from Chapter 3."),
-            new TargetKnowledge(5008, "Ebon Flow", "Transformation from Chapter 3 cleanup."),
-            new TargetKnowledge(5014, "Hoarfrost", "Transformation from the Chapter 3 side-content route."),
-            new TargetKnowledge(5016, "Umbral Abyss", "Transformation from later Chapter 3 content."),
-            new TargetKnowledge(5017, "Violet Hail", "Transformation from the Daoist Mi questline in Chapter 4."),
-            new TargetKnowledge(5018, "Golden Lining", "Transformation from Yellow Loong in Chapter 4."),
-            new TargetKnowledge(5019, "Dark Thunder", "Transformation from the horse NPC questline in Chapter 5."),
-            new TargetKnowledge(5024, "Azure Dome", "Endgame transformation from the true-ending path."),
+            new TargetKnowledge(5001, "Red Tides", "Defeat Guangzhi at Chapter 1 -> Forest of Wolves -> Outside the Forest and take his weapon."),
+            new TargetKnowledge(5004, "Azure Dust", "Finish Man-in-Stone's Chapter 2 quest, defeat him, rest, then buy the Azure Dust item from his shop."),
+            new TargetKnowledge(5006, "Ashen Slumber", "Set up the Two-Headed Rat dialogue in Chapter 2, then finish the Third Prince prison route in Chapter 3. Sequence-sensitive."),
+            new TargetKnowledge(5008, "Ebon Flow", "Unlock Zodiac Village in Chapter 3, challenge Yin Tiger, and defeat him."),
+            new TargetKnowledge(5014, "Hoarfrost", "Defeat Monk from the Sea near Chapter 3 -> New Thunderclap Temple -> Temple Entrance."),
+            new TargetKnowledge(5016, "Umbral Abyss", "Automatic Chapter 3 reward after the final Macaque Chief encounter."),
+            new TargetKnowledge(5017, "Violet Hail", "Complete Daoist Mi's quest in Purple Cloud Mountain before defeating Duskveil. Missable for the cycle."),
+            new TargetKnowledge(5018, "Golden Lining", "Defeat Red, Black, and Cyan Loong, then defeat Yellow Loong in Chapter 4."),
+            new TargetKnowledge(5019, "Dark Thunder", "Complete every Ma Tianba meeting from Chapters 1-5, then return to the Chapter 5 cart after finishing the chapter. Missable."),
+            new TargetKnowledge(5024, "Azure Dome", "Defeat Erlang and the Four Heavenly Kings on the secret-ending route."),
         ];
     }
 
@@ -775,13 +704,13 @@ public sealed class AchievementPlanner
     {
         return
         [
-            new TargetKnowledge(5101, "Immobilize", "Base spell from early story progression."),
-            new TargetKnowledge(5102, "Ring of Fire", "Chapter 1 spell from the Keeper route."),
-            new TargetKnowledge(5103, "Spell Binder", "Late-game spell from the Chapter 3 secret route."),
-            new TargetKnowledge(5201, "Cloud Step", "Base spell from early story progression."),
-            new TargetKnowledge(5202, "Rock Solid", "Chapter 2 spell from the Man-in-Stone route."),
-            new TargetKnowledge(5301, "A Pluck of Many", "Chapter 3 strand spell from story progression."),
-            new TargetKnowledge(5302, "Life-Saving Strand", "Late-game strand spell from story progression."),
+            new TargetKnowledge(5101, "Immobilize", "Automatic early Chapter 1 story spell during the Bullguard encounter."),
+            new TargetKnowledge(5102, "Ring of Fire", "Automatic Chapter 3 story spell after the Macaque Chief encounter at Warding Temple."),
+            new TargetKnowledge(5103, "Spell Binder", "Complete the Chapter 3 Treasure Hunter quest and defeat Green-Capped Martialist at Melon Field."),
+            new TargetKnowledge(5201, "Cloud Step", "Automatic Chapter 1 story spell after defeating Black Wind King."),
+            new TargetKnowledge(5202, "Rock Solid", "Automatic Chapter 2 story spell after defeating Tiger Vanguard."),
+            new TargetKnowledge(5301, "A Pluck of Many", "Automatic Chapter 2 story spell after reaching Windseal Gate."),
+            new TargetKnowledge(5302, "Life-Saving Strand", "Granted only after entering New Game+."),
         ];
     }
 
@@ -789,49 +718,26 @@ public sealed class AchievementPlanner
     {
         return
         [
-            new TargetKnowledge(1107, "Body-Fleeting Powder", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1110, "Septenary Heartfire Pill", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1111, "Life-Saving Pill", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1113, "Ascension Powder", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1115, "Soul Remigration Pill", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1118, "Essence Decoction", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1121, "Tonifying Decoction", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1130, "Longevity Decoction", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1134, "Fortifying Medicament", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1136, "Mirage Pill", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1142, "Loong Aura Amplification Pellets", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1144, "Evil Repelling Medicament", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1166, "Enhanced Ginseng Pellets", "Formula scroll that counts toward Page Preserver."),
-            new TargetKnowledge(1168, "Enhanced Tiger Subduing Pellets", "Formula scroll that counts toward Page Preserver."),
+            new TargetKnowledge(1107, "Body-Fleeting Powder", "Chapter 3 -> New Thunderclap Temple -> Temple Entrance: cross the upper wooden bridge near Ma Tianba and open the golden container."),
+            new TargetKnowledge(1110, "Septenary Heartfire Pill", "Chapter 5 -> Bishui Cave -> Purge Pit: jump-heavy-attack onto the ledge behind the shrine and open the chest."),
+            new TargetKnowledge(1111, "Life-Saving Pill", "Chapter 4 -> Purple Cloud Mountain -> Cloudnest Peak: open the small container to the right of the shrine."),
+            new TargetKnowledge(1113, "Ascension Powder", "Automatic reward for defeating Supreme Inspector at the start of Chapter 6."),
+            new TargetKnowledge(1115, "Soul Remigration Pill", "Buy the formula from Xu Dog in New Game+."),
+            new TargetKnowledge(1118, "Essence Decoction", "Buy the formula from Xu Dog from the start of Chapter 4."),
+            new TargetKnowledge(1121, "Tonifying Decoction", "Buy the formula from Xu Dog from the start of Chapter 3."),
+            new TargetKnowledge(1130, "Longevity Decoction", "Buy the formula from Xu Dog from the start of Chapter 2."),
+            new TargetKnowledge(1134, "Fortifying Medicament", "Receive it from Xu Dog while fetching Chen Loong's Special-Made Bone-Strengthening Pellet in Chapter 3."),
+            new TargetKnowledge(1136, "Mirage Pill", "Chapter 4 -> Webbed Hollow -> Verdure Bridge: cross the vine bridge, drop at the cliff, pass the cocoons, and reach the village chest."),
+            new TargetKnowledge(1142, "Loong Aura Amplification Pellets", "Buy the formula from Xu Dog from the start of Chapter 5."),
+            new TargetKnowledge(1144, "Evil Repelling Medicament", "Defeat Lang-Li-Guhh-Baw in the ravine below Chapter 2 -> Sandgate Village -> Village Entrance."),
+            new TargetKnowledge(1166, "Enhanced Ginseng Pellets", "Chapter 4 -> Webbed Hollow -> Verdure Bridge: cross the vine bridge, stay left, and open the chest in the side room."),
+            new TargetKnowledge(1168, "Enhanced Tiger Subduing Pellets", "Chapter 3 -> Bitter Lake -> Precept Corridor: follow the downhill story path and collect the page."),
         ];
-    }
-
-    private static List<TargetKnowledge> BuildBrewersBountyCategoryTargets(int sourceAchievementId)
-    {
-        return BuildBrewersBountyTargets()
-            .Where(x => x.SourceAchievementId == sourceAchievementId)
-            .ToList();
     }
 
     private static TargetKnowledge SpiritTarget(int id, string name, string howToGet)
     {
-        return new TargetKnowledge(id, $"Spirit Skill: {name}", howToGet);
-    }
-
-    public async Task<AnalysisReport> AnalyzeAsync(string savePath)
-    {
-        if (string.IsNullOrWhiteSpace(savePath))
-        {
-            throw new ArgumentException("Save path cannot be empty.", nameof(savePath));
-        }
-
-        if (!File.Exists(savePath))
-        {
-            throw new FileNotFoundException("Save file was not found at the provided path.");
-        }
-
-        var bytes = await File.ReadAllBytesAsync(savePath);
-        return AnalyzeCore(bytes, NormalizeSaveFileName(savePath));
+        return new TargetKnowledge(id, $"Spirit: {name}", howToGet);
     }
 
     public AnalysisReport AnalyzeUploadedSave(string saveFileName, byte[] saveBytes)
@@ -926,9 +832,15 @@ public sealed class AchievementPlanner
                     ? Math.Max(requiredCount - completedCount, 0)
                     : 1;
             var priority = PriorityFor(config.AchievementId, requirementType);
+            AchievementGuideCatalog.ById.TryGetValue(config.AchievementId, out var guide);
             var displayTitle =
-                knowledge?.DisplayTitleOverride ?? BuildTitle(config.AchievementId, requirementType);
-            var routeHint = knowledge?.RouteHintOverride ?? RouteHint(requirementType, context);
+                guide?.Name
+                ?? knowledge?.DisplayTitleOverride
+                ?? BuildTitle(config.AchievementId, requirementType);
+            var routeHint =
+                knowledge?.RouteHintOverride
+                ?? guide?.RequirementSummary
+                ?? RouteHint(requirementType, context);
 
             var steps = BuildStepPlan(
                 config.AchievementId,
@@ -966,6 +878,16 @@ public sealed class AchievementPlanner
                     Index = index,
                     AchievementId = config.AchievementId,
                     DisplayTitle = displayTitle,
+                    RequirementSummary = guide?.RequirementSummary ?? routeHint,
+                    Category = guide?.Category ?? "Other",
+                    Chapter = guide?.Chapter ?? "Unknown",
+                    IsMissable = guide?.IsMissable ?? false,
+                    MissableNote = guide?.MissableNote,
+                    RequiresNewGamePlus = guide?.RequiresNewGamePlus ?? false,
+                    Prerequisites = guide?.Prerequisites.ToList() ?? [],
+                    GuideSteps = guide?.GuideSteps.ToList() ?? [],
+                    GuideChecklist = guide?.GuideChecklist.ToList() ?? [],
+                    IsPresentInSave = true,
                     RequirementType = requirementType,
                     RequiredCount = requiredCount,
                     RequiredCountText = requiredCount > 0 ? requiredCount.ToString() : "Trigger",
@@ -986,9 +908,76 @@ public sealed class AchievementPlanner
             );
         }
 
-        var platformPlans = plans.Where(x => x.AchievementId >= 81000).ToList();
-        var selectedPlans = platformPlans.Count > 0 ? platformPlans : plans;
-        var filterMode = platformPlans.Count > 0 ? "platform_only" : "all";
+        var decodedPlatformPlans = plans
+            .Where(x => x.AchievementId is >= 81001 and <= 81081)
+            .GroupBy(x => x.AchievementId)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .OrderByDescending(plan => plan.IsComplete)
+                    .ThenByDescending(plan => plan.CompletedCount)
+                    .First()
+            );
+        var selectedPlans = new List<AchievementPlan>(AchievementGuideCatalog.All.Count);
+        foreach (var guide in AchievementGuideCatalog.All)
+        {
+            if (decodedPlatformPlans.TryGetValue(guide.Id, out var decodedPlan))
+            {
+                selectedPlans.Add(decodedPlan);
+                continue;
+            }
+
+            AchievementKnowledgeResult? knowledge = null;
+            if (
+                AchievementKnowledgeMap.TryGetValue(guide.Id, out var knowledgeDefinition)
+                && knowledgeDefinition.TargetSource == TargetSource.DecodedSaveInventory
+            )
+            {
+                knowledge = GetKnowledge(guide.Id, [], ownedIds, achievementRequirementIds);
+            }
+            var trackedCount = knowledge?.Targets.Count ?? 0;
+            var trackedComplete = knowledge?.Targets.Count(target => target.IsCollected) ?? 0;
+            var priority = PriorityFor(guide.Id, "NotPresentInSave");
+            selectedPlans.Add(
+                new AchievementPlan
+                {
+                    Index = guide.Id - 81001,
+                    AchievementId = guide.Id,
+                    DisplayTitle = guide.Name,
+                    RequirementSummary = guide.RequirementSummary,
+                    Category = guide.Category,
+                    Chapter = guide.Chapter,
+                    IsMissable = guide.IsMissable,
+                    MissableNote = guide.MissableNote,
+                    RequiresNewGamePlus = guide.RequiresNewGamePlus,
+                    Prerequisites = guide.Prerequisites.ToList(),
+                    GuideSteps = guide.GuideSteps.ToList(),
+                    GuideChecklist = guide.GuideChecklist.ToList(),
+                    IsPresentInSave = false,
+                    RequirementType = "NotPresentInSave",
+                    RequiredCount = trackedCount,
+                    RequiredCountText = trackedCount > 0 ? trackedCount.ToString() : "Trigger",
+                    CompletedCount = trackedComplete,
+                    RemainingCount = trackedCount > 0 ? Math.Max(trackedCount - trackedComplete, 0) : 1,
+                    IsComplete = false,
+                    IsProgressType = trackedCount > 0,
+                    ResetOnNewGamePlus = false,
+                    CompletedRequirementIds = [],
+                    CompletedRequirementGuids = [],
+                    PriorityOrder = priority.order,
+                    PriorityLabel = priority.label,
+                    RouteHint = knowledge?.RouteHintOverride ?? guide.RequirementSummary,
+                    Steps =
+                    [
+                        "This save does not expose a top-level progress row for this achievement yet. The guide remains available, and any decoded item ownership is shown below.",
+                    ],
+                    RequirementTargets = knowledge?.Targets ?? [],
+                    MissingTargets = knowledge?.MissingTargets ?? [],
+                }
+            );
+        }
+
+        const string filterMode = "canonical_81";
         var completed = selectedPlans.Count(x => x.IsComplete);
         var trackedChecklists = selectedPlans.Count(x => x.RequirementTargets.Count > 0);
         var missingTrackedItems = selectedPlans.Sum(x => x.MissingTargets.Count);
@@ -1027,7 +1016,7 @@ public sealed class AchievementPlanner
 
     private static string NormalizeSaveFileName(string pathOrFileName)
     {
-        var saveFileName = Path.GetFileName(pathOrFileName.Trim());
+        var saveFileName = Path.GetFileName(pathOrFileName.Trim().Replace('\\', '/'));
         return string.IsNullOrWhiteSpace(saveFileName) ? "uploaded-save.sav" : saveFileName;
     }
 
@@ -1486,11 +1475,6 @@ public sealed class AchievementPlanner
     }
 }
 
-public sealed class AnalyzeRequest
-{
-    public string SavePath { get; set; } = string.Empty;
-}
-
 public sealed record RouteContext(
     int CurrentChapterId,
     int CurrentMapId,
@@ -1523,6 +1507,16 @@ public sealed class AchievementPlan
     public required int Index { get; init; }
     public required int AchievementId { get; init; }
     public required string DisplayTitle { get; init; }
+    public required string RequirementSummary { get; init; }
+    public required string Category { get; init; }
+    public required string Chapter { get; init; }
+    public required bool IsMissable { get; init; }
+    public string? MissableNote { get; init; }
+    public required bool RequiresNewGamePlus { get; init; }
+    public required List<string> Prerequisites { get; init; }
+    public required List<string> GuideSteps { get; init; }
+    public required List<string> GuideChecklist { get; init; }
+    public required bool IsPresentInSave { get; init; }
     public required string RequirementType { get; init; }
     public required int RequiredCount { get; init; }
     public required string RequiredCountText { get; init; }

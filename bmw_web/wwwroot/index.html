@@ -3,119 +3,213 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wukong Achievement Tracker</title>
+    <meta
+      name="description"
+      content="Analyze a Black Myth: Wukong save and follow a complete, beginner-friendly guide to all 81 achievements."
+    />
+    <meta name="theme-color" content="#11100e" />
+    <title>Journey Ledger · Black Myth: Wukong Achievement Guide</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="bg-shape bg-shape-a"></div>
-    <div class="bg-shape bg-shape-b"></div>
-    <main class="container">
-      <header class="hero">
-        <p class="eyebrow">Black Myth: Wukong</p>
-        <h1>Achievement Tracker</h1>
-        <p class="subtitle">
-          Load your save file to see which achievements and checklist items are still missing.
-        </p>
-      </header>
+    <a class="skip-link" href="#achievementLibrary">Skip to achievement guide</a>
+    <div class="ambient ambient-sun" aria-hidden="true"></div>
+    <div class="ambient ambient-jade" aria-hidden="true"></div>
+    <div class="cloud-lines cloud-lines-one" aria-hidden="true"></div>
+    <div class="cloud-lines cloud-lines-two" aria-hidden="true"></div>
 
-      <section class="panel panel-input">
-        <label for="saveFile">Save File</label>
-        <div class="input-row">
-          <input
-            id="saveFile"
-            type="file"
-            accept=".sav"
-          />
-          <button id="analyzeBtn">Analyze</button>
+    <main class="page-shell">
+      <section class="hero" aria-labelledby="pageTitle">
+        <div class="hero-copy">
+          <p class="eyebrow"><span aria-hidden="true">悟</span> The Destined One’s Journey Ledger</p>
+          <h1 id="pageTitle">Every ordeal.<br /><em>One clear path.</em></h1>
+          <p class="hero-lede">
+            Upload a save to turn all 81 achievements into a personal route—complete with
+            missables, New Game+ gates, exact collection checklists, and practical next steps.
+          </p>
+          <div class="hero-promises" aria-label="Tracker features">
+            <span>81 guided achievements</span>
+            <span>Save-aware checklists</span>
+            <span>Beginner-friendly routes</span>
+          </div>
         </div>
-        <p class="hint">Choose your <code>ArchiveSaveFile.&lt;slot&gt;.sav</code> from <code>b1\Saved\SaveGames</code>. The browser uploads the file for analysis, so hosted deployments work too.</p>
-        <div class="utility-row">
-          <button id="spoilerToggleBtn" type="button" class="button-secondary spoiler-toggle-btn" aria-pressed="false">Item Spoilers Visible</button>
-          <p id="spoilerToggleHint" class="utility-hint">Route hints, item checklists, and next checks are fully visible.</p>
-        </div>
+
+        <form id="uploadForm" class="upload-card" novalidate>
+          <div class="upload-heading">
+            <div>
+              <p class="kicker">Begin your reading</p>
+              <h2>Choose your save</h2>
+            </div>
+            <span class="upload-seal" aria-hidden="true">81</span>
+          </div>
+
+          <label id="dropZone" class="drop-zone" for="saveFile">
+            <input id="saveFile" class="file-input-overlay" type="file" accept=".sav" />
+            <span class="drop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14" />
+              </svg>
+            </span>
+            <span class="drop-copy">
+              <strong>Drop a <code>.sav</code> here</strong>
+              <small>or choose one from your device · 8 MB maximum</small>
+            </span>
+          </label>
+
+          <div id="selectedFile" class="selected-file hidden" aria-live="polite"></div>
+          <button id="analyzeBtn" class="primary-button" type="submit" disabled>
+            <span>Read my journey</span>
+            <span aria-hidden="true">→</span>
+          </button>
+
+          <p class="privacy-note">
+            <span aria-hidden="true">◇</span>
+            Your save is decoded in memory for this request and is never written to disk.
+          </p>
+
+          <details class="save-help">
+            <summary>Where is my save?</summary>
+            <div class="save-help-body">
+              <p>Back up the file before uploading it. The common Windows location is:</p>
+              <code>&lt;Steam library&gt;\steamapps\common\BlackMythWukong\b1\Saved\SaveGames\&lt;Steam ID&gt;\ArchiveSaveFile.&lt;slot&gt;.sav</code>
+              <p>Pick the slot you actually play, not a backup or screenshot file.</p>
+            </div>
+          </details>
+        </form>
       </section>
 
-      <section id="statusPanel" class="panel status-panel hidden"></section>
+      <section
+        id="statusPanel"
+        class="status-panel hidden"
+        role="status"
+        aria-live="polite"
+        tabindex="-1"
+      ></section>
 
-      <!-- Overview bar with progress ring -->
-      <section id="overviewPanel" class="overview-bar hidden">
-        <div class="overview-ring-wrap">
-          <svg class="progress-ring" viewBox="0 0 80 80">
-            <circle class="progress-ring-bg" cx="40" cy="40" r="34" />
-            <circle id="progressArc" class="progress-ring-fg" cx="40" cy="40" r="34" stroke-dasharray="213.6 213.6" stroke-dashoffset="213.6" />
-          </svg>
-          <span id="progressPct" class="progress-pct">0%</span>
-        </div>
-        <div class="overview-stats">
-          <div class="overview-stat">
-            <span class="ov-label">Player</span>
-            <span id="ovPlayer" class="ov-value">-</span>
+      <div id="results" class="results hidden">
+        <section id="overviewPanel" class="overview-panel" aria-labelledby="overviewTitle">
+          <div class="progress-orbit" aria-hidden="true">
+            <svg class="progress-ring" viewBox="0 0 112 112">
+              <circle class="progress-ring-track" cx="56" cy="56" r="47" />
+              <circle id="progressArc" class="progress-ring-value" cx="56" cy="56" r="47" />
+            </svg>
+            <span id="progressPct" class="progress-percent">0%</span>
           </div>
-          <div class="overview-stat">
-            <span class="ov-label">Level</span>
-            <span id="ovLevel" class="ov-value">-</span>
-          </div>
-          <div class="overview-stat">
-            <span class="ov-label">NG+</span>
-            <span id="ovNgPlus" class="ov-value">-</span>
-          </div>
-          <div class="overview-stat">
-            <span class="ov-label">Achievements</span>
-            <span id="ovAchievements" class="ov-value">-</span>
-          </div>
-          <div class="overview-stat">
-            <span class="ov-label">Missing</span>
-            <span id="ovMissing" class="ov-value highlight-missing">-</span>
-          </div>
-        </div>
-      </section>
 
-      <section id="itemTrackerPanel" class="panel hidden">
-        <div class="section-title-row">
-          <h2>Missing Item Tracker</h2>
-          <span id="trackerCount" class="chip"></span>
-        </div>
-          <p class="action-subtitle">For collection achievements, this shows the exact items still missing from your save.</p>
-        <div id="trackerList" class="tracker-list"></div>
-      </section>
-
-      <!-- Action plan - what to do next -->
-      <section id="actionPlanPanel" class="panel hidden">
-        <div class="section-title-row">
-          <h2>Remaining Achievements</h2>
-          <span id="actionCount" class="chip chip-action"></span>
-        </div>
-        <p class="action-subtitle">These are your unfinished achievements, with progress and the best next place to check.</p>
-        <div id="actionList" class="action-list"></div>
-      </section>
-
-      <!-- Filter tabs + full table -->
-      <section id="fullPanel" class="panel hidden">
-        <div class="section-title-row">
-          <h2>All Achievements</h2>
-          <div class="filter-tabs">
-            <button class="tab active" data-filter="all">All</button>
-            <button class="tab" data-filter="incomplete">Incomplete</button>
-            <button class="tab" data-filter="complete">Complete</button>
+          <div class="overview-copy">
+            <p class="kicker">Your current pilgrimage</p>
+            <h2 id="overviewTitle"><span id="ovPlayer">Unknown</span>’s journey</h2>
+            <p id="overviewNarrative" class="overview-narrative"></p>
           </div>
-        </div>
-        <div id="searchRow" class="search-row">
-          <input id="searchInput" type="text" placeholder="Search achievements..." autocomplete="off" spellcheck="false" />
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Progress</th>
-                <th>Remaining</th>
-              </tr>
-            </thead>
-            <tbody id="fullTableBody"></tbody>
-          </table>
-        </div>
-      </section>
+
+          <dl class="stat-grid">
+            <div><dt>Level</dt><dd id="ovLevel">—</dd></div>
+            <div><dt>Cycle</dt><dd id="ovNgPlus">—</dd></div>
+            <div><dt>Complete</dt><dd id="ovAchievements">—</dd></div>
+            <div><dt>Remaining</dt><dd id="ovMissing" class="stat-alert">—</dd></div>
+          </dl>
+
+          <nav class="result-nav" aria-label="Result sections">
+            <a href="#nextStepsPanel">Next steps</a>
+            <a href="#itemTrackerPanel">Missing items</a>
+            <a href="#achievementLibrary">All 81</a>
+          </nav>
+        </section>
+
+        <section id="nextStepsPanel" class="content-section" aria-labelledby="nextStepsTitle">
+          <div class="section-heading">
+            <div>
+              <p class="kicker">Recommended route</p>
+              <h2 id="nextStepsTitle">The next three moves</h2>
+            </div>
+            <p>Start here, then use the full ledger for chapter-by-chapter cleanup.</p>
+          </div>
+          <div id="nextStepsList" class="next-steps-grid"></div>
+        </section>
+
+        <section id="itemTrackerPanel" class="content-section" aria-labelledby="trackerTitle">
+          <div class="section-heading">
+            <div>
+              <p class="kicker">Save-verified collection gaps</p>
+              <h2 id="trackerTitle">Missing collectibles</h2>
+            </div>
+            <span id="trackerCount" class="count-pill"></span>
+          </div>
+          <p class="section-note">
+            These rows come from decoded requirement IDs or inventory ownership. Guide-only steps are
+            labeled separately in each achievement card.
+          </p>
+          <div id="trackerList" class="tracker-list"></div>
+        </section>
+
+        <section id="achievementLibrary" class="content-section library-section" aria-labelledby="libraryTitle">
+          <div class="section-heading library-heading">
+            <div>
+              <p class="kicker">Complete achievement compendium</p>
+              <h2 id="libraryTitle">All 81 ordeals</h2>
+            </div>
+            <button
+              id="spoilerToggleBtn"
+              class="quiet-button"
+              type="button"
+              aria-pressed="false"
+            >
+              Hide route spoilers
+            </button>
+          </div>
+
+          <div class="library-toolbar" aria-label="Achievement filters">
+            <label class="search-control" for="searchInput">
+              <span class="visually-hidden">Search the achievement guide</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="6.5"></circle>
+                <path d="m16 16 4 4"></path>
+              </svg>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search achievements, items, bosses, or locations…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+
+            <div id="statusFilters" class="segmented-control" aria-label="Filter by completion">
+              <button type="button" data-status-filter="all" aria-pressed="true">All</button>
+              <button type="button" data-status-filter="incomplete" aria-pressed="false">Remaining</button>
+              <button type="button" data-status-filter="complete" aria-pressed="false">Complete</button>
+            </div>
+
+            <label class="select-control">
+              <span class="visually-hidden">Filter by category</span>
+              <select id="categoryFilter"><option value="all">Every category</option></select>
+            </label>
+
+            <label class="select-control">
+              <span class="visually-hidden">Filter by chapter</span>
+              <select id="chapterFilter"><option value="all">Every chapter</option></select>
+            </label>
+          </div>
+
+          <div class="library-meta">
+            <p id="libraryCount" role="status" aria-live="polite"></p>
+            <button id="expandVisibleBtn" class="text-button" type="button">Expand visible guides</button>
+          </div>
+
+          <div id="achievementList" class="achievement-grid"></div>
+          <div id="emptyState" class="empty-state hidden">
+            <span aria-hidden="true">☁</span>
+            <h3>No ordeals match those filters</h3>
+            <p>Try a broader search or reset one of the filters.</p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="site-footer">
+        <span>Journey Ledger</span>
+        <p>An independent save-analysis companion for Black Myth: Wukong.</p>
+      </footer>
     </main>
 
     <script src="/app.js"></script>

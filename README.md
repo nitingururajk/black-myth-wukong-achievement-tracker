@@ -1,6 +1,6 @@
 # Black Myth: Wukong Achievement Tracker
 
-This repo contains a save-file tracker for Black Myth: Wukong.
+This repo contains a private, browser-based save tracker and beginner-friendly achievement guide for Black Myth: Wukong.
 
 ![Black Myth: Wukong Achievement Tracker screenshot](assets/image.png)
 
@@ -10,6 +10,8 @@ This repo contains a save-file tracker for Black Myth: Wukong.
 - `vendor/blackwukong-dlls/`: vendored decoder/runtime DLLs required by both projects
 
 ## Quickstart
+
+Install a stable .NET 10 SDK, then run:
 
 ```powershell
 dotnet build .\bmw.sln
@@ -21,18 +23,21 @@ Then:
 1. Open the local URL printed in the terminal.
 2. Choose your `.sav` file in the browser.
 3. Click `Analyze`.
-4. Review the overview, missing item tracker, and remaining achievements.
+4. Review the next recommended steps, missing item tracker, and complete 81-achievement guide.
 
 ## What It Does
 
-The tracker reads a `.sav` file, decodes the achievement data, and builds a player-facing checklist.
+The tracker reads a browser-uploaded `.sav` file in memory, decodes the achievement and inventory data, and builds a player-facing checklist. The web app never needs a server-local path and does not write the uploaded save to disk.
 
-- Shows overall achievement progress from the save
-- Highlights unfinished achievements
-- For tracked collection achievements, shows the exact missing items still absent from the decoded save
-- Uses English item and achievement names in the web UI
+- Always renders the canonical set of all 81 platform achievements, including entries omitted by early-game saves
+- Shows completion status, plain-English requirements, chapter, category, prerequisites, missable warnings, New Game+ notes, and step-by-step routes
+- Recommends three useful next achievements based on current chapter and remaining work
+- Shows exact decoded missing-item checklists where the save exposes reliable ownership or requirement IDs
+- Supports full-text search across achievement names, requirements, route steps, collectible names, and acquisition hints
+- Includes status, category, and chapter filters plus an optional spoiler reveal
+- Uses a responsive ink, parchment, jade, and cinnabar interface designed for desktop and mobile
 
-Tracked collection checklists currently include achievements such as curios, soaks, seeds, drinks, gourds, meditation spots, spells, medicine formulas, vessels, armor pieces, and weapons.
+Tracked collection checklists include 36 curios, 20 weapons, 71 armor pieces, 54 spirits, 27 soaks, 24 meditation spots, 14 formulas, 12 seed requirements, 10 transformations, 9 collectible gourds, 8 collectible drinks, 7 spells, 4 vessels, journal groups, and celestial-medicine progress. Some automatic/story unlocks are explained in the achievement guide rather than represented as separate runtime item IDs.
 
 ## Web App
 
@@ -46,13 +51,16 @@ Then open the local URL printed in the terminal.
 
 In the UI:
 
-1. Choose your save file from disk.
+1. Drop a `.sav` file onto the upload panel or choose it from disk.
 2. Click `Analyze`.
 3. Review:
    - the overview panel
+   - the three recommended next steps
    - the missing item tracker
-   - the remaining achievements list
-   - the full achievement table
+   - the searchable and filterable 81-achievement library
+   - detailed requirements, routes, prerequisites, and missable warnings
+
+Uploads are limited to 8 MB. Analysis happens in memory and the response is marked `no-store`.
 
 Look for save files like:
 

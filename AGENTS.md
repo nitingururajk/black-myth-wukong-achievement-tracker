@@ -4,7 +4,7 @@
 
 This file gives coding agents the minimum repo-specific context needed to work safely in this repository.
 
-The repo is a .NET 8 save analysis tool for Black Myth: Wukong.
+The repo is a .NET 10 save analysis tool for Black Myth: Wukong.
 
 - `bmw_web`: ASP.NET Core web UI and API
 - `bmw_probe`: CLI report generator
@@ -21,11 +21,12 @@ The repo is a .NET 8 save analysis tool for Black Myth: Wukong.
 
 ## Environment Notes
 
-- Target framework: `net8.0`
+- Target framework: `net10.0`
+- SDK selection: `global.json` requires a stable .NET 10 SDK and rolls forward within .NET 10 feature bands.
 - Nullable reference types are enabled.
 - Implicit usings are enabled.
 - The repo currently has no dedicated test project.
-- The repo currently has no `.editorconfig`, `Directory.Build.props`, or `global.json`.
+- The repo currently has no `.editorconfig` or `Directory.Build.props`.
 
 ## Build Commands
 

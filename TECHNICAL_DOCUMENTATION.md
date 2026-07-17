@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository is a .NET 8 save analysis tool for Black Myth: Wukong. It reads a game `.sav` file, decodes the archive payload with vendored game-specific runtime assemblies, extracts achievement and inventory state, and presents the result in two forms:
+This repository is a .NET 10 save analysis tool for Black Myth: Wukong. It reads a game `.sav` file, decodes the archive payload with vendored game-specific runtime assemblies, extracts achievement and inventory state, and presents the result in two forms:
 
 - `bmw_web`: a browser-based achievement tracker
 - `bmw_probe`: a CLI report generator
@@ -18,6 +18,7 @@ The two applications share the same core idea but are implemented separately:
 - `Dockerfile`: multi-stage container build for the web app
 - `.dockerignore`: trims the Docker build context
 - `bmw_web/`: ASP.NET Core web application
+- `bmw_web/Services/AchievementGuideCatalog.cs`: canonical guide metadata for all 81 platform achievements
 - `bmw_probe/`: console application for report generation
 - `vendor/blackwukong-dlls/`: vendored third-party decoder/runtime DLLs required to parse save data
 - `run-planner.ps1`: helper script to start the CLI analyzer
@@ -29,14 +30,14 @@ The two applications share the same core idea but are implemented separately:
 
 The main runtime flow is:
 
-1. A user uploads a `.sav` file in the browser UI, or a caller provides a server-local path to the API.
-2. The application reads the raw save bytes from the upload or from disk.
+1. A web user uploads a `.sav` file as multipart form data. The CLI continues to accept a local path through `--save`.
+2. The web application copies the upload into memory; it does not write the save to disk or accept a server-local path.
 3. The raw bytes are parsed as an `ArchiveFile` protobuf container.
 4. The inner archive payload is extracted from `GameArchivesDataBytes`.
 5. The vendored decoder runtime deserializes that payload into `FUStBEDArchivesData`.
 6. The application reads player state, chapter/map progress, achievements, and selected inventory/equipment data.
 7. The raw decoded data is transformed into an application-level `AnalysisReport`.
-8. The web app renders that report as interactive UI; the CLI writes it to JSON and Markdown.
+8. The web app merges decoded progress into the canonical 81-achievement catalog and renders an interactive guide; the CLI writes its separate, lighter report to JSON and Markdown.
 
 ## Vendored External Module
 
@@ -109,21 +110,18 @@ Returns a simple `{ ok = true }` response for health checks.
 
 #### `POST /api/analyze`
 
-Accepts either:
-
-- multipart form-data with a `saveFile` upload field
-- a legacy JSON payload matching `AnalyzeRequest`
+Accepts multipart form-data containing exactly one `.sav` file in the `saveFile` field. JSON path input is intentionally unsupported because a browser-local path is meaningless to a hosted server.
 
 Execution flow:
 
-1. validate that an uploaded file or `savePath` is present
-2. enforce a basic upload size limit for browser uploads
+1. require multipart form data and exactly one file named `saveFile`
+2. validate the `.sav` extension and enforce an 8 MB file limit
 3. start request timing/log scope
-4. call `AchievementPlanner.AnalyzeUploadedSave(...)` for uploads or `AchievementPlanner.AnalyzeAsync(savePath)` for server-local paths
-5. return `{ ok: true, report, analyzedAtUtc, saveFileName, saveFileLastWriteTimeUtc }` on success
-6. return a bad request with a readable error for missing file or parse failure
+4. copy the upload to a bounded in-memory stream and call `AchievementPlanner.AnalyzeUploadedSave(...)`
+5. return `{ ok: true, report, analyzedAtUtc, saveFileName }` on success
+6. return `400` for an invalid file count, `413` for an oversized upload, `415` for an unsupported content type or extension, or `422` for an unreadable save
 
-The analyze response is explicitly marked `no-store` so repeated button presses always hit the server again instead of reusing a cached response.
+The analyze response is explicitly marked `no-store` so repeated button presses always hit the server again instead of reusing a cached response. Parse failures return a generic player-facing message; internal exception text and local path details are not exposed.
 
 ### Logging
 
@@ -135,11 +133,10 @@ The web app uses console logging with timestamps. Logging currently exists at tw
 Logged events include:
 
 - application startup
-- rejected analyze requests with no uploaded file or save path
+- rejected analyze requests with invalid content, file count, extension, or size
 - analyze request start and completion timing
-- file-not-found failures
 - unexpected parse failures
-- bytes loaded from disk
+- uploaded byte count
 - decoded player/chapter/map context
 - final report summary with tracked checklist counts
 
@@ -159,24 +156,26 @@ Container build flow:
 Container runtime details:
 
 - the image serves the web app on port `8080`
+- the .NET 10 `sdk:10.0` and `aspnet:10.0` tags use the official Ubuntu 24.04-based images
 - the browser upload flow means no host save-path mount is required for normal use
 - the vendored decoder DLLs are included through the published web app output
 
 ## `AchievementPlanner` Service
 
-File:
+Files:
 
 - `bmw_web/Services/AchievementPlanner.cs`
+- `bmw_web/Services/AchievementGuideCatalog.cs`
 
 This is the main backend component in the repository.
 
 ### Primary Responsibilities
 
-- validate uploaded save input or server-local save path
-- read and decode the save file bytes
+- validate and decode uploaded save bytes
 - extract player and achievement state
 - extract owned inventory/equipment IDs from decoded save data
-- enrich raw achievement data with curated knowledge for specific achievements
+- merge raw progress into a validated, canonical 81-achievement guide catalog
+- enrich every achievement with requirements, route steps, prerequisites, chapter/category metadata, and missable/New Game+ guidance
 - compute missing tracked items for selected collection achievements
 - return a normalized `AnalysisReport`
 
@@ -221,22 +220,21 @@ Examples of tracked achievements:
 - `Staffs and Spears`
 - `Final Fulfillment`
 
-#### `AnalyzeAsync`
+#### `AnalyzeUploadedSave`
 
-`AnalyzeAsync` and `AnalyzeUploadedSave` feed the same analysis pipeline.
+The web service accepts uploaded bytes only. Local-path parsing remains isolated in the separate CLI implementation.
 
 High-level behavior:
 
-1. validate the save source
-2. read bytes from disk or accept uploaded bytes
-3. protobuf-parse the outer save archive
-4. deserialize the inner archive payload
-5. extract chapter/map/player state
-6. collect owned item/equipment IDs
-7. read raw achievement entries from decoded save data
-8. transform each achievement into an `AchievementPlan`
-9. prefer platform-only achievements if IDs `>= 81000` exist
-10. package everything into `AnalysisReport`
+1. validate the uploaded bytes
+2. protobuf-parse the outer save archive
+3. deserialize the inner archive payload
+4. extract chapter/map/player state
+5. collect owned item/equipment IDs
+6. group and de-duplicate decoded platform progress for IDs `81001` through `81081`
+7. overlay that progress on the canonical catalog, including catalog rows absent from early saves
+8. resolve tracked collection targets and build each `AchievementPlan`
+9. package all 81 plans into `AnalysisReport`
 
 ### Achievement Transformation Logic
 
@@ -250,26 +248,19 @@ For every decoded achievement entry, the planner computes:
 - `PriorityOrder` and `PriorityLabel`
 - `RouteHint`
 - `Steps`
+- `RequirementSummary`, `Category`, and `Chapter`
+- `IsMissable`, `MissableNote`, and `RequiresNewGamePlus`
+- `Prerequisites`, `GuideSteps`, and `GuideChecklist`
+- `IsPresentInSave`
 - optional tracked checklist state
 
 This is the data the frontend renders.
 
-### Platform Achievement Filtering
+### Canonical Achievement Merge
 
-The planner prefers achievement IDs `>= 81000` when they exist.
+`AchievementGuideCatalog` defines exactly IDs `81001` through `81081`. Its static validation rejects duplicate, missing, or out-of-range entries during startup. `AchievementPlanner` uses decoded progress when present and supplies an incomplete guide row when an early save omits an achievement entirely. An absent achievement row does not turn unknown requirement-bucket targets into false "save-verified" misses; only inventory-backed ownership can still be resolved in that case.
 
-Why:
-
-- the save may contain additional internal or duplicate achievement entries
-- platform IDs give a cleaner user-facing set of 80 achievements
-
-When platform achievements exist:
-
-- `FilterMode = "platform_only"`
-
-Otherwise:
-
-- `FilterMode = "all"`
+The report therefore always contains 81 unique, ordered achievements and uses `FilterMode = "canonical_81"`. Internal or duplicate save entries cannot leak into the player-facing library.
 
 ### Missing Item Tracking Logic
 
@@ -291,16 +282,7 @@ For example:
 
 These use `DecodedSaveInventory`, not only achievement requirement progress.
 
-Composite trophies can also be tracked from related achievement buckets instead of raw inventory items.
-
-For example:
-
-- `Brewer's Bounty` now expands to the actual drink, soak, and gourd checklist
-- each target points at the correct source achievement bucket
-- drinks use `81064` (`Brews and Barrels`)
-- soaks use `81078` (`Brewer's Bounty`)
-- gourds use `81076` (`Gourds Gathered`)
-- source-backed soak IDs are labeled directly, while unresolved soak IDs stay generic instead of reusing a guessed item name
+Collection buckets remain separate: `Brews and Barrels` tracks the eight non-default drink IDs, `Gourds Gathered` tracks the nine collectible gourd IDs, and `Brewer's Bounty` tracks the 27 soak IDs. Automatic starting or upgrade-line entries are explained in the guide without inventing extra runtime IDs.
 
 ### Inventory/Equipment Ownership Extraction
 
@@ -358,10 +340,10 @@ Behavior:
 
 Important backend DTOs:
 
-- `AnalyzeRequest`: legacy JSON input payload for the web API
 - `AnalysisReport`: top-level response model
 - `AchievementPlan`: per-achievement derived state
 - `RequirementTarget`: individual tracked collectible/equipment target
+- `AchievementGuide`: canonical per-achievement guide definition
 - `AchievementKnowledge`: curated metadata definition
 - `AchievementKnowledgeResult`: resolved checklist state after applying save data
 
@@ -381,9 +363,10 @@ Defines the page structure:
 - save file upload panel
 - status panel
 - overview panel with progress ring
+- recommended next-step panel
 - missing item tracker panel
-- remaining achievements panel
-- full achievement table with tabs and search
+- full achievement card library with search and status/category/chapter filters
+- spoiler visibility control
 
 The page is static and relies on `app.js` for all behavior.
 
@@ -394,6 +377,7 @@ This is the client-side controller.
 Main responsibilities:
 
 - wire button and filter/search events
+- support drag-and-drop and native file selection with client-side extension/size checks
 - call `/api/analyze`
 - handle API success/failure states
 - cache the current `AnalysisReport`
@@ -402,20 +386,21 @@ Main responsibilities:
 Main render functions:
 
 - `renderOverview(report)`
-- `renderItemTracker(report)`
-- `renderActionPlan(report)`
-- `renderFullTable(report)`
-- `renderTargetBlock(item)`
+- `renderTracker(report)`
+- `renderNextSteps(report)`
+- `renderAchievementLibrary(report)`
+- `renderTargetChecklist(targets)`
 
 Important client-side behavior:
 
 - incomplete tracked items are grouped into the Missing Item Tracker
 - each analyze click uses a fresh `no-store` request and ignores older in-flight responses
 - the browser uploads the selected `.sav` file with `FormData` instead of sending a client-local path
-- the status panel shows the analysis timestamp and, when available from the browser file metadata, the selected file's last-modified timestamp so reruns are visible even when the achievement counts do not change
-- remaining achievements are sorted by priority and remaining count
-- meta achievements are pushed to the end of the remaining list
-- search filters only by visible achievement title
+- the status panel shows the analyzed filename and current completion total
+- next-step recommendations prefer useful incomplete work near the decoded current chapter
+- the library always renders all 81 canonical achievements unless filters narrow it
+- search indexes titles, requirements, routes, prerequisites, guide checklists, target names, and acquisition hints
+- spoiler text is structurally hidden until the player reveals it
 - all user-rendered text is escaped through `esc()` before insertion
 
 ### `styles.css`
@@ -425,18 +410,18 @@ This file defines the visual presentation for:
 - hero section
 - cards and panels
 - progress ring
-- missing item tracker grid
-- remaining achievement cards
+- missing item tracker groups
+- recommended next-step and achievement cards
 - checklist blocks
-- filter tabs and table
+- search and filter controls
 - responsive mobile layout
 
 The current visual system uses:
 
-- dark green/bronze palette
-- layered translucent panels
-- large blurred background shapes
-- compact card-based hierarchy for checklist items
+- ink, parchment, jade, bronze, and cinnabar palette
+- layered paper grain, lacquer panels, and restrained decorative motifs
+- card-based hierarchy with strong focus states and reduced-motion support
+- two-column desktop composition that collapses without horizontal overflow on mobile
 
 ## CLI Architecture
 
@@ -509,9 +494,9 @@ dotnet run --project ".\bmw_probe\bmw_probe.csproj" -- --save "$SavePath" --out 
 
 ## Build and Runtime Requirements
 
-- .NET 8 SDK
+- stable .NET 10 SDK (selected through `global.json` with roll-forward across .NET 10 feature bands)
 - the vendored DLLs in `vendor/blackwukong-dlls/`
-- a valid Black Myth: Wukong `.sav` file path accessible from the current machine
+- a valid Black Myth: Wukong `.sav` file (browser upload for the web app, local path for the CLI)
 
 ## Known Design Tradeoffs
 
