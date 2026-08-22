@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using bmw_web.Services;
 using Microsoft.AspNetCore.Http.Features;
 
-const long MaxUploadedSaveBytes = 8 * 1024 * 1024;
+const long MaxUploadedSaveBytes = 4 * 1024 * 1024;
 const long MaxUploadRequestBytes = MaxUploadedSaveBytes + (128 * 1024);
 
 var builder = WebApplication.CreateBuilder(args);

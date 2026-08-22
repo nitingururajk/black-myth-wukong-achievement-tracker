@@ -1,0 +1,10 @@
+.git
+.vercel
+.vs
+**/bin
+**/obj
+tmp_saves
+assets
+bmw_probe
+*.mp3
+*.log

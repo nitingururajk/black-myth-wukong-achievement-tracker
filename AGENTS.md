@@ -56,6 +56,12 @@ Build the Docker image for the web app:
 docker build -t bmw-web .
 ```
 
+Build the Vercel container image locally:
+
+```powershell
+docker build -f .\Dockerfile.vercel -t bmw-web-vercel .
+```
+
 Build the CLI only:
 
 ```powershell
@@ -90,6 +96,12 @@ Run the web app in Docker:
 docker run --rm -p 8080:8080 bmw-web
 ```
 
+Run the Vercel container image locally:
+
+```powershell
+docker run --rm -e PORT=8080 -p 8080:8080 bmw-web-vercel
+```
+
 Helper script for the web app:
 
 ```powershell
@@ -107,6 +119,16 @@ Helper script for the CLI:
 ```powershell
 .\run-planner.ps1 -SavePath "<full-path-to-save>" -OutDir ".\bmw_probe\output"
 ```
+
+Deploy a Vercel preview or production deployment from the repository root:
+
+```powershell
+vercel project update --framework container
+vercel deploy --logs
+vercel deploy --prod --logs
+```
+
+Keep the Vercel project root at the repository root because `Dockerfile.vercel` needs both `bmw_web/` and `vendor/blackwukong-dlls/`. Confirm the Vercel framework preset is `Container`; the generic `Other` preset can produce an empty deployment. The Vercel container must listen on the platform-provided `PORT`, and direct browser uploads are capped at 4 MB to stay below Vercel's 4.5 MB Function request limit.
 
 ## Test Commands
 

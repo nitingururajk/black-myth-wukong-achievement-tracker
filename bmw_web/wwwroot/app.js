@@ -1,4 +1,4 @@
-const MAX_SAVE_BYTES = 8 * 1024 * 1024;
+const MAX_SAVE_BYTES = 4 * 1024 * 1024;
 const EXPECTED_ACHIEVEMENT_COUNT = 81;
 
 const uploadForm = document.getElementById("uploadForm");
@@ -194,7 +194,7 @@ function validateFile(file) {
   }
 
   if (file.size > MAX_SAVE_BYTES) {
-    return "That save is larger than the 8 MB upload limit.";
+    return "That save is larger than the 4 MB upload limit.";
   }
 
   return null;

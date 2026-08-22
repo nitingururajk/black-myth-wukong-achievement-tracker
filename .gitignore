@@ -5,11 +5,13 @@
 
 # dotenv files
 .env
+.env.*
 
 # Local save files, regression samples, and generated reports
 *.sav
 bmw_probe/output/
 /tmp_saves/
+/.vercel/
 
 # Keep vendored decoder DLLs in repo
 !vendor/

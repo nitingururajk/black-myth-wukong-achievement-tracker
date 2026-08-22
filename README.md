@@ -60,7 +60,7 @@ In the UI:
    - the searchable and filterable 81-achievement library
    - detailed requirements, routes, prerequisites, and missable warnings
 
-Uploads are limited to 8 MB. Analysis happens in memory and the response is marked `no-store`.
+Uploads are limited to 4 MB so the complete multipart request stays below common managed-function request limits. Analysis happens in memory and the response is marked `no-store`.
 
 Look for save files like:
 
@@ -83,6 +83,38 @@ docker run --rm -p 8080:8080 bmw-web
 ```
 
 Then open `http://localhost:8080` and upload your `.sav` file in the browser. No save-path volume mount is required because the web UI uploads the file directly.
+
+## Vercel
+
+Vercel deploys the web app as a container-backed Function from `Dockerfile.vercel`. Keep the Vercel project root at the repository root so the container build can include both `bmw_web/` and `vendor/blackwukong-dlls/`.
+
+Install and authenticate the Vercel CLI:
+
+```powershell
+npm install --global vercel
+vercel login
+```
+
+Link or create the project at the repository root and ensure the framework preset is `Container`. If Vercel reports the preset as `Other`, set it explicitly before deploying:
+
+```powershell
+vercel link
+vercel project update --framework container
+```
+
+Create and verify a preview deployment from the repository root:
+
+```powershell
+vercel deploy --logs
+```
+
+After testing the preview URL and `/api/health`, deploy to production:
+
+```powershell
+vercel deploy --prod --logs
+```
+
+The Vercel container listens on the platform-provided `PORT`. The direct upload limit is 4 MB because Vercel Functions reject request bodies larger than 4.5 MB.
 
 ## CLI
 
