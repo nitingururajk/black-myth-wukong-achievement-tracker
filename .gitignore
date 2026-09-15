@@ -11,6 +11,10 @@
 *.sav
 bmw_probe/output/
 /tmp_saves/
+/start-bmw-tracker.cmd
+/启动黑神话成就追踪器.cmd
+/启动黑神话成就追踪器.ps1
+/work/save-diagnostic/
 /.vercel/
 
 # Keep vendored decoder DLLs in repo
