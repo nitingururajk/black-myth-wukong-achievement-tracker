@@ -11,7 +11,7 @@
     <title>Journey Ledger · Black Myth: Wukong Achievement Guide</title>
     <link rel="icon" href="/favicon.ico" sizes="64x64" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=zh-cn-language-menu-1" />
   </head>
   <body>
     <a class="skip-link" href="#achievementLibrary">Skip to achievement guide</a>
@@ -21,6 +21,28 @@
     <div class="cloud-lines cloud-lines-two" aria-hidden="true"></div>
 
     <main class="page-shell">
+      <div class="language-control">
+        <span id="languageLabel">Language / 语言</span>
+        <select id="languageSelect" aria-hidden="true" tabindex="-1">
+          <option value="en">English</option>
+          <option value="zh-CN">简体中文</option>
+        </select>
+        <button
+          id="languageTrigger"
+          class="language-trigger"
+          type="button"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-labelledby="languageLabel languageValue"
+        >
+          <span id="languageValue">English</span>
+          <span class="language-chevron" aria-hidden="true"></span>
+        </button>
+        <div id="languageMenu" class="language-menu" role="listbox" aria-labelledby="languageLabel" hidden>
+          <button type="button" role="option" data-language="en" aria-selected="true">English</button>
+          <button type="button" role="option" data-language="zh-CN" aria-selected="false">简体中文</button>
+        </div>
+      </div>
       <section class="hero" aria-labelledby="pageTitle">
         <div class="hero-copy">
           <p class="eyebrow"><span aria-hidden="true">悟</span> The Destined One’s Journey Ledger</p>
@@ -252,6 +274,9 @@
       </footer>
     </main>
 
-    <script src="/app.js"></script>
+    <script src="/zh-cn-guides.js"></script>
+    <script src="/zh-cn-targets.js"></script>
+    <script src="/i18n.js"></script>
+    <script src="/app.js?v=zh-cn-language-menu-1"></script>
   </body>
 </html>

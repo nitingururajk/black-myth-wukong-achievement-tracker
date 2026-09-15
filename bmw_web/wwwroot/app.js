@@ -25,9 +25,14 @@ const libraryCount = document.getElementById("libraryCount");
 const expandVisibleBtn = document.getElementById("expandVisibleBtn");
 const achievementList = document.getElementById("achievementList");
 const emptyState = document.getElementById("emptyState");
+const languageSelect = document.getElementById("languageSelect");
+const languageTrigger = document.getElementById("languageTrigger");
+const languageValue = document.getElementById("languageValue");
+const languageMenu = document.getElementById("languageMenu");
 
 let selectedFile = null;
 let currentReport = null;
+let analysisStatus = null;
 let activeRequest = null;
 let currentStatusFilter = "all";
 let hideSpoilers = loadSpoilerPreference();
@@ -220,7 +225,7 @@ async function analyzeSave(event) {
   const analyzedFile = selectedFile;
 
   analyzeBtn.disabled = true;
-  analyzeBtn.innerHTML = "<span>Reading the save…</span><span aria-hidden=\"true\">◌</span>";
+  renderAnalyzeButton(true);
   setStatus("Uploading and decoding the save in memory…");
 
   try {
@@ -258,6 +263,8 @@ async function analyzeSave(event) {
     setStatus(
       `Analyzed ${payload.saveFileName || analyzedFile.name}: ${currentReport.completedAchievements}/81 achievements complete.${countWarning}`
     );
+    analysisStatus = { fileName: payload.saveFileName || analyzedFile.name, completed: currentReport.completedAchievements, total: currentReport.totalAchievements };
+    renderAnalysisStatus();
   } catch (error) {
     if (error.name === "AbortError") return;
 
@@ -269,7 +276,7 @@ async function analyzeSave(event) {
     if (controller === activeRequest) {
       activeRequest = null;
       analyzeBtn.disabled = selectedFile === null;
-      analyzeBtn.innerHTML = "<span>Read my journey</span><span aria-hidden=\"true\">→</span>";
+      renderAnalyzeButton(false);
     }
   }
 }
@@ -285,7 +292,9 @@ function parseJsonResponse(text) {
 }
 
 function setStatus(message, type = "ok", shouldFocus = false) {
-  statusPanel.textContent = message;
+  analysisStatus = null;
+  statusPanel.dataset.message = message;
+  statusPanel.textContent = t(message);
   statusPanel.classList.remove("hidden", "status-error");
   statusPanel.classList.toggle("status-error", type === "error");
   statusPanel.setAttribute("role", type === "error" ? "alert" : "status");
@@ -293,6 +302,8 @@ function setStatus(message, type = "ok", shouldFocus = false) {
 }
 
 function hideStatus() {
+  analysisStatus = null;
+  delete statusPanel.dataset.message;
   statusPanel.classList.add("hidden");
   statusPanel.textContent = "";
 }
@@ -313,7 +324,7 @@ function renderCompletionState(report) {
 
   if (!journeyComplete) return;
 
-  completionPlayer.textContent = report.playerName || "The Destined One";
+  completionPlayer.textContent = report.playerName || t("The Destined One");
 }
 
 function isJourneyComplete(report) {
@@ -346,18 +357,18 @@ function renderOverview(report) {
   progressArc.style.strokeDasharray = String(circumference);
   progressArc.style.strokeDashoffset = String(offset);
   progressPct.textContent = `${percent}%`;
-  document.getElementById("ovPlayer").textContent = report.playerName || "Unknown";
+  document.getElementById("ovPlayer").textContent = report.playerName || t("Unknown");
   document.getElementById("ovLevel").textContent = String(report.playerLevel ?? "—");
   document.getElementById("ovNgPlus").textContent = Number(report.newGamePlusCount) > 0
     ? `NG+${report.newGamePlusCount}`
-    : "First";
+    : t("First");
   document.getElementById("ovAchievements").textContent = `${completed} / ${total}`;
   document.getElementById("ovMissing").textContent = String(report.incompleteAchievements ?? 0);
 
   const remaining = Number(report.incompleteAchievements) || 0;
   overviewNarrative.textContent = remaining === 0
-    ? "Every recorded ordeal is complete. The ledger is whole."
-    : `${remaining} ordeal${remaining === 1 ? "" : "s"} remain. Missable routes are marked in cinnabar.`;
+    ? t("Every recorded ordeal is complete. The ledger is whole.")
+    : language === "zh-CN" ? `还剩${remaining}难。易错过路线以朱红色标记。` : `${remaining} ordeal${remaining === 1 ? "" : "s"} remain. Missable routes are marked in cinnabar.`;
 }
 
 function renderNextSteps(report) {
@@ -388,11 +399,11 @@ function renderNextSteps(report) {
     const journeyComplete = isJourneyComplete(report);
     nextStepsList.innerHTML = `
       <div class="completion-banner">
-        <strong>${journeyComplete ? "No further route is needed." : "The final fulfillment remains."}</strong>
+        <strong>${journeyComplete ? t("No further route is needed.") : t("The final fulfillment remains.")}</strong>
         <p>${
           journeyComplete
-            ? "The final seal above marks every achievement complete."
-            : "Open Ordeal 81 in the full ledger to review the last platform trigger."
+            ? t("The final seal above marks every achievement complete.")
+            : t("Open Ordeal 81 in the full ledger to review the last platform trigger.")
         }</p>
       </div>`;
     return;
@@ -404,14 +415,14 @@ function renderNextSteps(report) {
         const spoilerHidden = isAchievementSpoilerHidden(item);
         return `
         <article class="next-card" data-order="${index + 1}">
-          <span class="next-card-number">Move ${index + 1} · ${esc(item.chapter)}</span>
-          <h3>${esc(item.displayTitle)}</h3>
+          <span class="next-card-number">${language === "zh-CN" ? "推荐" : "Move"} ${index + 1} · ${esc(chapterLabel(item.chapter))}</span>
+          <h3>${esc(guideText(item, "displayTitle"))}</h3>
           <p${spoilerHidden ? ' class="spoiler-placeholder"' : ""}>${
             spoilerHidden
-              ? "Achievement description hidden while spoiler protection is on."
-              : esc(item.requirementSummary || item.routeHint)
+              ? t("Achievement description hidden while spoiler protection is on.")
+              : esc(guideText(item, "requirementSummary") || guideText(item, "routeHint"))
           }</p>
-          <a href="#achievement-${item.achievementId}">Open this guide →</a>
+          <a href="#achievement-${item.achievementId}">${t("Open this guide →")}</a>
         </article>`;
       }
     )
@@ -462,12 +473,12 @@ function renderTracker(report) {
     (sum, entry) => sum + entry.missing.length,
     0
   );
-  trackerCount.textContent = `${totalMissing} missing`;
+  trackerCount.textContent = language === "zh-CN" ? `缺失${totalMissing}项` : `${totalMissing} missing`;
 
   if (trackedAchievements.length === 0) {
     trackerList.innerHTML = `
       <div class="tracker-empty">
-        No save-verified collection items are missing. Guide-only cleanup may still remain.
+        ${t("No save-verified collection items are missing. Guide-only cleanup may still remain.")}
       </div>`;
     return;
   }
@@ -477,25 +488,25 @@ function renderTracker(report) {
       ({ item, missing }) => {
         const spoilerHidden = isAchievementSpoilerHidden(item);
         return `
-        <details class="tracker-group">
+        <details class="tracker-group" data-tracker-id="${item.achievementId}">
           <summary>
             <span class="tracker-group-title">
-              <strong>${esc(item.displayTitle)}</strong>
-              <small>${missing.length} of ${(item.requirementTargets ?? []).length} tracked rows missing</small>
+              <strong>${esc(guideText(item, "displayTitle"))}</strong>
+              <small>${language === "zh-CN" ? `追踪${(item.requirementTargets ?? []).length}项，缺失${missing.length}项` : `${missing.length} of ${(item.requirementTargets ?? []).length} tracked rows missing`}</small>
             </span>
           </summary>
           ${
             spoilerHidden
               ? `<div class="spoiler-gate spoiler-gate-compact">
-                  <p>Missing item names and locations are hidden while spoiler protection is on.</p>
+                  <p>${t("Missing item names and locations are hidden while spoiler protection is on.")}</p>
                 </div>`
               : `<ul class="tracker-items">
                   ${missing
                     .map(
                       (target) => `
                         <li class="tracker-item">
-                          <strong>${esc(target.name)}</strong>
-                          ${target.howToGet ? `<p>${esc(target.howToGet)}</p>` : ""}
+                          <strong>${esc(targetText(item, target, "name"))}</strong>
+                          ${target.howToGet ? `<p>${esc(targetText(item, target, "howToGet"))}</p>` : ""}
                         </li>`
                     )
                     .join("")}
@@ -520,8 +531,8 @@ function populateFilters(achievements) {
 }
 
 function replaceSelectOptions(select, allLabel, values) {
-  const allOption = new Option(allLabel, "all");
-  select.replaceChildren(allOption, ...values.map((value) => new Option(value, value)));
+  const allOption = new Option(t(allLabel), "all");
+  select.replaceChildren(allOption, ...values.map((value) => new Option(chapterLabel(t(value)), value)));
 }
 
 function uniqueInOrder(values) {
@@ -545,7 +556,7 @@ function renderAchievementLibrary() {
     return true;
   });
 
-  libraryCount.textContent = `Showing ${visible.length} of ${allAchievements.length} achievements`;
+  libraryCount.textContent = language === "zh-CN" ? `显示 ${visible.length} / ${allAchievements.length} 项成就` : `Showing ${visible.length} of ${allAchievements.length} achievements`;
   emptyState.classList.toggle("hidden", visible.length !== 0);
   achievementList.innerHTML = visible.map(renderAchievementCard).join("");
   syncExpandButton();
@@ -573,6 +584,16 @@ function buildSearchText(item) {
     });
   }
 
+  if (language === "zh-CN") {
+    parts.push(guideText(item, "displayTitle"), t(item.category), chapterLabel(item.chapter));
+    if (!isAchievementSpoilerHidden(item)) {
+      for (const field of ["requirementSummary", "routeHint", "missableNote", "prerequisites", "guideSteps", "guideChecklist"]) {
+        const value = guideText(item, field);
+        parts.push(...(Array.isArray(value) ? value : [value]));
+      }
+      for (const target of item.requirementTargets ?? []) parts.push(targetText(item, target, "name"), targetText(item, target, "howToGet"));
+    }
+  }
   return parts.filter(Boolean).join(" ").toLocaleLowerCase();
 }
 
@@ -593,21 +614,21 @@ function renderAchievementCard(item) {
     <article id="achievement-${item.achievementId}" class="${classes}">
       <div class="achievement-card-main">
         <div class="achievement-topline">
-          <span class="ordeal-number">Ordeal ${ordeal}</span>
-          <span class="status-label">${item.isComplete ? "Complete" : "Remaining"}</span>
+          <span class="ordeal-number">${language === "zh-CN" ? `第${ordeal}难` : `Ordeal ${ordeal}`}</span>
+          <span class="status-label">${item.isComplete ? t("Complete") : t("Remaining")}</span>
         </div>
-        <h3>${esc(item.displayTitle)}</h3>
+        <h3>${esc(guideText(item, "displayTitle"))}</h3>
         <p class="requirement-summary${guideHidden ? " spoiler-placeholder" : ""}">${
           guideHidden
-            ? "Achievement description hidden while spoiler protection is on."
-            : esc(item.requirementSummary || item.routeHint)
+            ? t("Achievement description hidden while spoiler protection is on.")
+            : esc(guideText(item, "requirementSummary") || guideText(item, "routeHint"))
         }</p>
         <div class="tag-row">
-          <span class="tag">${esc(item.category)}</span>
-          <span class="tag">${esc(item.chapter)}</span>
-          ${item.isMissable ? '<span class="tag tag-missable">Missable</span>' : ""}
-          ${item.requiresNewGamePlus ? '<span class="tag tag-ng">New Game+</span>' : ""}
-          ${!item.isPresentInSave ? '<span class="tag tag-unverified">Guide-only progress</span>' : ""}
+          <span class="tag">${esc(t(item.category))}</span>
+          <span class="tag">${esc(chapterLabel(item.chapter))}</span>
+          ${item.isMissable ? `<span class="tag tag-missable">${t("Missable")}</span>` : ""}
+          ${item.requiresNewGamePlus ? `<span class="tag tag-ng">${t("New Game+")}</span>` : ""}
+          ${!item.isPresentInSave ? `<span class="tag tag-unverified">${t("Guide-only progress")}</span>` : ""}
         </div>
         <div class="achievement-progress" aria-label="${esc(progress.label)}">
           <div class="progress-track"><div class="progress-fill" style="width:${progress.percent}%"></div></div>
@@ -615,7 +636,7 @@ function renderAchievementCard(item) {
         </div>
       </div>
       <details class="achievement-guide" data-guide-id="${item.achievementId}" ${isOpen ? "open" : ""}>
-        <summary>Open full requirement guide</summary>
+        <summary>${t("Open full requirement guide")}</summary>
         <div class="guide-body">
           ${
             guideHidden
@@ -628,7 +649,7 @@ function renderAchievementCard(item) {
 }
 
 function getProgress(item) {
-  if (item.isComplete) return { percent: 100, label: "Complete" };
+  if (item.isComplete) return { percent: 100, label: t("Complete") };
 
   if (item.requiredCount > 0) {
     const completed = Math.max(Number(item.completedCount) || 0, 0);
@@ -641,7 +662,7 @@ function getProgress(item) {
 
   return {
     percent: 0,
-    label: item.isPresentInSave ? "Trigger pending" : "Not exposed yet",
+    label: item.isPresentInSave ? t("Trigger pending") : t("Not exposed yet"),
   };
 }
 
@@ -653,40 +674,42 @@ function renderSpoilerGate(item) {
   return `
     <div class="spoiler-gate">
       <div>
-        <p>The achievement description, route details, and collectible locations are hidden.</p>
+        <p>${t("The achievement description, route details, and collectible locations are hidden.")}</p>
         <button class="reveal-button" type="button" data-reveal-guide="${item.achievementId}">
-          Reveal ${esc(item.displayTitle)} guide
+          ${language === "zh-CN" ? "显示攻略：" : "Reveal "}${esc(guideText(item, "displayTitle"))}${language === "zh-CN" ? "" : " guide"}
         </button>
       </div>
     </div>`;
 }
 
 function renderGuideContent(item) {
-  const prerequisites = Array.isArray(item.prerequisites) ? item.prerequisites : [];
-  const guideSteps = Array.isArray(item.guideSteps) ? item.guideSteps : [];
+  const prerequisites = guideText(item, "prerequisites") ?? [];
+  const guideSteps = guideText(item, "guideSteps") ?? [];
   const guideChecklist = Array.isArray(item.guideChecklist) ? item.guideChecklist : [];
   const targets = Array.isArray(item.requirementTargets) ? item.requirementTargets : [];
-  const additionalMilestones = getAdditionalGuideMilestones(guideChecklist, targets);
+  const rawMilestones = getAdditionalGuideMilestones(guideChecklist, targets);
+  const translatedChecklist = guideText(item, "guideChecklist") ?? [];
+  const additionalMilestones = rawMilestones.map(entry => translatedChecklist[guideChecklist.indexOf(entry)] ?? entry);
 
   return `
     <div class="guide-layout">
       <div class="guide-column">
         <section class="guide-section">
-          <h4 class="guide-label">Exact route</h4>
-          <p>${esc(item.routeHint || item.requirementSummary)}</p>
+          <h4 class="guide-label">${t("Exact route")}</h4>
+          <p>${esc(guideText(item, "routeHint") || guideText(item, "requirementSummary"))}</p>
         </section>
         ${
           item.isMissable && item.missableNote
             ? `<section class="guide-section warning-box">
-                <h4 class="guide-label">Do this before moving on</h4>
-                <p>${esc(item.missableNote)}</p>
+                <h4 class="guide-label">${t("Do this before moving on")}</h4>
+                <p>${esc(guideText(item, "missableNote"))}</p>
               </section>`
             : ""
         }
         ${
           prerequisites.length
             ? `<section class="guide-section">
-                <h4 class="guide-label">Prerequisites</h4>
+                <h4 class="guide-label">${t("Prerequisites")}</h4>
                 <ul class="guide-list">${prerequisites.map((step) => `<li>${esc(step)}</li>`).join("")}</ul>
               </section>`
             : ""
@@ -694,20 +717,20 @@ function renderGuideContent(item) {
         ${
           guideSteps.length
             ? `<section class="guide-section">
-                <h4 class="guide-label">Walkthrough</h4>
+                <h4 class="guide-label">${t("Walkthrough")}</h4>
                 <ol class="guide-list">${guideSteps.map((step) => `<li>${esc(step)}</li>`).join("")}</ol>
               </section>`
             : ""
         }
       </div>
       <div class="guide-column">
-        ${targets.length ? renderTargetChecklist(targets) : ""}
+        ${targets.length ? renderTargetChecklist(item, targets) : ""}
         ${additionalMilestones.length ? renderGuideMilestones(additionalMilestones, targets.length > 0) : ""}
         ${
           !additionalMilestones.length && !targets.length
             ? `<section class="guide-section">
-                <h4 class="guide-label">Completion check</h4>
-                <p>This is a single trigger achievement. Follow the route on the left; the uploaded save supplies the final complete / incomplete state.</p>
+                <h4 class="guide-label">${t("Completion check")}</h4>
+                <p>${t("This is a single trigger achievement. Follow the route on the left; the uploaded save supplies the final complete / incomplete state.")}</p>
               </section>`
             : ""
         }
@@ -731,10 +754,10 @@ function normalizeRequirementName(value) {
 }
 
 function renderGuideMilestones(entries, hasTrackedTargets) {
-  const heading = hasTrackedTargets ? "Additional route milestones" : "Route milestones";
+  const heading = hasTrackedTargets ? t("Additional route milestones") : t("Route milestones");
   const note = hasTrackedTargets
-    ? "These notes add route context; automatically checked requirements are shown above."
-    : "These are route notes. The uploaded save exposes the overall achievement result, not a separate state for each step.";
+    ? t("These notes add route context; automatically checked requirements are shown above.")
+    : t("These are route notes. The uploaded save exposes the overall achievement result, not a separate state for each step.");
 
   return `
     <section class="guide-section">
@@ -744,12 +767,12 @@ function renderGuideMilestones(entries, hasTrackedTargets) {
     </section>`;
 }
 
-function renderTargetChecklist(targets) {
+function renderTargetChecklist(item, targets) {
   const collected = targets.filter((target) => target.isCollected).length;
   return `
     <section class="guide-section">
-      <h4 class="guide-label">Requirements from your save · ${collected}/${targets.length} complete</h4>
-      <p class="tracking-note">The uploaded save automatically marks each requirement collected or missing.</p>
+      <h4 class="guide-label">${language === "zh-CN" ? "存档收集要求" : "Requirements from your save"} · ${collected}/${targets.length} ${language === "zh-CN" ? "已完成" : "complete"}</h4>
+      <p class="tracking-note">${t("The uploaded save automatically marks each requirement collected or missing.")}</p>
       <ul class="target-list">
         ${targets
           .map(
@@ -757,9 +780,9 @@ function renderTargetChecklist(targets) {
               <li class="target-row ${target.isCollected ? "is-owned" : "is-missing"}">
                 <span class="target-mark" aria-hidden="true">${target.isCollected ? "✓" : "×"}</span>
                 <span>
-                  <strong>${esc(target.name)}</strong>
-                  <span class="target-state">${target.isCollected ? "Collected" : "Missing"}</span>
-                  ${target.howToGet ? `<small>${esc(target.howToGet)}</small>` : ""}
+                  <strong>${esc(targetText(item, target, "name"))}</strong>
+                  <span class="target-state">${target.isCollected ? t("Collected") : t("Missing")}</span>
+                  ${target.howToGet ? `<small>${esc(targetText(item, target, "howToGet"))}</small>` : ""}
                 </span>
               </li>`
           )
@@ -780,15 +803,15 @@ function rememberOpenGuides() {
 function syncExpandButton() {
   const guides = Array.from(achievementList.querySelectorAll("details[data-guide-id]"));
   const allOpen = guides.length > 0 && guides.every((details) => details.open);
-  expandVisibleBtn.textContent = allOpen ? "Collapse visible guides" : "Expand visible guides";
+  expandVisibleBtn.textContent = allOpen ? t("Collapse visible guides") : t("Expand visible guides");
   expandVisibleBtn.disabled = guides.length === 0;
 }
 
 function syncSpoilerButton() {
   spoilerToggleBtn.setAttribute("aria-pressed", hideSpoilers ? "true" : "false");
   spoilerToggleBtn.textContent = hideSpoilers
-    ? "Show achievement spoilers"
-    : "Hide achievement spoilers";
+    ? t("Show achievement spoilers")
+    : t("Hide achievement spoilers");
 }
 
 function loadSpoilerPreference() {
@@ -826,3 +849,76 @@ function esc(value) {
 }
 
 syncSpoilerButton();
+
+function renderAnalyzeButton(reading) {
+  analyzeBtn.innerHTML = `<span>${t(reading ? "Reading the save…" : "Read my journey")}</span><span aria-hidden="true">${reading ? "◌" : "→"}</span>`;
+}
+
+languageSelect.value = language;
+languageSelect.addEventListener("change", () => {
+  rememberOpenGuides();
+  language = languageSelect.value;
+  try { localStorage.setItem("journey-ledger.language", language); } catch { /* Storage is optional. */ }
+  applyLanguage();
+});
+
+languageTrigger.addEventListener("click", () => {
+  const isOpen = languageTrigger.getAttribute("aria-expanded") === "true";
+  setLanguageMenuOpen(!isOpen);
+});
+
+languageMenu.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-language]");
+  if (!option) return;
+  languageSelect.value = option.dataset.language;
+  languageSelect.dispatchEvent(new Event("change"));
+  setLanguageMenuOpen(false);
+  languageTrigger.focus();
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".language-control")) setLanguageMenuOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setLanguageMenuOpen(false);
+});
+
+function setLanguageMenuOpen(isOpen) {
+  languageMenu.hidden = !isOpen;
+  languageTrigger.setAttribute("aria-expanded", String(isOpen));
+}
+
+function syncLanguageControl() {
+  languageSelect.value = language;
+  languageValue.textContent = language === "zh-CN" ? "简体中文" : "English";
+  languageMenu.querySelectorAll("[data-language]").forEach((option) => {
+    option.setAttribute("aria-selected", String(option.dataset.language === language));
+  });
+}
+
+function applyLanguage() {
+  const openTrackers = new Set(Array.from(trackerList.querySelectorAll("details[open][data-tracker-id]"), node => node.dataset.trackerId));
+  translateStaticPage();
+  const selectedCategory = categoryFilter.value;
+  const selectedChapter = chapterFilter.value;
+  if (currentReport) {
+    populateFilters(currentReport.achievements ?? []);
+    categoryFilter.value = selectedCategory;
+    chapterFilter.value = selectedChapter;
+    renderAll(currentReport);
+    trackerList.querySelectorAll("details[data-tracker-id]").forEach(node => { node.open = openTrackers.has(node.dataset.trackerId); });
+  }
+  renderAnalyzeButton(activeRequest !== null);
+  syncSpoilerButton();
+  syncExpandButton();
+  syncLanguageControl();
+  if (statusPanel.dataset.message) statusPanel.textContent = t(statusPanel.dataset.message);
+  renderAnalysisStatus();
+}
+function renderAnalysisStatus() {
+  if (!analysisStatus || language !== "zh-CN") return;
+  const { fileName, completed, total } = analysisStatus;
+  statusPanel.textContent = `已解析 ${fileName}：已完成 ${completed}/81 项成就。${total === 81 ? "" : `解析返回了${total}项攻略，预期为81项。`}`;
+}
+applyLanguage();
