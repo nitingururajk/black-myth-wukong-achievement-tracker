@@ -427,7 +427,8 @@ The current visual system uses:
 - a prominent Black Myth: Wukong Achievement Tracker title in the header and landing page
 - custom moonlit Wukong artwork encoded as WebP, fitted without cropping on desktop and stacked below the upload area on mobile
 - a desktop landing layout that grows the hero to fill tall viewports and keeps the footer at the bottom without empty space beneath it
-- locally hosted Source Sans 3 and Lora fonts with their OFL licenses
+- locally hosted IM Fell English display type, Ma Shan Zheng Chinese brush lettering, and Source Sans 3 body type with their OFL licenses
+- a narrow blend at the artwork's left edge instead of a dark gradient overlay across the hero
 - compact achievement rows, readable expanded guides, and separate task-oriented views
 - responsive desktop and mobile layouts, visible focus states, and reduced-motion support
 

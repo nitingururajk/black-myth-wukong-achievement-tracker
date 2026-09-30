@@ -2,9 +2,9 @@
 
 The hero at `bmw_web/wwwroot/images/journey-hero.webp` was created with the built-in ImageGen tool for this frontend overhaul. It is custom fan artwork, not an official game screenshot. The original generated PNG is preserved in the Codex generated-images folder. FFmpeg encoded the shipped WebP at quality 85 without changing the composition (2.3 MB PNG to 189 KB WebP).
 
-The design uses the artwork's forest charcoal, jade, parchment fog, and bronze palette. The palette service was unavailable, so the artwork colors informed the CSS tokens. Source Sans 3 and Lora are hosted locally; their OFL licenses are included in `bmw_web/wwwroot/fonts/`.
+The design uses the artwork's forest charcoal, jade, parchment fog, and bronze palette. The palette service was unavailable, so the artwork colors informed the CSS tokens. IM Fell English gives the English headings an inked manuscript texture; Ma Shan Zheng supplies Chinese brush lettering for the 悟 mark and 悟空 caption. Source Sans 3 keeps controls and long guides readable. These fonts are hosted locally with their OFL licenses in `bmw_web/wwwroot/fonts/`. Ma Shan Zheng is subset to the two displayed Chinese characters.
 
-The layout preserves the full image with `object-fit: contain` on desktop. On mobile, the image follows the upload section at its original 3:2 aspect ratio so the character stays visible without obscuring the tracker title or controls.
+The layout preserves the full image with `object-fit: contain` on desktop. The broad dark overlay has been removed; a narrow mask at the artwork's left edge softens the join with the page background while preserving the original landscape's lighting. On mobile, the image follows the upload section at its original 3:2 aspect ratio without a mask so the character stays visible without obscuring the tracker title or controls.
 
 ## Exact generation prompt
 
