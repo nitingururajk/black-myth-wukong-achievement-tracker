@@ -1,6 +1,8 @@
 # Frontend artwork
 
-The hero at `bmw_web/wwwroot/images/journey-hero.webp` was created with the built-in ImageGen tool for this frontend overhaul. It is custom fan artwork, not an official game screenshot. The original generated PNG is preserved in the Codex generated-images folder. FFmpeg encoded the shipped WebP at quality 85 without changing the composition (2.3 MB PNG to 189 KB WebP).
+The original hero at `bmw_web/wwwroot/images/journey-hero.webp` was created with the built-in ImageGen tool for this frontend overhaul. It is custom fan artwork, not an official game screenshot. The original generated PNG is preserved in the Codex generated-images folder.
+
+The current hero, `bmw_web/wwwroot/images/journey-hero-v2.webp`, is the user's ChatGPT edit supplied on October 1, 2026. It corrects the staff so the character visibly grips it upright and restores mountain and mist texture on the left. FFmpeg encoded the supplied 1536 by 1024 PNG as WebP at quality 88 without changing its composition. The original WebP remains available for rollback.
 
 The design uses the artwork's forest charcoal, jade, parchment fog, and bronze palette. The palette service was unavailable, so the artwork colors informed the CSS tokens. IM Fell English gives the English headings an inked manuscript texture; Ma Shan Zheng supplies Chinese brush lettering for the 悟 mark and 悟空 caption. Source Sans 3 keeps controls and long guides readable. These fonts are hosted locally with their OFL licenses in `bmw_web/wwwroot/fonts/`. Ma Shan Zheng is subset to the two displayed Chinese characters.
 
