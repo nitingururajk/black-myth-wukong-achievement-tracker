@@ -115,7 +115,7 @@ Accepts multipart form-data containing exactly one `.sav` file in the `saveFile`
 Execution flow:
 
 1. require multipart form data and exactly one file named `saveFile`
-2. validate the `.sav` extension and enforce an 8 MB file limit
+2. validate the `.sav` extension and enforce a 4 MB file limit
 3. start request timing/log scope
 4. copy the upload to a bounded in-memory stream and call `AchievementPlanner.AnalyzeUploadedSave(...)`
 5. return `{ ok: true, report, analyzedAtUtc, saveFileName }` on success
@@ -361,14 +361,13 @@ Files:
 
 Defines the page structure:
 
-- hero header
-- save file upload panel
-- status panel
-- overview panel with progress ring
-- recommended next-step panel
-- missing item tracker panel
-- full achievement card library with search and status/category/chapter filters
-- spoiler visibility control
+- a landing page with custom artwork, save upload, and an example-report entry point
+- inline upload feedback and a modal with Steam save-location instructions
+- a report header and progress summary
+- accessible Overview, Missing items, and Achievements tab panels
+- chapter-aware recommendations and a missable-achievement summary
+- searchable missing collections and expandable achievement guides
+- spoiler visibility and checklist-download controls
 
 The page is static and relies on `app.js` for all behavior.
 
@@ -398,12 +397,16 @@ Important client-side behavior:
 - incomplete tracked items are grouped into the Missing Item Tracker
 - each analyze click uses a fresh `no-store` request and ignores older in-flight responses
 - the browser uploads the selected `.sav` file with `FormData` instead of sending a client-local path
-- the status panel shows the analyzed filename and current completion total
-- next-step recommendations prefer useful incomplete work near the decoded current chapter
+- the report header identifies the analyzed file; upload errors appear beside the uploader
+- next-step recommendations prefer the current chapter's specific tasks before multi-chapter collections
 - the library always renders all 81 canonical achievements unless filters narrow it
 - search indexes titles, requirements, routes, prerequisites, guide checklists, target names, and acquisition hints
 - spoiler text is structurally hidden until the player reveals it
 - all user-rendered text is escaped through `esc()` before insertion
+- tab navigation supports arrow keys, Home, and End; guide links clear conflicting filters and open the chosen guide
+- the sample report in `wwwroot/example-report.json` contains only anonymized example progress and public guide content; it does not call the analysis endpoint
+- only the spoiler preference is persisted in local storage; uploaded reports remain in page memory
+- text checklist exports include remaining achievements, walkthroughs, and missing items while respecting spoiler visibility
 
 ### `styles.css`
 
@@ -420,10 +423,13 @@ This file defines the visual presentation for:
 
 The current visual system uses:
 
-- ink, parchment, jade, bronze, and cinnabar palette
-- layered paper grain, lacquer panels, and restrained decorative motifs
-- card-based hierarchy with strong focus states and reduced-motion support
-- two-column desktop composition that collapses without horizontal overflow on mobile
+- forest charcoal, parchment, jade, bronze, and cinnabar palette
+- a prominent Black Myth: Wukong Achievement Tracker title in the header and landing page
+- custom moonlit Wukong artwork encoded as WebP, fitted without cropping on desktop and stacked below the upload area on mobile
+- a desktop landing layout that grows the hero to fill tall viewports and keeps the footer at the bottom without empty space beneath it
+- locally hosted Source Sans 3 and Lora fonts with their OFL licenses
+- compact achievement rows, readable expanded guides, and separate task-oriented views
+- responsive desktop and mobile layouts, visible focus states, and reduced-motion support
 
 ## CLI Architecture
 

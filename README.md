@@ -22,8 +22,10 @@ Then:
 
 1. Open the local URL printed in the terminal.
 2. Choose your `.sav` file in the browser.
-3. Click `Analyze`.
-4. Review the next recommended steps, missing item tracker, and complete 81-achievement guide.
+3. Click `Analyze my save`.
+4. Use the Overview, Missing items, and Achievements tabs to plan your next session.
+
+Use `Find your save` for step-by-step Steam folder instructions, or `Explore an example` to try a clearly labeled sample report without uploading a file. PC `.sav` uploads are limited to 4 MB.
 
 ## What It Does
 
@@ -35,7 +37,9 @@ The tracker reads a browser-uploaded `.sav` file in memory, decodes the achievem
 - Shows exact decoded missing-item checklists where the save exposes reliable ownership or requirement IDs
 - Supports full-text search across achievement names, requirements, route steps, collectible names, and acquisition hints
 - Includes status, category, and chapter filters plus an optional spoiler reveal
-- Uses a responsive ink, parchment, jade, and cinnabar interface designed for desktop and mobile
+- Separates next steps, missing collections, and the full guide into three focused report tabs
+- Offers a downloadable text checklist that respects your spoiler preference
+- Uses custom Wukong artwork, locally hosted fonts, and a responsive forest, parchment, and bronze interface
 
 Tracked collection checklists include 36 curios, 20 weapons, 71 armor pieces, 54 spirits, 27 soaks, 24 meditation spots, 14 formulas, 12 seed requirements, 10 transformations, 9 collectible gourds, 8 collectible drinks, 7 spells, 4 vessels, journal groups, and celestial-medicine progress. Some automatic/story unlocks are explained in the achievement guide rather than represented as separate runtime item IDs.
 
@@ -52,7 +56,7 @@ Then open the local URL printed in the terminal.
 In the UI:
 
 1. Drop a `.sav` file onto the upload panel or choose it from disk.
-2. Click `Analyze`.
+2. Click `Analyze my save`.
 3. Review:
    - the overview panel
    - the three recommended next steps

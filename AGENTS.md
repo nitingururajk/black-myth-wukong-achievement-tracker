@@ -14,6 +14,7 @@ The repo is a .NET 10 save analysis tool for Black Myth: Wukong.
 
 - The web app is the main product and has the richer achievement knowledge and missing item tracking logic.
 - The web app is designed to analyze a browser-uploaded `.sav` file; do not assume a hosted user can provide a meaningful local filesystem path.
+- The frontend separates the upload landing page from Overview, Missing items, and Achievements report tabs. Keep the example report clearly labeled and preserve the save-location help and checklist export.
 - The CLI is simpler and does not yet share a common analysis library with the web app.
 - Both projects depend on the vendored DLLs in `vendor/blackwukong-dlls/`.
 - Do not remove or relocate vendored DLLs unless you also update both `.csproj` files.

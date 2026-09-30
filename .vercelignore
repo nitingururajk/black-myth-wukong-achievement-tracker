@@ -8,3 +8,7 @@ assets
 bmw_probe
 *.mp3
 *.log
+.playwright-mcp
+.env*
+__pycache__
+*.sav

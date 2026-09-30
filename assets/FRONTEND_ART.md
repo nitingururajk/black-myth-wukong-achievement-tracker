@@ -1,0 +1,11 @@
+# Frontend artwork
+
+The hero at `bmw_web/wwwroot/images/journey-hero.webp` was created with the built-in ImageGen tool for this frontend overhaul. It is custom fan artwork, not an official game screenshot. The original generated PNG is preserved in the Codex generated-images folder. FFmpeg encoded the shipped WebP at quality 85 without changing the composition (2.3 MB PNG to 189 KB WebP).
+
+The design uses the artwork's forest charcoal, jade, parchment fog, and bronze palette. The palette service was unavailable, so the artwork colors informed the CSS tokens. Source Sans 3 and Lora are hosted locally; their OFL licenses are included in `bmw_web/wwwroot/fonts/`.
+
+The layout preserves the full image with `object-fit: contain` on desktop. On mobile, the image follows the upload section at its original 3:2 aspect ratio so the character stays visible without obscuring the tracker title or controls.
+
+## Exact generation prompt
+
+Use case: stylized-concept. Asset type: wide website hero background for a Black Myth: Wukong achievement companion. Primary request: painterly, atmospheric Chinese landscape with the Destined One, an armored monkey warrior with a long ornate staff, standing on a misty rocky ledge and looking toward distant mountain temples. Composition: 1536x1024 landscape, warrior in right third of image, side/back three-quarter view, full torso and staff visible, cinematic layers of mountains and a pale warm moon behind his head; the entire left half fades into nearly solid deep forest-black negative space for website copy. Style: sophisticated matte painting, engraved ink details, tangible brush texture, restrained game art rather than cartoon or anime. Color palette: forest charcoal #101b19, muted jade grey, parchment fog #e9e2cf, old bronze #c6a56a. Lighting: soft moon backlight, quiet, dignified and mysterious, rich depth. Constraints: no text, no letters, no logos, no interface, no borders, no watermark, no neon, no bright saturated colors. Make a beautiful clear silhouette and keep the left half dark and low detail for readable text.
