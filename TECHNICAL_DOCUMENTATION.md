@@ -236,6 +236,8 @@ High-level behavior:
 8. resolve tracked collection targets and build each `AchievementPlan`
 9. package all 81 plans into `AnalysisReport`
 
+Both analyzers normalize `RoleCs.Actor.NewGamePlusCount`, which stores a one-based journey number: `1` is the first playthrough and `2` is NG+1. The report's `NewGamePlusCount` is the number of NG+ cycles instead, computed as `Math.Max(playthroughNumber, 1) - 1`; missing or non-positive counters remain `0`. The web app uses this normalized value for the cycle label, next-step ranking, and NG+ achievement-completion fallback.
+
 ### Achievement Transformation Logic
 
 For every decoded achievement entry, the planner computes:

@@ -768,7 +768,9 @@ public sealed class AchievementPlanner
         var chapter = data.RoleData?.RoleCs?.Chapter?.CurChapter ?? -1;
         var mapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MapId ?? -1;
         var maxMapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MaxMapId ?? -1;
-        var newGamePlusCount = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 0;
+        // The save counts journeys from 1, so the first run has no NG+ cycles.
+        var playthroughNumber = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 1;
+        var newGamePlusCount = Math.Max(playthroughNumber, 1) - 1;
         var ownedIds = CollectOwnedIds(data);
         var activeRebirthPoints = data
             .PersistentECSData

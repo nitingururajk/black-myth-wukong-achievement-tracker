@@ -34,6 +34,7 @@ The tracker reads a browser-uploaded `.sav` file in memory, decodes the achievem
 - Always renders the canonical set of all 81 platform achievements, including entries omitted by early-game saves
 - Shows completion status, plain-English requirements, chapter, category, prerequisites, missable warnings, New Game+ notes, and step-by-step routes
 - Recommends three useful next achievements based on current chapter and remaining work
+- Shows `First journey` for the initial playthrough, `NG+ 1` for the second, and so on
 - Shows exact decoded missing-item checklists where the save exposes reliable ownership or requirement IDs
 - Supports full-text search across achievement names, requirements, route steps, collectible names, and acquisition hints
 - Includes status, category, and chapter filters plus an optional spoiler reveal

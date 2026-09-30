@@ -166,6 +166,9 @@ async Task<AnalysisReport> BuildReportAsync(string savePath)
     var chapter = data.RoleData?.RoleCs?.Chapter?.CurChapter ?? -1;
     var mapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MapId ?? -1;
     var maxMapId = data.PersistentECSData?.BPCData?.BPCPlayerRoleData?.MaxMapId ?? -1;
+    // The save counts journeys from 1, so the first run has no NG+ cycles.
+    var playthroughNumber = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 1;
+    var newGamePlusCount = Math.Max(playthroughNumber, 1) - 1;
 
     var activeRebirthPoints = data
         .PersistentECSData
@@ -232,7 +235,7 @@ async Task<AnalysisReport> BuildReportAsync(string savePath)
         GeneratedAtUtc = DateTime.UtcNow,
         PlayerName = data.RoleData?.RoleCs?.Base?.Name ?? "Unknown",
         PlayerLevel = data.RoleData?.RoleCs?.Base?.Level ?? 0,
-        NewGamePlusCount = data.RoleData?.RoleCs?.Actor?.NewGamePlusCount ?? 0,
+        NewGamePlusCount = newGamePlusCount,
         CurrentChapter = chapter,
         CurrentMapId = mapId,
         MaxMapId = maxMapId,
