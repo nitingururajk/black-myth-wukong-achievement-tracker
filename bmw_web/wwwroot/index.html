@@ -10,7 +10,7 @@
     <link rel="icon" href="/favicon.ico" sizes="64x64" />
     <link rel="preload" href="/fonts/source-sans-3.woff" as="font" type="font/woff" crossorigin />
     <link rel="preload" href="/fonts/im-fell-english.woff" as="font" type="font/woff" crossorigin />
-    <link rel="stylesheet" href="/styles.css?v=5" />
+    <link rel="stylesheet" href="/styles.css?v=6" />
     <script src="/app.js?v=2" defer></script>
   </head>
   <body>
@@ -112,7 +112,11 @@
       </div>
     </main>
 
-    <footer class="site-footer page-shell"><span class="footer-brand">Journey Ledger <span aria-hidden="true">/</span> <small>Made for the journey.</small></span><p>An independent fan-made companion. Not affiliated with Game Science.</p></footer>
+    <footer class="site-footer page-shell">
+      <span class="footer-brand">Journey Ledger <span aria-hidden="true">/</span> <small>Made for the journey.</small></span>
+      <p>An independent fan-made companion. Not affiliated with Game Science.</p>
+      <a class="text-button footer-repo" href="https://github.com/nitingururajk/black-myth-wukong-achievement-tracker" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub (opens in a new tab)">View source on GitHub <span aria-hidden="true">↗</span></a>
+    </footer>
 
     <dialog id="saveHelpDialog" class="help-dialog" aria-labelledby="saveHelpTitle"><div class="dialog-heading"><p class="kicker">LET’S FIND YOUR SAVE</p><button id="closeHelpBtn" class="icon-button" type="button" aria-label="Close save help">×</button></div><h2 id="saveHelpTitle">A few clicks from your checklist.</h2><p>For the Steam version on Windows:</p><ol class="help-steps"><li><span>1</span><div><strong>Open the game’s folder.</strong><p>In Steam, right-click Black Myth: Wukong → Manage → Browse local files.</p></div></li><li><span>2</span><div><strong>Follow this folder path.</strong><div class="path-box"><code>b1\Saved\SaveGames</code><button id="copyPathBtn" class="text-button" type="button">Copy</button></div><p>Open the folder named with your Steam ID.</p></div></li><li><span>3</span><div><strong>Choose the save you play.</strong><p>Look for <code>ArchiveSaveFile.&lt;slot&gt;.sav</code>. Choose the slot with the most recent modification time.</p></div></li></ol><div class="help-note"><strong>Keep your original save.</strong><p>This tool only reads the file. It does not edit it or sync changes back to your game. Console saves are not supported.</p></div><button id="helpDoneBtn" class="primary-button" type="button">Got it <span aria-hidden="true">→</span></button></dialog>
   </body>

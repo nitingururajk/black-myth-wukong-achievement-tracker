@@ -263,6 +263,7 @@ summary::-webkit-details-marker { display: none; }
 .footer-brand { font-family: var(--font-display); font-size: 13px; color: #58684f; }
 .footer-brand > span { color: #c3bcaa; padding: 0 9px; font-family: var(--font-body); }
 .footer-brand small { font-family: var(--font-body); font-size: 11px; }
+.footer-repo { flex-shrink: 0; text-decoration: none; }
 .help-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100% - 40px); padding: 29px; color: var(--ink); background: var(--paper); border: 1px solid #ced6c5; border-radius: var(--radius); box-shadow: 0 24px 90px #101b1940; }
 .help-dialog::backdrop { background: #101b19b5; backdrop-filter: blur(3px); }
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; }
