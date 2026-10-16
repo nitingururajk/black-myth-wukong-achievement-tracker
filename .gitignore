@@ -16,6 +16,7 @@ bmw_probe/output/
 /启动黑神话成就追踪器.ps1
 /work/save-diagnostic/
 /.vercel/
+/.playwright-mcp/
 
 # Keep vendored decoder DLLs in repo
 !vendor/

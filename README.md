@@ -22,8 +22,10 @@ Then:
 
 1. Open the local URL printed in the terminal.
 2. Choose your `.sav` file in the browser.
-3. Click `Analyze`.
-4. Review the next recommended steps, missing item tracker, and complete 81-achievement guide.
+3. Click `Analyze my save`.
+4. Use the Overview, Missing items, and Achievements tabs to plan your next session.
+
+Use `Find your save` for step-by-step Steam folder instructions, or `Explore an example` to try a clearly labeled sample report without uploading a file. PC `.sav` uploads are limited to 4 MB.
 
 ## What It Does
 
@@ -32,10 +34,13 @@ The tracker reads a browser-uploaded `.sav` file in memory, decodes the achievem
 - Always renders the canonical set of all 81 platform achievements, including entries omitted by early-game saves
 - Shows completion status, plain-English requirements, chapter, category, prerequisites, missable warnings, New Game+ notes, and step-by-step routes
 - Recommends three useful next achievements based on current chapter and remaining work
+- Shows `First journey` for the initial playthrough, `NG+ 1` for the second, and so on
 - Shows exact decoded missing-item checklists where the save exposes reliable ownership or requirement IDs
 - Supports full-text search across achievement names, requirements, route steps, collectible names, and acquisition hints
 - Includes status, category, and chapter filters plus an optional spoiler reveal
-- Uses a responsive ink, parchment, jade, and cinnabar interface designed for desktop and mobile
+- Separates next steps, missing collections, and the full guide into three focused report tabs
+- Offers a downloadable text checklist that respects your spoiler preference
+- Uses custom Wukong artwork, locally hosted fonts, and a responsive forest, parchment, and bronze interface
 
 Tracked collection checklists include 36 curios, 20 weapons, 71 armor pieces, 54 spirits, 27 soaks, 24 meditation spots, 14 formulas, 12 seed requirements, 10 transformations, 9 collectible gourds, 8 collectible drinks, 7 spells, 4 vessels, journal groups, and celestial-medicine progress. Some automatic/story unlocks are explained in the achievement guide rather than represented as separate runtime item IDs.
 
@@ -52,7 +57,7 @@ Then open the local URL printed in the terminal.
 In the UI:
 
 1. Drop a `.sav` file onto the upload panel or choose it from disk.
-2. Click `Analyze`.
+2. Click `Analyze my save`.
 3. Review:
    - the overview panel
    - the three recommended next steps
@@ -142,6 +147,23 @@ Build both projects from the solution root:
 ```powershell
 dotnet build .\bmw.sln
 ```
+
+## Frontend localization and tests
+
+Use the header language selector to switch between English and Simplified Chinese. The preference is stored locally; uploads, report tabs, filters, spoiler protection, and open guides are preserved when switching. Checklist downloads use the selected language. The API and save analysis remain language-independent.
+
+The original Chinese achievement and item translations are contributed by @Dongmei6661. Translations are keyed by achievement/target IDs with English fallback. Keep `id` on both `requirementTargets` and `missingTargets` when updating `example-report.json`; the example must follow the API's target shape for localized item names and searches to work.
+
+Frontend regression tests require Node.js 22.13+ (or a supported newer LTS):
+
+```sh
+npm ci --ignore-scripts
+npm test
+```
+
+These tests execute the real HTML and scripts in jsdom using the checked-in example report. They cover language persistence and round-trips, filters and open state, translated searches, spoiler handling, safe player/filename text, upload-state preservation, and checklist exports. They are not real-save decoding or visual-browser tests. Test dependencies are development-only; serving the app does not require Node.js.
+
+Before merging frontend changes, also check the example report and language selector in a real browser at mobile and desktop widths, and analyze a local `.sav` if one is available. Never commit private saves.
 
 ## Vendored Dependency
 

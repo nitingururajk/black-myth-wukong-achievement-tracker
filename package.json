@@ -1,0 +1,10 @@
+{
+  "name": "journey-ledger-frontend-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --expose-gc --max-old-space-size=256 --test --test-concurrency=1 tests/frontend.test.cjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.0"
+  }
+}

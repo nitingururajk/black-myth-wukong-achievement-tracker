@@ -14,6 +14,7 @@ The repo is a .NET 10 save analysis tool for Black Myth: Wukong.
 
 - The web app is the main product and has the richer achievement knowledge and missing item tracking logic.
 - The web app is designed to analyze a browser-uploaded `.sav` file; do not assume a hosted user can provide a meaningful local filesystem path.
+- The frontend separates the upload landing page from Overview, Missing items, and Achievements report tabs. Keep the example report clearly labeled and preserve the save-location help and checklist export.
 - The CLI is simpler and does not yet share a common analysis library with the web app.
 - Both projects depend on the vendored DLLs in `vendor/blackwukong-dlls/`.
 - Do not remove or relocate vendored DLLs unless you also update both `.csproj` files.
@@ -132,11 +133,16 @@ Keep the Vercel project root at the repository root because `Dockerfile.vercel` 
 
 ## Test Commands
 
-There is no test project in the repository today.
+There is no .NET test project in the repository today. Frontend localization regression tests live in `tests/frontend.test.cjs` and run the actual HTML/scripts in jsdom against the checked-in example report:
 
-Do not claim tests were run unless you actually add a test project and execute it.
+```sh
+npm ci --ignore-scripts
+npm test
+```
 
-If a test project is added later, use standard .NET commands:
+These are DOM tests, not real-save decoding or visual browser tests. Preserve stable target IDs in the example report, keep English API data unchanged, and test both language directions. Do not claim a real-save or browser test unless it was actually executed.
+
+If a .NET test project is added later, use standard .NET commands:
 
 Run all tests in a project:
 
