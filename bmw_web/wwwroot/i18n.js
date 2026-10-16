@@ -280,12 +280,12 @@ Object.assign(uiZh, {
   "All achievements are complete.": "全部成就已完成。",
   "This is a snapshot. Upload a fresh save after playing to update your checklist.": "这只是当前进度快照，游玩后上传最新存档以更新清单。"
 });
-function t(text) { return language === "zh-CN" ? (uiZh[text] ?? text) : text; }
+function t(text) { return language === "zh-CN" ? (Object.hasOwn(uiZh, text) ? uiZh[text] : text) : text; }
 // Replace named placeholders without interpreting values as HTML or replacement syntax.
 function tf(key, values) { return t(key).replace(/\{(\w+)\}/g, (match, name) => String(values[name] ?? match)); }
 function chapterLabel(value) {
   if (language !== "zh-CN") return value;
-  return uiZh[value] ?? String(value).replace(/^Chapters? (\d)(?:[-–](\d))?$/, (_, first, last) => last ? `第${first}—${last}回` : `第${first}回`);
+  return Object.hasOwn(uiZh, value) ? uiZh[value] : String(value).replace(/^Chapters? (\d)(?:[-–](\d))?$/, (_, first, last) => last ? `第${first}—${last}回` : `第${first}回`);
 }
 function guideText(item, field) {
   if (language === "zh-CN" && field === "routeHint") {

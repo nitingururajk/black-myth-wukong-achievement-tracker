@@ -2,7 +2,7 @@
   "name": "journey-ledger-frontend-tests",
   "private": true,
   "scripts": {
-    "test": "node --expose-gc --max-old-space-size=256 --test --test-concurrency=1 tests/frontend.test.cjs"
+    "test": "node --expose-gc --max-old-space-size=512 --test --test-concurrency=1 tests/frontend-ui.test.cjs && node --expose-gc --max-old-space-size=512 --test --test-concurrency=1 tests/frontend-data.test.cjs && node --expose-gc --max-old-space-size=512 --test --test-concurrency=1 tests/frontend-races.test.cjs"
   },
   "devDependencies": {
     "jsdom": "^29.0.0"

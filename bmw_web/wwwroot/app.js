@@ -178,9 +178,18 @@ copyPathBtn.addEventListener('click', async () => {
   } catch { copyPathBtn.textContent = t("Select the path to copy"); }
 });
 
-function chooseFile(file) {
+function cancelActiveRequest() {
+  const cancelledExample = activeRequest !== null && exampleLoading;
   activeRequest?.abort();
   activeRequest = null;
+  if (cancelledExample) {
+    exampleLoading = false;
+    demoBtn.disabled = false;
+    renderExampleButton();
+  }
+}
+function chooseFile(file) {
+  cancelActiveRequest();
   selectedFile = null;
   setAnalyzeButton(false);
   selectedFilePanel.classList.add('hidden');
@@ -213,7 +222,7 @@ async function analyzeSave(event) {
   if (!selectedFile) return setStatus("Choose your .sav file first.", 'error', true);
   const error = validateFile(selectedFile);
   if (error) return setStatus(error, 'error', true);
-  activeRequest?.abort();
+  cancelActiveRequest();
   const controller = new AbortController();
   activeRequest = controller;
   const file = selectedFile;
@@ -246,7 +255,8 @@ async function readResponse(response) {
 }
 
 async function loadExample() {
-  activeRequest?.abort();
+  cancelActiveRequest();
+  hideStatus();
   const controller = new AbortController();
   activeRequest = controller;
   setAnalyzeButton(false);
@@ -261,10 +271,12 @@ async function loadExample() {
   } catch (error) {
     if (error.name !== 'AbortError' && controller === activeRequest) setStatus(error.message, 'error', true);
   } finally {
-    if (controller === activeRequest) activeRequest = null;
-    demoBtn.disabled = false;
-    exampleLoading = false;
-    renderExampleButton();
+    if (controller === activeRequest) {
+      activeRequest = null;
+      demoBtn.disabled = false;
+      exampleLoading = false;
+      renderExampleButton();
+    }
   }
 }
 function showReport(report, { fileName, example }) {
@@ -291,8 +303,7 @@ function showReport(report, { fileName, example }) {
   reportTitle.focus({ preventScroll: true });
 }
 function resetReport() {
-  activeRequest?.abort();
-  activeRequest = null;
+  cancelActiveRequest();
   currentReport = null;
   isExampleReport = false;
   selectedFile = null;

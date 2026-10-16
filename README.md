@@ -154,7 +154,7 @@ Use the header language selector to switch between English and Simplified Chines
 
 The original Chinese achievement and item translations are contributed by @Dongmei6661. Translations are keyed by achievement/target IDs with English fallback. Keep `id` on both `requirementTargets` and `missingTargets` when updating `example-report.json`; the example must follow the API's target shape for localized item names and searches to work.
 
-Frontend regression tests require Node.js 22.13+ (or a supported newer LTS):
+The frontend regression suite is split into functional and request-race/edge-case suites. It requires Node.js 22.13+ (or a supported newer LTS); `npm test` runs the suites sequentially to keep peak memory bounded on small hosts.
 
 ```sh
 npm ci --ignore-scripts
