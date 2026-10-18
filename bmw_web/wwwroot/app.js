@@ -453,8 +453,8 @@ function renderTracker(report) {
   const query = itemSearchInput.value.trim().toLocaleLowerCase();
   const openIds = new Set([...trackerList.querySelectorAll('details[open]')].map((node) => Number(node.dataset.collectionId)));
   const visible = collections.map(({ item, missing }) => {
-    const titleMatch = `${item.displayTitle} ${guideText(item, 'displayTitle')}`.toLocaleLowerCase().includes(query);
-    const matches = !query || titleMatch ? missing : isAchievementSpoilerHidden(item) ? [] : missing.filter((target) => `${target.name} ${target.howToGet || ''} ${targetText(item, target, 'name')} ${targetText(item, target, 'howToGet') || ''}`.toLocaleLowerCase().includes(query));
+    const titleMatch = `${item.displayTitle} ${guideText(item, 'displayTitle', 'zh-CN')}`.toLocaleLowerCase().includes(query);
+    const matches = !query || titleMatch ? missing : isAchievementSpoilerHidden(item) ? [] : missing.filter((target) => `${target.name} ${target.howToGet || ''} ${targetText(item, target, 'name', 'zh-CN')} ${targetText(item, target, 'howToGet', 'zh-CN') || ''}`.toLocaleLowerCase().includes(query));
     return { item, missing: matches, totalMissing: missing.length };
   }).filter((entry) => entry.missing.length);
   if (!visible.length) {
@@ -500,15 +500,13 @@ function buildSearchText(item) {
     parts.push(item.requirementSummary, item.routeHint, item.missableNote, ...(item.prerequisites ?? []), ...(item.guideSteps ?? []), ...(item.guideChecklist ?? []));
     (item.requirementTargets ?? []).forEach((target) => parts.push(target.name, target.howToGet));
   }
-  if (language === 'zh-CN') {
-    parts.push(guideText(item, 'displayTitle'), t(item.category), chapterLabel(item.chapter));
-    if (!isAchievementSpoilerHidden(item)) {
-      for (const field of ['requirementSummary', 'routeHint', 'missableNote', 'prerequisites', 'guideSteps', 'guideChecklist']) {
-        const value = guideText(item, field);
-        parts.push(...(Array.isArray(value) ? value : [value]));
-      }
-      (item.requirementTargets ?? []).forEach(target => parts.push(targetText(item, target, 'name'), targetText(item, target, 'howToGet')));
+  parts.push(guideText(item, 'displayTitle', 'zh-CN'), t(item.category), chapterLabel(item.chapter));
+  if (!isAchievementSpoilerHidden(item)) {
+    for (const field of ['requirementSummary', 'routeHint', 'missableNote', 'prerequisites', 'guideSteps', 'guideChecklist']) {
+      const value = guideText(item, field, 'zh-CN');
+      parts.push(...(Array.isArray(value) ? value : [value]));
     }
+    (item.requirementTargets ?? []).forEach(target => parts.push(targetText(item, target, 'name', 'zh-CN'), targetText(item, target, 'howToGet', 'zh-CN')));
   }
   return parts.filter(Boolean).join(' ').toLocaleLowerCase();
 }

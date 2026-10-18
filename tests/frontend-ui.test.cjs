@@ -84,6 +84,8 @@ test('Chinese and English achievement searches work without exposing spoiler con
   report(); switchLanguage('zh-CN');
   run('searchInput.value=zhGuides[81002].displayTitle;renderAchievementLibrary()');
   assert.equal(d.querySelectorAll('.achievement-card').length, 1);
+  switchLanguage('en');
+  assert.equal(d.querySelectorAll('.achievement-card').length, 1);
   run('searchInput.value=fixture.achievements.find(x=>x.achievementId===81002).displayTitle;renderAchievementLibrary()');
   assert.equal(d.querySelectorAll('.achievement-card').length, 1);
   run('hideSpoilers=true;revealedGuideIds.clear()');
@@ -93,6 +95,8 @@ test('missing-item search supports translated target names and respects spoiler 
   const { d, report, run, switchLanguage } = setup(t);
   report(); switchLanguage('zh-CN');
   run('var entry=getTrackedCollections(currentReport).find(({item,missing})=>missing.some(target=>zhTargets[`${item.achievementId}:${target.id}`])); var target=entry.missing.find(target=>zhTargets[`${entry.item.achievementId}:${target.id}`]); itemSearchInput.value=targetText(entry.item,target,"name");renderTracker(currentReport)');
+  assert.ok(d.querySelectorAll('.tracker-item').length > 0);
+  switchLanguage('en');
   assert.ok(d.querySelectorAll('.tracker-item').length > 0);
   run('hideSpoilers=true;revealedGuideIds.clear();renderTracker(currentReport)');
   assert.equal(d.querySelectorAll('.tracker-item').length, 0);

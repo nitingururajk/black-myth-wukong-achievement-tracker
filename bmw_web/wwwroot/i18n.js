@@ -287,14 +287,14 @@ function chapterLabel(value) {
   if (language !== "zh-CN") return value;
   return Object.hasOwn(uiZh, value) ? uiZh[value] : String(value).replace(/^Chapters? (\d)(?:[-–](\d))?$/, (_, first, last) => last ? `第${first}—${last}回` : `第${first}回`);
 }
-function guideText(item, field) {
-  if (language === "zh-CN" && field === "routeHint") {
+function guideText(item, field, locale = language) {
+  if (locale === "zh-CN" && field === "routeHint") {
     return zhGuides[item.achievementId]?.routeHint ?? zhGuides[item.achievementId]?.requirementSummary ?? item[field];
   }
-  return language === "zh-CN" ? (zhGuides[item.achievementId]?.[field] ?? item[field]) : item[field];
+  return locale === "zh-CN" ? (zhGuides[item.achievementId]?.[field] ?? item[field]) : item[field];
 }
-function targetText(item, target, field) {
-  return language === "zh-CN" ? (zhTargets[`${item.achievementId}:${target.id}`]?.[field] ?? target[field]) : target[field];
+function targetText(item, target, field, locale = language) {
+  return locale === "zh-CN" ? (zhTargets[`${item.achievementId}:${target.id}`]?.[field] ?? target[field]) : target[field];
 }
 
 // Capture only the original static text nodes. Player names, filenames and API values
