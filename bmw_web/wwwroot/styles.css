@@ -404,3 +404,24 @@ code { font: 11px/1.6 Consolas, monospace; overflow-wrap: anywhere; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+:root:lang(zh-CN) {
+  --font-body: 'Source Sans 3', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+/* Native select supplies keyboard navigation and focus management. */
+.language-select {
+  max-width: 8rem;
+  min-height: 44px;
+  padding: .45rem .6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #101b19;
+  color: #f1eee5;
+  font: inherit;
+}
+.language-select:focus-visible { outline: 2px solid #c6ac78; outline-offset: 3px; }
+@media (max-width: 640px) {
+  .header-inner { flex-wrap: wrap; }
+  .header-actions { flex-wrap: wrap; gap: .5rem; }
+  .language-select { max-width: 7rem; }
+}

@@ -133,11 +133,16 @@ Keep the Vercel project root at the repository root because `Dockerfile.vercel` 
 
 ## Test Commands
 
-There is no test project in the repository today.
+There is no .NET test project in the repository today. Frontend localization regression tests live in `tests/frontend-*.test.cjs` and run the actual HTML/scripts in jsdom against the checked-in example report:
 
-Do not claim tests were run unless you actually add a test project and execute it.
+```sh
+npm ci --ignore-scripts
+npm test
+```
 
-If a test project is added later, use standard .NET commands:
+These are DOM tests, not real-save decoding or visual browser tests. Preserve stable target IDs in the example report, keep English API data unchanged, and test both language directions. Do not claim a real-save or browser test unless it was actually executed.
+
+If a .NET test project is added later, use standard .NET commands:
 
 Run all tests in a project:
 

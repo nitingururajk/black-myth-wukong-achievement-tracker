@@ -10,8 +10,11 @@
     <link rel="icon" href="/favicon.ico" sizes="64x64" />
     <link rel="preload" href="/fonts/source-sans-3.woff" as="font" type="font/woff" crossorigin />
     <link rel="preload" href="/fonts/im-fell-english.woff" as="font" type="font/woff" crossorigin />
-    <link rel="stylesheet" href="/styles.css?v=7" />
-    <script src="/app.js?v=2" defer></script>
+    <link rel="stylesheet" href="/styles.css?v=zh-cn-integration-1" />
+    <script src="/zh-cn-guides.js?v=1" defer></script>
+    <script src="/zh-cn-targets.js?v=1" defer></script>
+    <script src="/i18n.js?v=2" defer></script>
+    <script src="/app.js?v=zh-cn-integration-1" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#mainContent">Skip to content</a>
@@ -22,6 +25,8 @@
           <span class="brand-name">Black Myth: Wukong<small>ACHIEVEMENT TRACKER</small></span>
         </a>
         <nav class="header-actions" aria-label="Main navigation">
+          <label class="visually-hidden" for="languageSelect">Language / 语言</label>
+          <select id="languageSelect" class="language-select"><option value="en">English</option><option value="zh-CN">简体中文</option></select>
           <button class="quiet-button" type="button" data-open-help aria-label="Find your save"><span aria-hidden="true">?</span><span class="help-label">Find your save</span></button>
           <button id="resetBtn" class="outline-button hidden" type="button">Upload another save <span aria-hidden="true">↗</span></button>
         </nav>

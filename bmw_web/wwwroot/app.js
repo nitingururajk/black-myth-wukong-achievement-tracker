@@ -51,6 +51,9 @@ let activeRequest = null;
 let currentStatusFilter = 'all';
 let hideSpoilers = loadSpoilerPreference();
 let isExampleReport = false;
+let reportFileName = '';
+let exampleLoading = false;
+const languageSelect = document.getElementById('languageSelect');
 const revealedGuideIds = new Set();
 const openGuideIds = new Set();
 
@@ -71,7 +74,7 @@ dropZone.addEventListener('drop', (event) => {
   const files = [...(event.dataTransfer?.files ?? [])];
   if (files.length !== 1) {
     chooseFile(null);
-    setStatus('Drop one .sav file at a time.', 'error', true);
+    setStatus("Drop one .sav file at a time.", 'error', true);
     return;
   }
   chooseFile(files[0]);
@@ -170,20 +173,29 @@ saveHelpDialog.addEventListener('click', (event) => {
 copyPathBtn.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText('b1\\Saved\\SaveGames');
-    copyPathBtn.textContent = 'Copied';
-    setTimeout(() => { copyPathBtn.textContent = 'Copy'; }, 2000);
-  } catch { copyPathBtn.textContent = 'Select the path to copy'; }
+    copyPathBtn.textContent = t("Copied");
+    setTimeout(() => { copyPathBtn.textContent = t("Copy"); }, 2000);
+  } catch { copyPathBtn.textContent = t("Select the path to copy"); }
 });
 
-function chooseFile(file) {
+function cancelActiveRequest() {
+  const cancelledExample = activeRequest !== null && exampleLoading;
   activeRequest?.abort();
   activeRequest = null;
+  if (cancelledExample) {
+    exampleLoading = false;
+    demoBtn.disabled = false;
+    renderExampleButton();
+  }
+}
+function chooseFile(file) {
+  cancelActiveRequest();
   selectedFile = null;
   setAnalyzeButton(false);
   selectedFilePanel.classList.add('hidden');
   selectedFilePanel.replaceChildren();
-  dropTitle.textContent = 'Choose your save file';
-  dropHint.textContent = 'or drag it here · .sav · up to 4 MB';
+  dropTitle.textContent = t("Choose your save file");
+  dropHint.textContent = t("or drag it here · .sav · up to 4 MB");
   hideStatus();
   if (!file) return;
   const error = validateFile(file);
@@ -194,28 +206,28 @@ function chooseFile(file) {
   }
   selectedFile = file;
   dropTitle.textContent = file.name;
-  dropHint.textContent = `${formatBytes(file.size)} · Ready to analyze`;
-  selectedFilePanel.innerHTML = '<strong>Save selected</strong><span>Read-only analysis</span>';
+  dropHint.textContent = `${formatBytes(file.size)} · ${t("Ready to analyze")}`;
+  selectedFilePanel.innerHTML = `<strong>${t("Save selected")}</strong><span>${t("Read-only analysis")}</span>`;
   selectedFilePanel.classList.remove('hidden');
   setAnalyzeButton(false);
 }
 function validateFile(file) {
-  if (!file.name.toLowerCase().endsWith('.sav')) return 'Choose a Black Myth: Wukong file ending in .sav.';
-  if (!file.size) return 'That file is empty. Choose your game’s .sav file.';
-  if (file.size > MAX_SAVE_BYTES) return 'That save is larger than the 4 MB upload limit. Choose a smaller .sav file.';
+  if (!file.name.toLowerCase().endsWith('.sav')) return "Choose a Black Myth: Wukong file ending in .sav.";
+  if (!file.size) return "That file is empty. Choose your game’s .sav file.";
+  if (file.size > MAX_SAVE_BYTES) return "That save is larger than the 4 MB upload limit. Choose a smaller .sav file.";
   return null;
 }
 async function analyzeSave(event) {
   event.preventDefault();
-  if (!selectedFile) return setStatus('Choose your .sav file first.', 'error', true);
+  if (!selectedFile) return setStatus("Choose your .sav file first.", 'error', true);
   const error = validateFile(selectedFile);
   if (error) return setStatus(error, 'error', true);
-  activeRequest?.abort();
+  cancelActiveRequest();
   const controller = new AbortController();
   activeRequest = controller;
   const file = selectedFile;
   setAnalyzeButton(true);
-  setStatus('Reading your save and checking all 81 achievements…');
+  setStatus("Reading your save and checking all 81 achievements…");
   try {
     const form = new FormData();
     form.append('saveFile', file, file.name);
@@ -225,7 +237,7 @@ async function analyzeSave(event) {
     showReport(payload.report, { fileName: payload.saveFileName || file.name, example: false });
   } catch (error) {
     if (error.name === 'AbortError' || controller !== activeRequest) return;
-    setStatus(error.message || 'Could not read your save. Please try again.', 'error', true);
+    setStatus(error.message || "Could not read your save. Please try again.", 'error', true);
   } finally {
     if (controller === activeRequest) {
       activeRequest = null;
@@ -237,18 +249,20 @@ async function readResponse(response) {
   let payload = null;
   try { payload = JSON.parse(await response.text()); } catch { /* Handle platform responses that are not JSON. */ }
   if (!response.ok || !payload?.ok || !Array.isArray(payload.report?.achievements)) {
-    throw new Error(payload?.error || (response.status === 413 ? 'That upload exceeds the 4 MB limit.' : 'The save could not be analyzed. Please try again.'));
+    throw new Error(payload?.error || (response.status === 413 ? "That upload exceeds the 4 MB limit." : "The save could not be analyzed. Please try again."));
   }
   return payload;
 }
 
 async function loadExample() {
-  activeRequest?.abort();
+  cancelActiveRequest();
+  hideStatus();
   const controller = new AbortController();
   activeRequest = controller;
   setAnalyzeButton(false);
   demoBtn.disabled = true;
-  demoBtn.textContent = 'Loading the example…';
+  exampleLoading = true;
+  renderExampleButton();
   try {
     const response = await fetch('/example-report.json', { signal: controller.signal });
     const payload = await readResponse(response);
@@ -257,9 +271,12 @@ async function loadExample() {
   } catch (error) {
     if (error.name !== 'AbortError' && controller === activeRequest) setStatus(error.message, 'error', true);
   } finally {
-    if (controller === activeRequest) activeRequest = null;
-    demoBtn.disabled = false;
-    demoBtn.innerHTML = 'Just looking? <span>Explore an example</span> <span aria-hidden="true">→</span>';
+    if (controller === activeRequest) {
+      activeRequest = null;
+      demoBtn.disabled = false;
+      exampleLoading = false;
+      renderExampleButton();
+    }
   }
 }
 function showReport(report, { fileName, example }) {
@@ -272,7 +289,8 @@ function showReport(report, { fileName, example }) {
   populateFilters(report.achievements);
   clearFilters();
   itemSearchInput.value = '';
-  reportFile.textContent = example ? 'EXAMPLE SAVE REPORT' : `SAVE REPORT · ${fileName}`;
+  reportFileName = fileName;
+  renderReportFile();
   demoBanner.hidden = !example;
   renderAll(report);
   switchView('overview');
@@ -285,8 +303,7 @@ function showReport(report, { fileName, example }) {
   reportTitle.focus({ preventScroll: true });
 }
 function resetReport() {
-  activeRequest?.abort();
-  activeRequest = null;
+  cancelActiveRequest();
   currentReport = null;
   isExampleReport = false;
   selectedFile = null;
@@ -327,17 +344,18 @@ function openAchievement(id) {
 }
 function setAnalyzeButton(busy) {
   analyzeBtn.disabled = busy || !selectedFile;
-  analyzeBtn.innerHTML = busy ? '<span>Analyzing your save…</span><span aria-hidden="true">◌</span>' : '<span>Analyze my save</span><span aria-hidden="true">→</span>';
+  analyzeBtn.innerHTML = `<span>${t(busy ? "Analyzing your save…" : "Analyze my save")}</span><span aria-hidden="true">${busy ? '◌' : '→'}</span>`;
   uploadForm.setAttribute('aria-busy', String(busy));
 }
 function setStatus(message, type = 'ok', focus = false) {
-  statusPanel.textContent = message;
+  statusPanel.dataset.message = message;
+  statusPanel.textContent = t(message);
   statusPanel.classList.remove('hidden');
   statusPanel.classList.toggle('status-error', type === 'error');
   statusPanel.setAttribute('role', type === 'error' ? 'alert' : 'status');
   if (focus) statusPanel.focus();
 }
-function hideStatus() { statusPanel.classList.add('hidden'); statusPanel.textContent = ''; }
+function hideStatus() { delete statusPanel.dataset.message; statusPanel.classList.add('hidden'); statusPanel.textContent = ''; }
 function renderAll(report) {
   renderCompletionState(report);
   renderOverview(report);
@@ -351,7 +369,7 @@ function renderCompletionState(report) {
     && report?.achievements.length === EXPECTED_ACHIEVEMENT_COUNT
     && report.achievements.every((item) => item.isComplete === true);
   completionCeremony.hidden = !complete;
-  if (complete) completionPlayer.textContent = report.playerName || 'The Destined One';
+  if (complete) completionPlayer.textContent = report.playerName || t("The Destined One");
 }
 function renderSpoilerSensitiveViews() {
   if (!currentReport) return;
@@ -374,12 +392,12 @@ function renderOverview(report) {
   document.getElementById('ovMissing').textContent = String(remaining);
   document.getElementById('ovCollectibles').textContent = String(missing);
   const chapter = normalizeChapterNumber(report.currentChapterId);
-  document.getElementById('ovChapter').textContent = chapter > 0 ? String(chapter) : 'Prologue';
-  document.getElementById('ovNgPlus').textContent = Number(report.newGamePlusCount) > 0 ? `NG+ ${report.newGamePlusCount}` : 'First journey';
-  overviewNarrative.textContent = remaining === 0 ? 'All achievements completed.' : 'One save. A clear picture.';
-  playerContext.textContent = `${report.playerName || 'The Destined One'} · Level ${report.playerLevel ?? '—'} · ${chapter > 0 ? `Chapter ${chapter}` : 'Prologue'}`;
+  document.getElementById('ovChapter').textContent = chapter > 0 ? String(chapter) : t("Prologue");
+  document.getElementById('ovNgPlus').textContent = Number(report.newGamePlusCount) > 0 ? `NG+ ${report.newGamePlusCount}` : t("First journey");
+  overviewNarrative.textContent = remaining === 0 ? t("All achievements completed.") : t("One save. A clear picture.");
+  playerContext.textContent = `${report.playerName || t("The Destined One")} · ${t("Level")} ${report.playerLevel ?? '—'} · ${chapter > 0 ? chapterLabel(`Chapter ${chapter}`) : t("Prologue")}`;
   document.getElementById('itemsTabCount').textContent = String(missing);
-  document.getElementById('collectionTeaser').textContent = missing ? `${missing} missing requirements, with locations and tips.` : 'Your tracked collections are complete.';
+  document.getElementById('collectionTeaser').textContent = missing ? tf("{count} missing requirements, with locations and tips.", {count: missing}) : t("Your tracked collections are complete.");
   document.getElementById('allFilterCount').textContent = String(total);
   document.getElementById('remainingFilterCount').textContent = String(remaining);
   document.getElementById('completeFilterCount').textContent = String(completed);
@@ -398,10 +416,10 @@ function renderNextSteps(report) {
   const items = getNextSteps(report);
   if (!items.length) {
     const complete = report.completedAchievements === 81;
-    nextStepsList.innerHTML = `<div class="completion-banner"><strong>${complete ? 'Your achievement checklist is complete.' : 'Just the final achievement remains.'}</strong><p>${complete ? 'Enjoy the view. There are no unfinished achievements in this save.' : 'Open Final Fulfillment to check the last requirement.'}</p>${complete ? '' : '<button class="text-button" type="button" data-open-guide="81081">Open Final Fulfillment →</button>'}</div>`;
+    nextStepsList.innerHTML = `<div class="completion-banner"><strong>${complete ? t("Your achievement checklist is complete.") : t("Just the final achievement remains.")}</strong><p>${complete ? t("Enjoy the view. There are no unfinished achievements in this save.") : t("Open Final Fulfillment to check the last requirement.")}</p>${complete ? '' : `<button class="text-button" type="button" data-open-guide="81081">${t("Open Final Fulfillment →")}</button>`}</div>`;
     return;
   }
-  nextStepsList.innerHTML = items.map((item, index) => `<article class="next-card"><span class="next-card-number">${String(index + 1).padStart(2, '0')}</span><div class="next-card-content"><div class="next-card-meta"><span>${esc(item.chapter)}</span>${item.isMissable ? '<span class="next-missable">Can be missed</span>' : ''}${item.requiresNewGamePlus ? '<span>New Game+</span>' : ''}</div><h3>${esc(item.displayTitle)}</h3><p${isAchievementSpoilerHidden(item) ? ' class="spoiler-placeholder"' : ''}>${isAchievementSpoilerHidden(item) ? 'Details hidden while spoiler protection is on.' : esc(item.requirementSummary || item.routeHint)}</p></div><button class="next-card-link" type="button" data-open-guide="${item.achievementId}" aria-label="Open ${esc(item.displayTitle)} guide">→</button></article>`).join('');
+  nextStepsList.innerHTML = items.map((item, index) => `<article class="next-card"><span class="next-card-number">${String(index + 1).padStart(2, '0')}</span><div class="next-card-content"><div class="next-card-meta"><span>${esc(chapterLabel(item.chapter))}</span>${item.isMissable ? `<span class="next-missable">${t("Can be missed")}</span>` : ''}${item.requiresNewGamePlus ? `<span>${t("New Game+")}</span>` : ''}</div><h3>${esc(guideText(item, 'displayTitle'))}</h3><p${isAchievementSpoilerHidden(item) ? ' class="spoiler-placeholder"' : ''}>${isAchievementSpoilerHidden(item) ? t("Details hidden while spoiler protection is on.") : esc(guideText(item, 'requirementSummary') || guideText(item, 'routeHint'))}</p></div><button class="next-card-link" type="button" data-open-guide="${item.achievementId}" aria-label="${esc(tf("Open {title} guide", {title: guideText(item, 'displayTitle')}))}">→</button></article>`).join('');
 }
 function chapterRouteRank(item, chapter, ng) {
   if (item.requiresNewGamePlus && !ng) return 5;
@@ -422,7 +440,7 @@ function renderMissables(report) {
   const items = report.achievements.filter((item) => !item.isComplete && item.isMissable);
   const chapter = normalizeChapterNumber(report.currentChapterId);
   const near = items.filter((item) => chapterRouteRank(item, chapter, Number(report.newGamePlusCount) || 0) <= 1).slice(0, 3);
-  missableSummary.innerHTML = items.length ? `<p class="missable-count">${items.length} missable${items.length === 1 ? '' : 's'} still open</p><p>Some achievements depend on a choice or a quest order. Check their guides before finishing a chapter.</p>${near.length ? `<div class="missable-list">${near.map((item) => `<button class="missable-link" type="button" data-open-guide="${item.achievementId}">${esc(item.displayTitle)} →</button>`).join('')}</div>` : ''}` : '<p>All missable achievements are complete in this save. You can focus on the remaining checklist.</p>';
+  missableSummary.innerHTML = items.length ? `<p class="missable-count">${language === 'zh-CN' ? `还有 ${items.length} 项易错过成就未完成` : `${items.length} missable${items.length === 1 ? '' : 's'} still open`}</p><p>${t("Some achievements depend on a choice or a quest order. Check their guides before finishing a chapter.")}</p>${near.length ? `<div class="missable-list">${near.map((item) => `<button class="missable-link" type="button" data-open-guide="${item.achievementId}">${esc(guideText(item, 'displayTitle'))} →</button>`).join('')}</div>` : ''}` : `<p>${t("All missable achievements are complete in this save. You can focus on the remaining checklist.")}</p>`;
 }
 function getTrackedCollections(report) {
   return (report?.achievements ?? []).filter((item) => !item.isComplete).map((item) => ({ item, missing: Array.isArray(item.missingTargets) ? item.missingTargets : [] })).filter((entry) => entry.missing.length > 0).sort((a, b) => b.missing.length - a.missing.length || a.item.achievementId - b.item.achievementId);
@@ -431,26 +449,26 @@ function renderTracker(report) {
   if (!report) return;
   const collections = getTrackedCollections(report);
   const total = collections.reduce((sum, entry) => sum + entry.missing.length, 0);
-  trackerCount.textContent = `${total} missing`;
+  trackerCount.textContent = tf("{count} missing", {count: total});
   const query = itemSearchInput.value.trim().toLocaleLowerCase();
   const openIds = new Set([...trackerList.querySelectorAll('details[open]')].map((node) => Number(node.dataset.collectionId)));
   const visible = collections.map(({ item, missing }) => {
-    const titleMatch = item.displayTitle.toLocaleLowerCase().includes(query);
-    const matches = !query || titleMatch ? missing : isAchievementSpoilerHidden(item) ? [] : missing.filter((target) => `${target.name} ${target.howToGet || ''}`.toLocaleLowerCase().includes(query));
+    const titleMatch = `${item.displayTitle} ${guideText(item, 'displayTitle', 'zh-CN')}`.toLocaleLowerCase().includes(query);
+    const matches = !query || titleMatch ? missing : isAchievementSpoilerHidden(item) ? [] : missing.filter((target) => `${target.name} ${target.howToGet || ''} ${targetText(item, target, 'name', 'zh-CN')} ${targetText(item, target, 'howToGet', 'zh-CN') || ''}`.toLocaleLowerCase().includes(query));
     return { item, missing: matches, totalMissing: missing.length };
   }).filter((entry) => entry.missing.length);
   if (!visible.length) {
-    trackerList.innerHTML = `<div class="tracker-empty">${query ? 'No missing items match. Try another search or collection name.' : 'All tracked collection requirements are complete. Other achievement steps may still remain.'}</div>`;
+    trackerList.innerHTML = `<div class="tracker-empty">${query ? t("No missing items match. Try another search or collection name.") : t("All tracked collection requirements are complete. Other achievement steps may still remain.")}</div>`;
     return;
   }
-  trackerList.innerHTML = visible.map(({ item, missing, totalMissing }) => `<details class="tracker-group" data-collection-id="${item.achievementId}" ${query || openIds.has(item.achievementId) ? 'open' : ''}><summary><span class="tracker-symbol" aria-hidden="true">◇</span><span class="tracker-group-title"><strong>${esc(item.displayTitle)}</strong><small>${(item.requirementTargets ?? []).filter((target) => target.isCollected).length} of ${(item.requirementTargets ?? []).length} requirements collected</small></span><span class="tracker-missing-badge">${totalMissing} missing</span><span class="chevron" aria-hidden="true"></span></summary>${isAchievementSpoilerHidden(item) ? '<div class="spoiler-gate spoiler-gate-compact"><p>Item names and locations are hidden. Reveal this achievement’s guide to see them.</p></div>' : `<ul class="tracker-items">${missing.map((target) => `<li class="tracker-item"><strong>${esc(target.name)}</strong>${target.howToGet ? `<p>${esc(target.howToGet)}</p>` : ''}</li>`).join('')}</ul>`}<div class="tracker-guide-link"><button class="text-button" type="button" data-open-guide="${item.achievementId}">Open achievement guide →</button></div></details>`).join('');
+  trackerList.innerHTML = visible.map(({ item, missing, totalMissing }) => `<details class="tracker-group" data-collection-id="${item.achievementId}" ${query || openIds.has(item.achievementId) ? 'open' : ''}><summary><span class="tracker-symbol" aria-hidden="true">◇</span><span class="tracker-group-title"><strong>${esc(guideText(item, 'displayTitle'))}</strong><small>${tf("{collected} of {total} requirements collected", {collected: (item.requirementTargets ?? []).filter(target => target.isCollected).length, total: (item.requirementTargets ?? []).length})}</small></span><span class="tracker-missing-badge">${tf("{count} missing", {count: totalMissing})}</span><span class="chevron" aria-hidden="true"></span></summary>${isAchievementSpoilerHidden(item) ? `<div class="spoiler-gate spoiler-gate-compact"><p>${t("Item names and locations are hidden. Reveal this achievement’s guide to see them.")}</p></div>` : `<ul class="tracker-items">${missing.map((target) => `<li class="tracker-item"><strong>${esc(targetText(item, target, 'name'))}</strong>${target.howToGet ? `<p>${esc(targetText(item, target, 'howToGet'))}</p>` : ''}</li>`).join('')}</ul>`}<div class="tracker-guide-link"><button class="text-button" type="button" data-open-guide="${item.achievementId}">${t("Open achievement guide →")}</button></div></details>`).join('');
 }
 
 function populateFilters(achievements) {
   const categories = [...new Set(achievements.map((item) => item.category).filter(Boolean))];
   const chapters = [...new Set(achievements.map((item) => item.chapter).filter(Boolean))];
-  categoryFilter.replaceChildren(new Option('All categories', 'all'), ...categories.map((value) => new Option(value, value)));
-  chapterFilter.replaceChildren(new Option('All chapters', 'all'), ...chapters.map((value) => new Option(value, value)));
+  categoryFilter.replaceChildren(new Option(t("All categories"), 'all'), ...categories.map((value) => new Option(chapterLabel(t(value)), value)));
+  chapterFilter.replaceChildren(new Option(t("All chapters"), 'all'), ...chapters.map((value) => new Option(chapterLabel(t(value)), value)));
 }
 function clearFilters() {
   searchInput.value = '';
@@ -471,7 +489,7 @@ function renderAchievementLibrary() {
     if (chapterFilter.value !== 'all' && item.chapter !== chapterFilter.value) return false;
     return !query || buildSearchText(item).includes(query);
   });
-  libraryCount.textContent = `${visible.length} of ${currentReport.achievements.length} achievements`;
+  libraryCount.textContent = tf("{visible} of {total} achievements", {visible: visible.length, total: currentReport.achievements.length});
   emptyState.classList.toggle('hidden', visible.length > 0);
   achievementList.innerHTML = visible.map(renderAchievementCard).join('');
   syncExpandButton();
@@ -482,33 +500,43 @@ function buildSearchText(item) {
     parts.push(item.requirementSummary, item.routeHint, item.missableNote, ...(item.prerequisites ?? []), ...(item.guideSteps ?? []), ...(item.guideChecklist ?? []));
     (item.requirementTargets ?? []).forEach((target) => parts.push(target.name, target.howToGet));
   }
+  parts.push(guideText(item, 'displayTitle', 'zh-CN'), t(item.category), chapterLabel(item.chapter));
+  if (!isAchievementSpoilerHidden(item)) {
+    for (const field of ['requirementSummary', 'routeHint', 'missableNote', 'prerequisites', 'guideSteps', 'guideChecklist']) {
+      const value = guideText(item, field, 'zh-CN');
+      parts.push(...(Array.isArray(value) ? value : [value]));
+    }
+    (item.requirementTargets ?? []).forEach(target => parts.push(targetText(item, target, 'name', 'zh-CN'), targetText(item, target, 'howToGet', 'zh-CN')));
+  }
   return parts.filter(Boolean).join(' ').toLocaleLowerCase();
 }
 function renderAchievementCard(item) {
   const number = String(item.achievementId - 81000).padStart(2, '0');
   const progress = getProgress(item);
   const hidden = isAchievementSpoilerHidden(item);
-  return `<article id="achievement-${item.achievementId}" class="achievement-card ${item.isComplete ? 'is-complete' : 'is-incomplete'}"><details class="achievement-guide" data-guide-id="${item.achievementId}" ${openGuideIds.has(item.achievementId) ? 'open' : ''}><summary><span class="achievement-number" aria-hidden="true">${item.isComplete ? '✓' : number}</span><div class="achievement-summary-copy"><h3>${esc(item.displayTitle)}</h3><p class="requirement-summary${hidden ? ' spoiler-placeholder' : ''}">${hidden ? 'Details hidden while spoiler protection is on.' : esc(item.requirementSummary || item.routeHint)}</p><div class="tag-row"><span class="tag">${esc(item.chapter)}</span><span class="tag">${esc(item.category)}</span>${item.isMissable ? '<span class="tag tag-missable">Missable</span>' : ''}${item.requiresNewGamePlus ? '<span class="tag tag-ng">New Game+</span>' : ''}${!item.isPresentInSave ? '<span class="tag tag-unverified">Not recorded in save</span>' : ''}</div></div><span class="achievement-status"><span class="status-label">${item.isComplete ? 'Complete' : 'Remaining'}</span>${!item.isComplete ? `<span class="progress-copy">${esc(progress.label)}</span><span class="achievement-progress" aria-label="${esc(progress.label)}"><span class="progress-track" style="display:block"><span class="progress-fill" style="display:block;width:${progress.percent}%"></span></span></span>` : ''}</span><span class="chevron" aria-hidden="true"></span></summary><div class="guide-body">${hidden ? renderSpoilerGate(item) : renderGuideContent(item)}</div></details></article>`;
+  return `<article id="achievement-${item.achievementId}" class="achievement-card ${item.isComplete ? 'is-complete' : 'is-incomplete'}"><details class="achievement-guide" data-guide-id="${item.achievementId}" ${openGuideIds.has(item.achievementId) ? 'open' : ''}><summary><span class="achievement-number" aria-hidden="true">${item.isComplete ? '✓' : number}</span><div class="achievement-summary-copy"><h3>${esc(guideText(item, 'displayTitle'))}</h3><p class="requirement-summary${hidden ? ' spoiler-placeholder' : ''}">${hidden ? t("Details hidden while spoiler protection is on.") : esc(guideText(item, 'requirementSummary') || guideText(item, 'routeHint'))}</p><div class="tag-row"><span class="tag">${esc(chapterLabel(item.chapter))}</span><span class="tag">${esc(t(item.category))}</span>${item.isMissable ? `<span class="tag tag-missable">${t("Missable")}</span>` : ''}${item.requiresNewGamePlus ? `<span class="tag tag-ng">${t("New Game+")}</span>` : ''}${!item.isPresentInSave ? `<span class="tag tag-unverified">${t("Not recorded in save")}</span>` : ''}</div></div><span class="achievement-status"><span class="status-label">${item.isComplete ? t("Complete") : t("Remaining")}</span>${!item.isComplete ? `<span class="progress-copy">${esc(progress.label)}</span><span class="achievement-progress" aria-label="${esc(progress.label)}"><span class="progress-track" style="display:block"><span class="progress-fill" style="display:block;width:${progress.percent}%"></span></span></span>` : ''}</span><span class="chevron" aria-hidden="true"></span></summary><div class="guide-body">${hidden ? renderSpoilerGate(item) : renderGuideContent(item)}</div></details></article>`;
 }
 function getProgress(item) {
-  if (item.isComplete) return { percent: 100, label: 'Complete' };
+  if (item.isComplete) return { percent: 100, label: t("Complete") };
   if (item.requiredCount > 0) {
     const completed = Math.max(Number(item.completedCount) || 0, 0);
     const required = Math.max(Number(item.requiredCount) || 1, 1);
     return { percent: Math.min(100, Math.round(completed / required * 100)), label: `${completed} / ${required}` };
   }
-  return { percent: 0, label: item.isPresentInSave ? 'Not unlocked' : 'Not recorded' };
+  return { percent: 0, label: item.isPresentInSave ? t("Not unlocked") : t("Not recorded") };
 }
 function isAchievementSpoilerHidden(item) { return hideSpoilers && !revealedGuideIds.has(item.achievementId); }
 function renderSpoilerGate(item) {
-  return `<div class="spoiler-gate"><div><p>The walkthrough and collectible locations are hidden.</p><button class="reveal-button" type="button" data-reveal-guide="${item.achievementId}">Reveal this guide</button></div></div>`;
+  return `<div class="spoiler-gate"><div><p>${t("The walkthrough and collectible locations are hidden.")}</p><button class="reveal-button" type="button" data-reveal-guide="${item.achievementId}">${t("Reveal this guide")}</button></div></div>`;
 }
 function renderGuideContent(item) {
-  const prerequisites = item.prerequisites ?? [];
-  const steps = item.guideSteps ?? [];
+  const prerequisites = guideText(item, 'prerequisites') ?? [];
+  const steps = guideText(item, 'guideSteps') ?? [];
   const targets = item.requirementTargets ?? [];
-  const milestones = getAdditionalGuideMilestones(item.guideChecklist ?? [], targets);
-  return `<div class="guide-layout"><div class="guide-column"><section class="guide-section"><h4 class="guide-label">How to unlock it</h4><p>${esc(item.routeHint || item.requirementSummary)}</p></section>${item.isMissable && item.missableNote ? `<section class="guide-section warning-box"><h4 class="guide-label">Do this before moving on</h4><p>${esc(item.missableNote)}</p></section>` : ''}${prerequisites.length ? `<section class="guide-section"><h4 class="guide-label">Before you start</h4><ul class="guide-list">${prerequisites.map((step) => `<li>${esc(step)}</li>`).join('')}</ul></section>` : ''}${steps.length ? `<section class="guide-section"><h4 class="guide-label">Step by step</h4><ol class="guide-list">${steps.map((step) => `<li>${esc(step)}</li>`).join('')}</ol></section>` : ''}</div><div class="guide-column">${targets.length ? renderTargetChecklist(targets) : ''}${milestones.length ? renderGuideMilestones(milestones, targets.length > 0) : ''}${!milestones.length && !targets.length ? '<section class="guide-section"><h4 class="guide-label">Completion check</h4><p>Your save shows whether this achievement is complete. Follow the walkthrough, then upload a fresh save to check your progress.</p></section>' : ''}</div></div>`;
+  const checklist = item.guideChecklist ?? [];
+  const translated = guideText(item, 'guideChecklist') ?? [];
+  const milestones = getAdditionalGuideMilestones(checklist, targets).map(entry => translated[checklist.indexOf(entry)] ?? entry);
+  return `<div class="guide-layout"><div class="guide-column"><section class="guide-section"><h4 class="guide-label">${t("How to unlock it")}</h4><p>${esc(guideText(item, 'routeHint') || guideText(item, 'requirementSummary'))}</p></section>${item.isMissable && item.missableNote ? `<section class="guide-section warning-box"><h4 class="guide-label">${t("Do this before moving on")}</h4><p>${esc(guideText(item, 'missableNote'))}</p></section>` : ''}${prerequisites.length ? `<section class="guide-section"><h4 class="guide-label">${t("Before you start")}</h4><ul class="guide-list">${prerequisites.map((step) => `<li>${esc(step)}</li>`).join('')}</ul></section>` : ''}${steps.length ? `<section class="guide-section"><h4 class="guide-label">${t("Step by step")}</h4><ol class="guide-list">${steps.map((step) => `<li>${esc(step)}</li>`).join('')}</ol></section>` : ''}</div><div class="guide-column">${targets.length ? renderTargetChecklist(item, targets) : ''}${milestones.length ? renderGuideMilestones(milestones, targets.length > 0) : ''}${!milestones.length && !targets.length ? `<section class="guide-section"><h4 class="guide-label">${t("Completion check")}</h4><p>${t("Your save shows whether this achievement is complete. Follow the walkthrough, then upload a fresh save to check your progress.")}</p></section>` : ''}</div></div>`;
 }
 function getAdditionalGuideMilestones(entries, targets) {
   if (!targets.length) return entries;
@@ -519,11 +547,11 @@ function normalizeRequirementName(value) {
   return String(value ?? '').toLowerCase().replace(/^(?:soak|spirit(?: skill)?):\s*/, '').replace(/\s*\([^)]*\)\s*$/, '').replace(/[^a-z0-9]+/g, '');
 }
 function renderGuideMilestones(entries, tracked) {
-  return `<section class="guide-section"><h4 class="guide-label">${tracked ? 'More things to check in-game' : 'Check these in-game'}</h4><p class="tracking-note">${tracked ? 'These route steps are not individually checked by your save.' : 'Your save records the overall result, so use these notes to check each step yourself.'}</p><ul class="guide-list">${entries.map((entry) => `<li>${esc(entry)}</li>`).join('')}</ul></section>`;
+  return `<section class="guide-section"><h4 class="guide-label">${tracked ? t("More things to check in-game") : t("Check these in-game")}</h4><p class="tracking-note">${tracked ? t("These route steps are not individually checked by your save.") : t("Your save records the overall result, so use these notes to check each step yourself.")}</p><ul class="guide-list">${entries.map((entry) => `<li>${esc(entry)}</li>`).join('')}</ul></section>`;
 }
-function renderTargetChecklist(targets) {
+function renderTargetChecklist(item, targets) {
   const collected = targets.filter((target) => target.isCollected).length;
-  return `<section class="guide-section"><h4 class="guide-label">Your collection · ${collected} / ${targets.length}</h4><p class="tracking-note">Collected and missing requirements are checked against your save.</p><ul class="target-list">${targets.map((target) => `<li class="target-row ${target.isCollected ? 'is-owned' : 'is-missing'}"><span class="target-mark" aria-hidden="true">${target.isCollected ? '✓' : '×'}</span><span><strong>${esc(target.name)}</strong><span class="target-state">${target.isCollected ? 'Collected' : 'Missing'}</span>${target.howToGet ? `<small>${esc(target.howToGet)}</small>` : ''}</span></li>`).join('')}</ul></section>`;
+  return `<section class="guide-section"><h4 class="guide-label">${t("Your collection")} · ${collected} / ${targets.length}</h4><p class="tracking-note">${t("Collected and missing requirements are checked against your save.")}</p><ul class="target-list">${targets.map((target) => `<li class="target-row ${target.isCollected ? 'is-owned' : 'is-missing'}"><span class="target-mark" aria-hidden="true">${target.isCollected ? '✓' : '×'}</span><span><strong>${esc(targetText(item, target, 'name'))}</strong><span class="target-state">${target.isCollected ? t("Collected") : t("Missing")}</span>${target.howToGet ? `<small>${esc(targetText(item, target, 'howToGet'))}</small>` : ''}</span></li>`).join('')}</ul></section>`;
 }
 function rememberOpenGuides() {
   achievementList.querySelectorAll('details[data-guide-id]').forEach((details) => {
@@ -534,13 +562,13 @@ function rememberOpenGuides() {
 }
 function syncExpandButton() {
   const guides = [...achievementList.querySelectorAll('details[data-guide-id]')];
-  expandVisibleBtn.textContent = guides.length && guides.every((guide) => guide.open) ? 'Collapse guides' : 'Expand guides';
+  expandVisibleBtn.textContent = guides.length && guides.every((guide) => guide.open) ? t("Collapse guides") : t("Expand guides");
   expandVisibleBtn.disabled = !guides.length;
 }
 function syncSpoilerButton() {
   spoilerToggleBtn.setAttribute('aria-pressed', String(hideSpoilers));
-  spoilerToggleBtn.textContent = hideSpoilers ? 'Spoilers hidden' : 'Hide spoilers';
-  spoilerToggleBtn.setAttribute('aria-label', hideSpoilers ? 'Show spoilers in all guides' : 'Hide spoilers in all guides');
+  spoilerToggleBtn.textContent = hideSpoilers ? t("Spoilers hidden") : t("Hide spoilers");
+  spoilerToggleBtn.setAttribute('aria-label', hideSpoilers ? t("Show spoilers in all guides") : t("Hide spoilers in all guides"));
 }
 function loadSpoilerPreference() {
   try { return localStorage.getItem('journey-ledger.hide-spoilers') === 'true'; } catch { return false; }
@@ -551,23 +579,23 @@ function saveSpoilerPreference(value) {
 function downloadChecklist() {
   if (!currentReport) return;
   const report = currentReport;
-  const lines = ['JOURNEY LEDGER — BLACK MYTH: WUKONG', isExampleReport ? 'EXAMPLE CHECKLIST — sample progress, not your save.' : 'Your save checklist', `${report.completedAchievements} / ${report.totalAchievements} achievements complete`, ''];
+  const lines = [t("JOURNEY LEDGER — BLACK MYTH: WUKONG"), isExampleReport ? t("EXAMPLE CHECKLIST — sample progress, not your save.") : t("Your save checklist"), tf('{completed} / {total} achievements complete', {completed: report.completedAchievements, total: report.totalAchievements}), ''];
   report.achievements.filter((item) => !item.isComplete).forEach((item) => {
-    lines.push(`[ ] ${item.displayTitle} (${item.chapter})${item.isMissable ? ' — MISSABLE' : ''}`);
-    if (isAchievementSpoilerHidden(item)) lines.push('    Details hidden by your spoiler preference.');
+    lines.push(`[ ] ${guideText(item, 'displayTitle')} (${chapterLabel(item.chapter)})${item.isMissable ? ` — ${t('MISSABLE')}` : ''}`);
+    if (isAchievementSpoilerHidden(item)) lines.push(`    ${t('Details hidden by your spoiler preference.')}`);
     else {
-      if (item.requirementSummary) lines.push(`    ${item.requirementSummary}`);
-      if (item.isMissable && item.missableNote) lines.push(`    Before moving on: ${item.missableNote}`);
-      (item.guideSteps ?? []).forEach((step, index) => lines.push(`    ${index + 1}. ${step}`));
+      if (item.requirementSummary) lines.push(`    ${guideText(item, 'requirementSummary')}`);
+      if (item.isMissable && item.missableNote) lines.push(`    ${t('Before moving on:')} ${guideText(item, 'missableNote')}`);
+      (guideText(item, 'guideSteps') ?? []).forEach((step, index) => lines.push(`    ${index + 1}. ${step}`));
       (item.missingTargets ?? []).forEach((target) => {
-        lines.push(`    [ ] ${target.name}`);
-        if (target.howToGet) lines.push(`        ${target.howToGet}`);
+        lines.push(`    [ ] ${targetText(item, target, 'name')}`);
+        if (target.howToGet) lines.push(`        ${targetText(item, target, 'howToGet')}`);
       });
     }
     lines.push('');
   });
-  if (report.completedAchievements === report.totalAchievements) lines.push('All achievements are complete.');
-  lines.push('This is a snapshot. Upload a fresh save after playing to update your checklist.');
+  if (report.completedAchievements === report.totalAchievements) lines.push(t("All achievements are complete."));
+  lines.push(t("This is a snapshot. Upload a fresh save after playing to update your checklist."));
   const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;
@@ -579,3 +607,41 @@ function scrollBehavior() { return matchMedia('(prefers-reduced-motion: reduce)'
 function formatBytes(bytes) { return bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / (1024 * 1024)).toFixed(2)} MB`; }
 function esc(value) { return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
 syncSpoilerButton();
+
+
+function renderReportFile() {
+  reportFile.textContent = isExampleReport ? t('EXAMPLE SAVE REPORT') : `${t('SAVE REPORT')} · ${reportFileName}`;
+}
+function renderExampleButton() {
+  demoBtn.innerHTML = exampleLoading ? t('Loading the example…') : `${t('Just looking?')} <span>${t('Explore an example')}</span> <span aria-hidden="true">→</span>`;
+}
+function applyLanguage() {
+  rememberOpenGuides();
+  translateStaticPage();
+  languageSelect.value = language;
+  if (currentReport) {
+    const category = categoryFilter.value;
+    const chapter = chapterFilter.value;
+    populateFilters(currentReport.achievements);
+    categoryFilter.value = category;
+    chapterFilter.value = chapter;
+    renderReportFile();
+    renderAll(currentReport);
+  }
+  // Re-render upload labels without chooseFile(): it would abort the active request.
+  dropTitle.textContent = selectedFile ? selectedFile.name : t('Choose your save file');
+  dropHint.textContent = selectedFile ? `${formatBytes(selectedFile.size)} · ${t('Ready to analyze')}` : t('or drag it here · .sav · up to 4 MB');
+  if (selectedFile) selectedFilePanel.innerHTML = `<strong>${t('Save selected')}</strong><span>${t('Read-only analysis')}</span>`;
+  setAnalyzeButton(uploadForm.getAttribute('aria-busy') === 'true');
+  renderExampleButton();
+  syncSpoilerButton();
+  syncExpandButton();
+  copyPathBtn.textContent = t('Copy');
+  if (statusPanel.dataset.message) statusPanel.textContent = t(statusPanel.dataset.message);
+}
+languageSelect.addEventListener('change', () => {
+  language = languageSelect.value === 'zh-CN' ? 'zh-CN' : 'en';
+  try { localStorage.setItem('journey-ledger.language', language); } catch { /* Storage is optional. */ }
+  applyLanguage();
+});
+applyLanguage();

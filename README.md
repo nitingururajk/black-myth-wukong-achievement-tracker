@@ -148,6 +148,23 @@ Build both projects from the solution root:
 dotnet build .\bmw.sln
 ```
 
+## Frontend localization and tests
+
+Use the header language selector to switch between English and Simplified Chinese. The preference is stored locally; uploads, report tabs, filters, spoiler protection, and open guides are preserved when switching. Checklist downloads use the selected language. The API and save analysis remain language-independent.
+
+The original Chinese achievement and item translations are contributed by @Dongmei6661. Translations are keyed by achievement/target IDs with English fallback. Keep `id` on both `requirementTargets` and `missingTargets` when updating `example-report.json`; the example must follow the API's target shape for localized item names and searches to work.
+
+The frontend regression suite is split into functional and request-race/edge-case suites. It requires Node.js 22.13+ (or a supported newer LTS); `npm test` runs the suites sequentially to keep peak memory bounded on small hosts.
+
+```sh
+npm ci --ignore-scripts
+npm test
+```
+
+These tests execute the real HTML and scripts in jsdom using the checked-in example report. They cover language persistence and round-trips, filters and open state, translated searches, spoiler handling, safe player/filename text, upload-state preservation, and checklist exports. They are not real-save decoding or visual-browser tests. Test dependencies are development-only; serving the app does not require Node.js.
+
+Before merging frontend changes, also check the example report and language selector in a real browser at mobile and desktop widths, and analyze a local `.sav` if one is available. Never commit private saves.
+
 ## Vendored Dependency
 
 This repo vendors the decoder DLL set used to read Black Myth: Wukong saves.
